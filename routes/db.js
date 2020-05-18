@@ -1,7 +1,7 @@
 var MongoClient = require('mongodb');
 var express = require('express');
 
-const uri = "mongodb://root:example@localhost:27017";
+const uri = "mongodb://root:AYNIL#$%678liayn@blcloud.ddns.net:27017";
 //const uri = "mongodb://localhost:27017";
 
 var router = express.Router();
