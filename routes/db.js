@@ -15,10 +15,10 @@ router.get('/:collection', function (req, res) {
 
         var collection = db.collection(req.params.collection);
         var filter = {};
-        var q = JSON.parse(req.q);
+        var q = JSON.parse(req.query.q);
         filter[q.qv] = new RegExp(q.qe, 'i');
 
-        collection.find(filter, q.prj).toArray(function(err, items) {
+        collection.find(filter, { projection: q.prj }).toArray(function(err, items) {
             return res.status(200).send(items);
         });
 

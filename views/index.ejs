@@ -40,11 +40,11 @@
         apiURL += 'api/';
 
         var currQuery = {
-            references: { qv: 'ref_id', qe: '[A-Z]+_[A-Z]+_\\d+', prj: { text: 0, images: 0 } },
-            documents: { qv: 'doc_id', qe: 'D\\d+', prj: { text: 0, images: 0 } },
-            ext_documents: { qv: 'edoc_id', qe:'ED\\d+', prj: { text: 0, images: 0 } },
-            persons: { qv: 'prsn_id', qe: 'P\\d+', prj: { text: 0, images: 0 } },
-            locations: { qv: 'loc_id', qe: 'L\\d+', prj: { text: 0, images: 0 } }
+            references: { qv: 'ref_id', qe: '[A-Z]+_[A-Z]+_\\d+', prj: { 'text': 0, 'images': 0 } },
+            documents: { qv: 'doc_id', qe: 'D\\d+', prj: { 'text': 0, 'images': 0 } },
+            ext_documents: { qv: 'edoc_id', qe:'ED\\d+', prj: { 'text': 0, 'images': 0 } },
+            persons: { qv: 'prsn_id', qe: 'P\\d+', prj: { 'text': 0, 'images': 0 } },
+            locations: { qv: 'loc_id', qe: 'L\\d+', prj: { 'text': 0, 'images': 0 } }
         }
 
         function queryMongoCollection(collection, query) {
