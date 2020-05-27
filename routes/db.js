@@ -6,7 +6,7 @@ const uri = "mongodb://root:" + encodeURIComponent('AYNIL#$%678liayn') + "@blclo
 var router = express.Router();
 
 router.get('/:collection', function (req, res) {
-    console.log(req.params.collection + ' sync');
+    console.log(req.params.collection + ' get');
 
     MongoClient.connect(uri, function(err, client) {
         if(err) { return console.dir(err); }
@@ -15,9 +15,10 @@ router.get('/:collection', function (req, res) {
 
         var collection = db.collection(req.params.collection);
         var filter = {};
-        filter[req.query.qv] = new RegExp(req.query.qe, 'i');
+        var q = JSON.parse(req.q);
+        filter[q.qv] = new RegExp(q.qe, 'i');
 
-        collection.find(filter).toArray(function(err, items) {
+        collection.find(filter, q.prj).toArray(function(err, items) {
             return res.status(200).send(items);
         });
 
