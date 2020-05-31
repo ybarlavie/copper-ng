@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Debug API",
-            "program": "${workspaceFolder}/index.js",
+            "program": "${workspaceFolder}/www",
             "skipFiles": [
                 "<node_internals>/**"
             ]

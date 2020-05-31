@@ -3,6 +3,7 @@
 const configureAPI = require('./configure')
 
 module.exports = {
+    publicPath: "/copper/",
     devServer: {
         before: configureAPI
     }
