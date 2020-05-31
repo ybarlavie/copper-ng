@@ -15,7 +15,7 @@
     </div>
 </template>
 <script>
-let apiURL = window.location.origin;
+let apiURL = window.location.origin + window.location.pathname;
 if (!apiURL.endsWith('/')) apiURL += '/';
 apiURL += 'api/db/documents';
 

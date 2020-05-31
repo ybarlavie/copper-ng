@@ -3,7 +3,7 @@
 const configureAPI = require('./configure')
 
 module.exports = {
-    publicPath: "/copper/",
+    publicPath: process.env.NODE_ENV === 'production' ? '/copper/' : '/',
     devServer: {
         before: configureAPI
     }
