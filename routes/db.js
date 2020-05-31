@@ -15,10 +15,23 @@ router.get('/:collection', function (req, res) {
 
         var collection = db.collection(req.params.collection);
         var filter = {};
-        var q = JSON.parse(req.query.q);
-        filter[q.qv] = new RegExp(q.qe, 'i');
+        var projection = {};
+        var findOne = false;
 
-        collection.find(filter, { projection: q.prj }).toArray(function(err, items) {
+        if (req.query.q) {
+            try {
+                q = JSON.parse(req.query.q);
+                filter[q.qv] = new RegExp(q.qe, 'i');
+            } catch {
+                return res.status(404).end();
+            }
+
+            if (q.prj) {
+                projection = { projection: q.prj };
+            }
+        }
+
+        collection.find(filter, projection).toArray(function(err, items) {
             return res.status(200).send(items);
         });
 

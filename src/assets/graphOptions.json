@@ -1,0 +1,64 @@
+{
+    "nodes": {
+        "shape": "dot",
+        "size": 20,
+        "font": {
+            "size": 15,
+            "color": "#000000"
+        },
+        "borderWidth": 2
+    },
+    "edges": {
+        "width": 1.0
+    },
+    "groups": {
+        "doc_id": {
+            "shape": "icon",
+            "icon": {
+                "face": "'Font Awesome 5 Free'",
+                "weight": "bold",
+                "size": 20,
+                "code": "\uf1c6",
+                "color": "#ff0000"
+            }
+        },
+        "edoc_id": {
+            "shape": "icon",
+            "icon": {
+                "face": "'Font Awesome 5 Free'",
+                "weight": "bold",
+                "size": 20,
+                "code": "\uf70e",
+                "color": "#00ff00"
+            }
+        },
+        "loc_id": {
+            "shape": "icon",
+            "icon": {
+                "face": "'Font Awesome 5 Free'",
+                "weight": "bold",
+                "size": 20,
+                "code": "\uf57d",
+                "color": "#ff00aa"
+            }
+        },
+        "prsn_id": {
+            "shape": "icon",
+            "icon": {
+                "face": "'Font Awesome 5 Free'",
+                "weight": "bold",
+                "size": 20,
+                "code": "\uf007",
+                "color": "#ff00ff"
+            }
+        },
+        "unselected": {
+            "shape": "dot",
+            "size": 15,
+            "color": "#aaaaaa"
+        }
+    },
+    "physics": {
+        "stabilization": false
+    }
+}
