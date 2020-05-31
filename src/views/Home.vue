@@ -6,7 +6,7 @@
             <input id="btnFind" type="button" value="איתור" onclick="findNode()">
             <span> </span>
             <label>לחיצה בגרף :</label>
-            <input type="radio" id="card" name="graphClick" value="card">
+            <input type="radio" id="card" name="graphClick" value="card" checked>
             <label for="card">כרטיס</label><br>
             <input type="radio" id="map" name="graphClick" value="map">
             <label for="map">מפה</label><br>

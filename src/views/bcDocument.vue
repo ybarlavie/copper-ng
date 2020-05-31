@@ -2,12 +2,12 @@
     <div :key="componentKey" class="card">
       <h1>{{document.title}} - {{document.doc_id}}</h1>
       <h2>מזהה בארכיב בר כוכבא: {{document.arch_id}}</h2>
-      <label>חומר: {{document.material}}</label>
-      <textarea rows="20" v-model="document.text"></textarea>
-      <label>תגית: {{document.label}}</label>
-      <label>תאריך: {{document.date}}</label>
-      <label>רמת אותנטיות: {{document.authenticity}}</label>
-      <label>תמונות:</label>
+      <h2>חומר: {{document.material}}</h2>
+      <textarea rows="20" v-model="document.text" style="font-size:14pt;"></textarea>
+      <h2>תגית: {{document.label}}</h2>
+      <h2>תאריך: {{document.date}}</h2>
+      <h2>רמת אותנטיות: {{document.authenticity}}</h2>
+      <h2>תמונות:</h2>
       <div class="list-unstyled" v-for="imgobj in document.images" v-bind:key="imgobj.label">
         <img v-if="imgobj.url" class="mr-3" :src="imgobj.url" :alt="imgobj.label">
         <label>{{imgobj.label}}</label>
