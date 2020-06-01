@@ -1,23 +1,26 @@
 <template>
-    <div :key="componentKey" class="card">
-      <h1>תעודה: "{{document.title}}" - מזהה: {{document.doc_id}}</h1>
-      <h2>מזהה בארכיב בר כוכבא: "{{document.arch_id}}"</h2>
-      <h2>חומר: {{document.material}}</h2>
-      <h2>תגית: {{document.label}}</h2>
-      <h2>תאריך: {{document.date}}</h2>
-      <h2>רמת אותנטיות: {{document.authenticity}}</h2>
-      <h2>טקסט:</h2>
-      <textarea rows="20" v-model="document.text" style="font-size:14pt;"></textarea>
-      <h2>תמונות:</h2>
-      <div class="list-unstyled" v-for="imgobj in document.images" v-bind:key="imgobj.label">
-          <div style="display: flex; flex-direction: column;">
-              <label>{{imgobj.label}}</label>
-              <img v-if="imgobj.url" class="mr-3" :src="imgobj.url" :alt="imgobj.label">
-          </div>
-      </div>
-    </div>
+    <mdb-container>
+        <div :key="componentKey" class="card">
+        <h1>תעודה: "{{document.title}}" - מזהה: {{document.doc_id}}</h1>
+        <h2>מזהה בארכיב בר כוכבא: "{{document.arch_id}}"</h2>
+        <h2>חומר: {{document.material}}</h2>
+        <h2>תגית: {{document.label}}</h2>
+        <h2>תאריך: {{document.date}}</h2>
+        <h2>רמת אותנטיות: {{document.authenticity}}</h2>
+        <mdb-row class="align-items-center">
+            <mdb-col sm="12">
+                <mdb-input outline style="height: 130px;" type="textarea" label="טקסט" v-model="document.text" />
+            </mdb-col>
+        </mdb-row>
+        <h2>תמונות:</h2>
+        <Imgs v-bind:images="document.images" />
+        </div>
+    </mdb-container>
 </template>
 <script>
+import Imgs from '../components/Images.vue';
+import { mdbContainer, mdbRow, mdbInput, mdbCol, mdbIcon } from "mdbvue";
+
 let apiURL = window.location.origin + window.location.pathname;
 if (!apiURL.endsWith('/')) apiURL += '/';
 apiURL += 'api/db/documents';
@@ -25,10 +28,19 @@ apiURL += 'api/db/documents';
 export default {
     props: ['docId'],
 
+    components: {
+        Imgs,
+        mdbContainer,
+        mdbRow,
+        mdbInput,
+        mdbCol,
+        mdbIcon
+    },
+
     data() {
         return {
             componentKey: 0,
-            document: {}
+            document: {},
         }
     },
 
@@ -61,7 +73,6 @@ export default {
     },
 }
 </script>
- 
 <style>
 .card {
     direction: rtl;
