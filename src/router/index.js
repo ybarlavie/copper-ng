@@ -23,8 +23,13 @@ Vue.use(VueRouter)
     name: 'bcDocument',
     component: () => import( /* webpackChunkName: "bcDocument" */ '../views/bcDocument.vue'),
     props: true,
-},
-
+  },
+  {
+    path: '/extdocument',
+    name: 'extDocument',
+    component: () => import( /* webpackChunkName: "bcDocument" */ '../views/extDocument.vue'),
+    props: true,
+  },
 ]
 
 const router = new VueRouter({

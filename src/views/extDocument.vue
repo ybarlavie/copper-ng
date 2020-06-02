@@ -1,11 +1,11 @@
 <template>
     <div class="q-pa-md" :key="componentKey">
         <div class="q-gutter-md" style="max-width: 1024px">
-            <h4>תעודה: "{{document.title}}" - מזהה: {{document.doc_id}}</h4>
+            <h4>תעודה חיצונית: "{{document.title}}" - מזהה: {{document.edoc_id}}</h4>
             <q-field filled>
                 <template v-slot:control>
                     <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.arch_id}}</div>
-                    <label>מזהה בארכיב בר-כוכבא</label>
+                    <label>מזהה בארכיב חיצוני</label>
                 </template>
             </q-field>
             <q-field filled>
@@ -30,6 +30,18 @@
                 <template v-slot:control>
                     <q-slider v-model="document.authenticity" :min="0.1" :max="1.0" :step="0.1" label label-always color="light-green" />
                     <label>רמת אותנטיות</label>
+                </template>
+            </q-field>
+            <q-field filled>
+                <template v-slot:control>
+                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.author}}</div>
+                    <label>מחבר</label>
+                </template>
+            </q-field>
+            <q-field filled>
+                <template v-slot:control>
+                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.edition}}</div>
+                    <label>מהדורה</label>
                 </template>
             </q-field>
             <q-input v-model="document.text" filled type="textarea" style="font-size: 19px;" />
@@ -70,7 +82,7 @@
 
 let apiURL = window.location.origin + window.location.pathname;
 if (!apiURL.endsWith('/')) apiURL += '/';
-apiURL += 'api/db/documents';
+apiURL += 'api/db/ext_documents';
 
 export default {
     props: ['docId'],
@@ -95,7 +107,7 @@ export default {
         },
         fetchData() {
             this.document = null;
-            let docQ = {qv:"doc_id",qe:this.docId};
+            let docQ = {qv:"edoc_id",qe:this.docId};
             console.log("fetching document " + JSON.stringify(docQ));
             let that = this;
             $.ajax({
