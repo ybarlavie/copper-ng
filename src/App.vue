@@ -1,127 +1,68 @@
 <template>
-    <div id="app">
-        <mdb-navbar 
-            id="main-navbar"
-            dark
-            position="top"
-            color="stylish"
-            style="z-index: 1049"
-            expand="xl"
-            scrolling
-            :scrollingOffset="20">
-            <mdb-navbar-brand to="/" waves class="font-weight-bold">בית</mdb-navbar-brand>
-            <mdb-navbar-toggler>
-                <mdb-navbar-nav right>
-                    <mdb-nav-item to="/">
-                        <strong>גרף</strong>
-                    </mdb-nav-item>
-                    <mdb-nav-item to="/about">
-                        <strong>אודות</strong>
-                    </mdb-nav-item>
-                </mdb-navbar-nav>
-            </mdb-navbar-toggler>
-        </mdb-navbar>
-        <!-- <div id="nav">
-        <router-link to="/">בית</router-link> |
-        <router-link to="/about">אודות</router-link>
-        </div>
-        <router-view/> -->
-        <main :style="{ marginTop: '60px' }">
-            <transition name="fade" mode="out-in">
-                <router-view></router-view>
-            </transition>
-        </main>
-        <mdb-footer color="stylish-color">
-            <p class="footer-copyright mb-0 py-3 text-center">&copy; {{ new Date().getFullYear() }} Copyright: תכנות: יוני בר-לביא</p>
-        </mdb-footer>
-    </div>
+  <q-layout>
+    <q-header elevated class="glossy">
+      <q-toolbar>
+        <q-btn
+          flat
+          dense
+          round
+          @click="leftDrawerOpen = !leftDrawerOpen"
+          aria-label="Menu"
+          icon="menu"
+        />
+
+        <q-toolbar-title>
+          ארכיון בר-בוכבא
+        </q-toolbar-title>
+
+        <div>גרסה v0.12.1</div>
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer
+      side="left"
+      v-model="leftDrawerOpen"
+      show-if-above
+      bordered
+      content-class="bg-grey-2"
+    >
+      <q-list>
+        <q-item-label header>קישורים חשובים</q-item-label>
+        <q-item clickable tag="a" target="_blank" href="http://blcloud.ddns.net:8081/db/copper-db">
+          <q-item-section avatar>
+            <q-icon name="school" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>בסיס הנתונים</q-item-label>
+            <q-item-label caption>ז ה י ר ו ת ! ! !</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
+
+    <q-page-container dir="rtl">
+      <router-view />
+    </q-page-container>
+  </q-layout>
 </template>
+
 <script>
-import {
-  mdbNavbar,
-  mdbNavItem,
-  mdbNavbarNav,
-  mdbNavbarToggler,
-  mdbNavbarBrand,
-  mdbFooter,
-  mdbTooltip
-} from "mdbvue";
+import HelloWorld from './components/HelloWorld.vue'
 
 export default {
-  name: "app",
+  name: 'LayoutDefault',
+
   components: {
-    mdbNavbar,
-    mdbNavItem,
-    mdbNavbarNav,
-    mdbNavbarToggler,
-    mdbNavbarBrand,
-    mdbFooter,
-    mdbTooltip
+    HelloWorld
+  },
+
+  data () {
+    return {
+      leftDrawerOpen: false
+    }
   }
-};
+}
 </script>
 
 <style>
-@import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap");
-
-.flyout {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  justify-content: space-between;
-}
-.active {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-.demo-section {
-  padding: 20px 0;
-}
-.demo-section > section {
-  border: 1px solid #e0e0e0;
-  padding: 15px;
-}
-.demo-section > h4 {
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-.demo-title {
-  color: #9e9e9e;
-  font-weight: 700;
-  margin-bottom: 0;
-  padding-left: 15px;
-}
-.demo-result-section {
-  position: relative;
-  margin-top: -20px;
-  margin-bottom: 20px;
-  border: 1px solid #e0e0e0;
-  border-top: none;
-  padding: 15px;
-  padding-top: 50px;
-  color: grey;
-  background-color: #f8f8f8;
-}
-.demo-result-section:before {
-  display: block;
-  content: "Result:";
-  position: absolute;
-  left: 0;
-  top: 0;
-  padding: 5px 15px;
-  width: 100%;
-  background-color: #e0e0e0;
-  font-weight: 400;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition-duration: 0.3s;
-  transition-property: opacity;
-  transition-timing-function: ease-out;
-}
-
-.fade-enter,
-.fade-leave-active {
-  opacity: 0;
-}
 </style>

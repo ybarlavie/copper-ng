@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div dir="rtl">
         <div style="display:flex; flex-direction: row;">
             <input id="btnRefresh" type="button" value="Refresh" onclick="draw()">
             <input id="findNode" type="text" dir="ltr">
@@ -13,7 +13,6 @@
         </div>
         <div style="display: flex; flex-direction: row;">
             <div id="mynetwork" ref="mynetwork"></div>
-            <textarea id="frozenPos" cols=30 rows=50 dir="ltr"></textarea>
         </div>
     </div>
 </template>
@@ -206,8 +205,8 @@ export default {
     }
 
     #mynetwork {
-        width: 1600px;
-        height: 750px;
+        width: 100vw;
+        height: 80vh;
         border: 1px solid lightgray;
     }
 
