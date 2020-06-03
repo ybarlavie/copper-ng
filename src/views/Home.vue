@@ -185,6 +185,10 @@ export default {
                         that.$router.push({ name: 'bcDocument', params: { docId: sel.doc_id } });
                     } else if (sel.hasOwnProperty("edoc_id")) {
                         that.$router.push({ name: 'extDocument', params: { docId: sel.edoc_id } });
+                    } else if (sel.hasOwnProperty("loc_id")) {
+                        that.$router.push({ name: 'Location', params: { docId: sel.loc_id } });
+                    } else if (sel.hasOwnProperty("prsn_id")) {
+                        that.$router.push({ name: 'Person', params: { docId: sel.prsn_id } });
                     } else {
                         alert('אין מידע');
                     }

@@ -30,6 +30,18 @@ Vue.use(VueRouter)
     component: () => import( /* webpackChunkName: "bcDocument" */ '../views/extDocument.vue'),
     props: true,
   },
+  {
+    path: '/location',
+    name: 'Location',
+    component: () => import( /* webpackChunkName: "bcDocument" */ '../views/Location.vue'),
+    props: true,
+  },
+  {
+    path: '/person',
+    name: 'Person',
+    component: () => import( /* webpackChunkName: "bcDocument" */ '../views/Person.vue'),
+    props: true,
+  },
 ]
 
 const router = new VueRouter({
