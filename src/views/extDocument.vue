@@ -44,7 +44,7 @@
                     <label>מהדורה</label>
                 </template>
             </q-field>
-            <q-input v-model="document.text" filled type="textarea" style="font-size: 19px;" />
+            <q-input v-model="document.text" filled readonly="readonly" type="textarea" style="font-size: 19px;" />
             <label>טקסט</label>
 
              <div class="q-pa-md q-gutter-md">
