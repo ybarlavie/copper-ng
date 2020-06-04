@@ -67,10 +67,6 @@
 </template>
 <script>
 
-let apiURL = window.location.origin + window.location.pathname;
-if (!apiURL.endsWith('/')) apiURL += '/';
-apiURL += 'api/db/locations';
-
 export default {
     props: ['docId'],
 
@@ -96,10 +92,12 @@ export default {
             this.document = null;
             let docQ = {qv:"loc_id",qe:this.docId};
             console.log("fetching document " + JSON.stringify(docQ));
+
+            let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/locations';
             let that = this;
             $.ajax({
                 type: "GET",
-                url: apiURL + "?q=" + encodeURIComponent(JSON.stringify(docQ)),
+                url: dbURL + "?q=" + encodeURIComponent(JSON.stringify(docQ)),
                 crossdomain: true,
                 success: function (result) {
                     if (result.length > 0) {

@@ -67,10 +67,6 @@ let currQuery = {
     }
 };
 
-let apiURL = window.location.origin + window.location.pathname;
-if (!apiURL.endsWith('/')) apiURL += '/';
-apiURL += 'api/';
-
 export default {
     name: 'home',
     data: () => ({
@@ -81,6 +77,7 @@ export default {
     },
     methods: {
         queryMongoCollection: function (collection, query) {
+            let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/';
             var that = this;
 
             return new Promise((resolve, reject) => {
@@ -89,7 +86,7 @@ export default {
                 }
                 $.ajax({
                     type: "GET",
-                    url: apiURL + 'db/' + collection + "?q=" + encodeURIComponent(JSON.stringify(query)),
+                    url: dbURL + collection + "?q=" + encodeURIComponent(JSON.stringify(query)),
                     crossdomain: true,
                     success: function (result) {
                         resolve(result);
