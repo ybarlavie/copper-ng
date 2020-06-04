@@ -1,7 +1,7 @@
 <template>
   <q-layout>
     <q-header elevated class="glossy">
-      <q-toolbar>
+      <q-toolbar dir="rtl">
         <q-btn
           flat
           dense
@@ -13,20 +13,21 @@
 
         <q-toolbar-title>
           ארכיון בר-בוכבא
+          <div style="font-size: 12px;" >גרסה v0.12.1</div>
         </q-toolbar-title>
 
-        <div>גרסה v0.12.1</div>
+        <q-btn color="light-green" icon="device_hub" label="גרף" style="font-size: 15px;" to="/" />
       </q-toolbar>
     </q-header>
 
     <q-drawer
-      side="left"
+      side="right"
       v-model="leftDrawerOpen"
       show-if-above
       bordered
       content-class="bg-grey-2"
     >
-      <q-list>
+      <q-list dir="rtl">
         <q-item-label header>קישורים חשובים</q-item-label>
         <q-item clickable tag="a" target="_blank" href="http://blcloud.ddns.net:8081/db/copper-db">
           <q-item-section avatar>
