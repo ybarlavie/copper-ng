@@ -1,41 +1,71 @@
-var MongoClient = require('mongodb');
 var express = require('express');
-
-const uri = "mongodb://root:" + encodeURIComponent('AYNIL#$%678liayn') + "@blcloud.ddns.net:27017";
+const ObjectID = require('mongodb').ObjectID;
+const MongoDB = require('../mongoUtils');
 
 var router = express.Router();
 
-router.get('/:collection', function (req, res) {
+router.get('/:collection', function (req, resp) {
     console.log(req.params.collection + ' get');
 
-    MongoClient.connect(uri, function(err, client) {
-        if(err) { return console.dir(err); }
+    let filter = {};
+    let projection = {};
 
-        var db = client.db('copper-db');
-
-        var collection = db.collection(req.params.collection);
-        var filter = {};
-        var projection = {};
-        var findOne = false;
-
-        if (req.query.q) {
-            try {
-                q = JSON.parse(req.query.q);
-                filter[q.qv] = new RegExp(q.qe, 'i');
-            } catch {
-                return res.status(404).end();
-            }
-
-            if (q.prj) {
-                projection = { projection: q.prj };
-            }
+    if (req.query.q) {
+        try {
+            q = JSON.parse(req.query.q);
+            filter[q.qv] = new RegExp(q.qe, 'i');
+        } catch {
+            return res.status(400).end();
         }
 
-        collection.find(filter, projection).toArray(function(err, items) {
-            return res.status(200).send(items);
-        });
+        if (q.prj) {
+            projection = { projection: q.prj };
+        }
+    }
 
-        client.close();
+    MongoDB.connectDB('copper-db', async (err) => {
+        if (err) return resp.status(500).send("cannot connet to DB");
+
+        const collection = db.getDB().collection(req.params.collection);
+
+        collection.find(filter, projection).toArray(function(err, items) {
+            MongoDB.disconnectDB();
+            return resp.status(200).send(items);
+        });
+    });
+});
+
+
+router.post('/:collection', async (req, resp, next) => {
+    var collName = req.params.collection;
+    var newDoc = req.body;
+
+    if (newDoc.hasOwnProperty('_id')) delete newDoc['_id'];
+    
+    MongoDB.getNextId(collName, newDoc)
+    .then(([nextId, id_col]) => {
+        MongoDB.connectDB('copper-db', async (err) => {
+            if (err) return resp.status(500).send("cannot connet to DB");
+
+            newDoc[id_col] = nextId;
+
+            MongoDB.getDB()
+            .collection(collName)
+            .insertOne(newDoc, function(err1, res1) {
+                MongoDB.disconnectDB();
+
+                if (err1) return resp.status(500).send("failed insert: " + JSON.stringify(newDoc));
+
+                MongoDB.incrementNext(collName)
+                .then(newTadmin => {
+                    return resp.status(200).send(res1.insertedId);
+                }, reason => {
+                    return resp.status(500).send("failed increment for " + collName);
+                });
+            })
+        });
+    }, reason => {
+        return resp.status(500).send("failed get nextId for " + collName);
     });
 });
 
