@@ -26,7 +26,7 @@ router.get('/:collection', function (req, resp) {
     MongoDB.connectDB('copper-db', async (err) => {
         if (err) return resp.status(500).send("cannot connet to DB");
 
-        const collection = db.getDB().collection(req.params.collection);
+        const collection = MongoDB.getDB().collection(req.params.collection);
 
         collection.find(filter, projection).toArray(function(err, items) {
             MongoDB.disconnectDB();
@@ -34,7 +34,6 @@ router.get('/:collection', function (req, resp) {
         });
     });
 });
-
 
 router.post('/:collection', async (req, resp, next) => {
     var collName = req.params.collection;

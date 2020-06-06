@@ -24,6 +24,10 @@ import {
   QCarouselSlide,
   QSlider,
   QBadge,
+  QTable,
+  QTh,
+  QTr,
+  QTd,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -48,7 +52,11 @@ Vue.use(Quasar, {
     QCarouselControl,
     QCarouselSlide,
     QSlider,
-    QBadge
+    QBadge,
+    QTable,
+    QTh,
+    QTr,
+    QTd,
   },
   directives: {
   },

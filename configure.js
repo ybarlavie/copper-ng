@@ -1,6 +1,7 @@
 const bodyParser = require('body-parser');
 const logger = require('morgan');
 const dbRouter = require('./routes/db');
+const researchRouter = require('./routes/research');
 
 module.exports = (app) => {
     app.use(bodyParser.json());
@@ -11,4 +12,5 @@ module.exports = (app) => {
     }));
 
     app.use('/api/db', dbRouter);
+    app.use('/api/research', researchRouter);
 }
