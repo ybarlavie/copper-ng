@@ -29,6 +29,7 @@ import {
   QTr,
   QTd,
   QToggle,
+  QLinearProgress,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -59,6 +60,7 @@ Vue.use(Quasar, {
     QTr,
     QTd,
     QToggle,
+    QLinearProgress,
   },
   directives: {
   },
