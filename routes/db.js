@@ -1,6 +1,6 @@
 var express = require('express');
-const ObjectID = require('mongodb').ObjectID;
-const MongoDB = require('../mongoUtils');
+var ObjectID = require('mongodb').ObjectID;
+var MongoDB = require('../mongoUtils');
 
 var router = express.Router();
 
