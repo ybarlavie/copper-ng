@@ -5,10 +5,10 @@ const MongoDB = require('../mongoUtils');
 const router = express.Router();
 
 const searches = [
-    { coll: 'documents', fields: [ 'text', 'keywords' ], prj: { 'text': 0, 'images': 0 } },
-    { coll: 'ext_documents', fields: [ 'text', 'keywords' ], prj: { 'text': 0, 'images': 0 } },
-    { coll: 'locations', fields: [ 'keywords' ], prj: { 'text': 0, 'images': 0 } },
-    { coll: 'persons', fields: [ 'name', 'aliases', 'keywords'], prj: { 'text': 0, 'images': 0 } }
+    { coll: 'documents', fields: [ 'text', 'keywords' ], prj: { sug: 'מסמך בר כוכבא', item_id: '$doc_id', name: 1, title: 1, keywords: 1 } },
+    { coll: 'ext_documents', fields: [ 'text', 'keywords' ], prj: { sug: 'מסמך חיצוני', item_id: '$edoc_id', name: 1, title: 1, keywords: 1 } },
+    { coll: 'locations', fields: [ 'keywords' ], prj: { sug: 'מיקום', item_id: '$loc_id', name: 1, title: 1, keywords: 1 } },
+    { coll: 'persons', fields: [ 'name', 'aliases', 'keywords'], prj: { sug: 'דמות', item_id: '$prsn_id', name: 1, title: 1, keywords: 1 } }
 ];
 
 const _regexBuilder = ((word) => {
@@ -61,7 +61,7 @@ router.get('/by_word/:id/:limit/:word', function (req, resp) {
                 new Promise((resolve, reject) => {
                     MongoDB.getDB()
                     .collection(s.coll)
-                    .find(_queryBuilder(exclude_id, s.fields, re), { projection: s.prj })
+                    .aggregate( [ { $match: _queryBuilder(exclude_id, s.fields, re) }, { $project: s.prj } ] )
                     .limit(limit)
                     .toArray((err, data) => {
                         err ? reject(err) : resolve(data);

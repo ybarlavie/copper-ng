@@ -28,6 +28,7 @@ import {
   QTh,
   QTr,
   QTd,
+  QToggle,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -57,6 +58,7 @@ Vue.use(Quasar, {
     QTh,
     QTr,
     QTd,
+    QToggle,
   },
   directives: {
   },

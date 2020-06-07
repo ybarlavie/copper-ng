@@ -42,6 +42,12 @@ Vue.use(VueRouter)
     component: () => import( /* webpackChunkName: "bcDocument" */ '../views/Person.vue'),
     props: true,
   },
+  {
+    path: '/resultGrid',
+    name: 'resultGrid',
+    component: () => import( /* webpackChunkName: "bcDocument" */ '../views/resultGrid.vue'),
+    props: true,
+  },
 ]
 
 const router = new VueRouter({

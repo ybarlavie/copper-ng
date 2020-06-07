@@ -36,7 +36,13 @@
             <label>טקסט</label>
 
              <div class="q-pa-md q-gutter-md">
-                <q-badge v-for="kw in keywords" :key="kw" outline color="primary" :label="kw" style="font-size: 19px;" />
+                <q-badge v-for="kw in keywords" 
+                    :key="kw"
+                    :label="kw"
+                    @click="onSearchClick(kw)"
+                    outline 
+                    color="primary" 
+                    style="font-size: 19px;" />
             </div>
             <label>מילות מפתח</label>
         </div>
@@ -89,6 +95,11 @@ export default {
         onImageClick(url) {
             window.open(url);
         },
+
+        onSearchClick(query) {
+            this.$router.push({ name: 'resultGrid', params: { exclude: this.document._id, query: query } });
+        },
+
         fetchData() {
             this.document = null;
             this.docId = this.docId || this.$route.query.docId;
