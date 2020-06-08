@@ -13,7 +13,7 @@
             <q-input rounded outlined v-model="document.edition" hint="מהדורה" style="font-size: 19px;" :readonly="editable ? false : true" />
             <q-input rounded outlined v-model="document.text" type="textarea" hint="טקסט" style="font-size: 19px;" :readonly="editable ? false : true" />
 
-            <Keywords v-model="keywords" :parentId="document._id" editable="editable" color="primary" hint="מילות מפתח"/>
+            <Keywords v-model="keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
         </div>
         <h4>תמונות</h4>
         <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">

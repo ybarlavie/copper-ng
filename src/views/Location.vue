@@ -8,7 +8,7 @@
             <q-input rounded outlined v-model="document.lat" hint="Latitude" style="font-size: 19px;" :readonly="editable ? false : true" />
             <q-input rounded outlined v-model="document.lng" hint="Longitude" style="font-size: 19px;" :readonly="editable ? false : true" />
 
-            <Keywords v-model="keywords" :parentId="document._id" editable="editable" color="primary" hint="מילות מפתח"/>
+            <Keywords v-model="keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
 
             <h4>תמונות</h4>
             <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">

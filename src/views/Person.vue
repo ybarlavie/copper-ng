@@ -5,8 +5,8 @@
             <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
             <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
 
-            <Keywords v-model="aliases" :parentId="document._id" editable="editable" color="red" hint="שמות נרדפים"/>
-            <Keywords v-model="keywords" :parentId="document._id" editable="editable" color="primary" hint="מילות מפתח"/>
+            <Keywords v-model="aliases" :parentId="document._id" :editable="editable" color="red" hint="שמות נרדפים"/>
+            <Keywords v-model="keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
 
             <h4>תמונות</h4>
             <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
