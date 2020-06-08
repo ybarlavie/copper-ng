@@ -5,27 +5,8 @@
             <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
             <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
 
-            <div class="q-pa-md q-gutter-md">
-                <q-badge v-for="kw in aliases" 
-                    hint="מילות מפתח"
-                    :key="kw"
-                    :label="kw"
-                    @click="onSearchClick(kw)"
-                    outline 
-                    color="red" 
-                    style="font-size: 19px;" />
-            </div>
-
-            <div class="q-pa-md q-gutter-md">
-                <q-badge v-for="kw in keywords" 
-                    hint="מילות מפתח"
-                    :key="kw"
-                    :label="kw"
-                    @click="onSearchClick(kw)"
-                    outline 
-                    color="primary" 
-                    style="font-size: 19px;" />
-            </div>
+            <Keywords v-model="aliases" :parentId="document._id" editable="editable" color="red" hint="שמות נרדפים"/>
+            <Keywords v-model="keywords" :parentId="document._id" editable="editable" color="primary" hint="מילות מפתח"/>
 
             <h4>תמונות</h4>
             <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
@@ -55,8 +36,11 @@
     </div>
 </template>
 <script>
-
+import Keywords from '../components/keywords.vue'
 export default {
+    components: {
+        Keywords
+    },
     props: ['docId'],
 
     data() {
