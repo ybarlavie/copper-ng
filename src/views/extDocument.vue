@@ -1,6 +1,6 @@
 <template>
     <div class="q-pa-md" :key="componentKey">
-        <div class="q-gutter-md" style="max-width: 1024px">
+        <div v-if="document" class="q-gutter-md" style="max-width: 1024px">
             <h4>תעודה חיצונית: "{{document.arch_id}}" - מזהה: {{document.edoc_id}}</h4>
             <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב חיצוני" style="font-size: 19px;" :readonly="editable ? false : true" />
             <q-input rounded outlined v-model="document.material" hint="חומר" style="font-size: 19px;" :readonly="editable ? false : true" />

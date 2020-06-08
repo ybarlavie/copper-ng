@@ -55,7 +55,7 @@ export default {
             images: [],
             keywords: [],
             slide: '',
-            editable: true
+            editable: false
         }
     },
 

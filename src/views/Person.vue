@@ -1,6 +1,6 @@
 <template>
     <div class="q-pa-md" :key="componentKey">
-        <div class="q-gutter-md" style="max-width: 1024px">
+        <div v-if="document" class="q-gutter-md" style="max-width: 1024px">
             <h4>דמות: "{{document.title}}" - מזהה: {{document.prsn_id}}</h4>
             <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
             <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
