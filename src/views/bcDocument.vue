@@ -1,42 +1,19 @@
 <template>
     <div class="q-pa-md" :key="componentKey">
-        <div class="q-gutter-md" style="max-width: 1024px">
+        <div class="q-gutter-md" style="max-width: 1024px; ">
             <h4>תעודה: "{{document.title}}" - מזהה: {{document.doc_id}}</h4>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.arch_id}}</div>
-                    <label>מזהה בארכיב בר-כוכבא</label>
-                </template>
-            </q-field>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.material}}</div>
-                    <label>חומר</label>
-                </template>
-            </q-field>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.label}}</div>
-                    <label>תגית</label>
-                </template>
-            </q-field>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.date}}</div>
-                    <label>תאריך</label>
-                </template>
-            </q-field>
-            <q-field filled>
-                <template v-slot:control>
-                    <q-slider v-model="document.authenticity" :min="0.1" :max="1.0" :step="0.1" label label-always color="light-green" />
-                    <label>רמת אותנטיות</label>
-                </template>
-            </q-field>
-            <q-input v-model="document.text" filled readonly="readonly" type="textarea" style="font-size: 19px;" />
-            <label>טקסט</label>
 
-             <div class="q-pa-md q-gutter-md">
+            <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב ב.כ." style="font-size: 19px;" :readonly="editable ? false : true" />
+            <q-input rounded outlined v-model="document.material" hint="חומר" style="font-size: 19px;" :readonly="editable ? false : true" />
+            <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
+            <q-input rounded outlined type="date" v-model="document.date" hint="תאריך" style="font-size: 19px;" :readonly="editable ? false : true" />
+            <q-field rounded outlined hint="רמת אותנטיות">
+                <q-slider v-model="document.authenticity" :min="0.1" :max="1.0" :step="0.1" color="light-green" :readonly="editable ? false : true" />
+            </q-field>
+            <q-input rounded outlined v-model="document.text" type="textarea" hint="טקסט" style="font-size: 19px;" :readonly="editable ? false : true" />
+            <div class="q-pa-md q-gutter-md">
                 <q-badge v-for="kw in keywords" 
+                    hint="מילות מפתח"
                     :key="kw"
                     :label="kw"
                     @click="onSearchClick(kw)"
@@ -44,7 +21,6 @@
                     color="primary" 
                     style="font-size: 19px;" />
             </div>
-            <label>מילות מפתח</label>
         </div>
         <h4>תמונות</h4>
         <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
@@ -84,6 +60,7 @@ export default {
             images: [],
             keywords: [],
             slide: '',
+            editable: false
         }
     },
 

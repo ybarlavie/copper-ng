@@ -2,26 +2,30 @@
     <div class="q-pa-md" :key="componentKey">
         <div class="q-gutter-md" style="max-width: 1024px">
             <h4>דמות: "{{document.title}}" - מזהה: {{document.prsn_id}}</h4>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.name}}</div>
-                    <label>שם</label>
-                </template>
-            </q-field>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.label}}</div>
-                    <label>תגית</label>
-                </template>
-            </q-field>
+            <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
+            <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
+
             <div class="q-pa-md q-gutter-md">
-                <q-badge v-for="kw in aliases" :key="kw" outline color="red" :label="kw" style="font-size: 19px;" />
+                <q-badge v-for="kw in aliases" 
+                    hint="מילות מפתח"
+                    :key="kw"
+                    :label="kw"
+                    @click="onSearchClick(kw)"
+                    outline 
+                    color="red" 
+                    style="font-size: 19px;" />
             </div>
-            <label>שמות נרדפים</label>
+
             <div class="q-pa-md q-gutter-md">
-                <q-badge v-for="kw in keywords" :key="kw" outline color="primary" :label="kw" style="font-size: 19px;" />
+                <q-badge v-for="kw in keywords" 
+                    hint="מילות מפתח"
+                    :key="kw"
+                    :label="kw"
+                    @click="onSearchClick(kw)"
+                    outline 
+                    color="primary" 
+                    style="font-size: 19px;" />
             </div>
-            <label>מילות מפתח</label>
 
             <h4>תמונות</h4>
             <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
@@ -63,6 +67,7 @@ export default {
             keywords: [],
             aliases: [],
             slide: '',
+            editable: false
         }
     },
 
@@ -74,6 +79,11 @@ export default {
         onImageClick(url) {
             window.open(url);
         },
+        
+        onSearchClick(query) {
+            this.$router.push({ name: 'resultGrid', params: { exclude: this.document._id, query: query } });
+        },
+
         fetchData() {
             this.document = null;
             let docQ = {qv:"prsn_id",qe:this.docId};

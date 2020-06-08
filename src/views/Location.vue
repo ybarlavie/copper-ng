@@ -2,41 +2,22 @@
     <div class="q-pa-md" :key="componentKey">
         <div class="q-gutter-md" style="max-width: 1024px">
             <h4>מיקום: "{{document.title}}" - מזהה: {{document.loc_id}}</h4>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.name}}</div>
-                    <label>שם</label>
-                </template>
-            </q-field>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.label}}</div>
-                    <label>תגית</label>
-                </template>
-            </q-field>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.coordinates}}</div>
-                    <label>קואורדינטות</label>
-                </template>
-            </q-field>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.lat}}</div>
-                    <label>Latitude</label>
-                </template>
-            </q-field>
-            <q-field filled>
-                <template v-slot:control>
-                    <div class="self-center full-width no-outline" style="font-size: 19px;" tabindex="0">{{document.lng}}</div>
-                    <label>Longitude</label>
-                </template>
-            </q-field>
+            <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
+            <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
+            <q-input rounded outlined v-model="document.coordinates" hint="קואורדינטות" style="font-size: 19px;" :readonly="editable ? false : true" />
+            <q-input rounded outlined v-model="document.lat" hint="Latitude" style="font-size: 19px;" :readonly="editable ? false : true" />
+            <q-input rounded outlined v-model="document.lng" hint="Longitude" style="font-size: 19px;" :readonly="editable ? false : true" />
 
             <div class="q-pa-md q-gutter-md">
-                <q-badge v-for="kw in keywords" :key="kw" outline color="primary" :label="kw" style="font-size: 19px;" />
+                <q-badge v-for="kw in keywords" 
+                    hint="מילות מפתח"
+                    :key="kw"
+                    :label="kw"
+                    @click="onSearchClick(kw)"
+                    outline 
+                    color="primary" 
+                    style="font-size: 19px;" />
             </div>
-            <label>מילות מפתח</label>
 
             <h4>תמונות</h4>
             <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
@@ -77,6 +58,7 @@ export default {
             images: [],
             keywords: [],
             slide: '',
+            editable: false
         }
     },
 
@@ -88,6 +70,11 @@ export default {
         onImageClick(url) {
             window.open(url);
         },
+        
+        onSearchClick(query) {
+            this.$router.push({ name: 'resultGrid', params: { exclude: this.document._id, query: query } });
+        },
+
         fetchData() {
             this.document = null;
             let docQ = {qv:"loc_id",qe:this.docId};
