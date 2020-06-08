@@ -5,7 +5,7 @@
                     :key="kw"
                     :label="kw"
                     :color="color" 
-                    @click="onSearchClick(kw)"
+                    @click="onWordClick(kw)"
                     outline 
                     style="font-size: 19px;"
                     :class="editable ? '' : 'cursor-pointer'" />
@@ -16,14 +16,27 @@
                 square
                 filled
                 dense
-                v-model="newKeyword" 
+                v-model="editText" 
                 error-message = "כבר קיים או מכיל רווח"
                 :error="!isValid">
                 <template v-slot:prepend>
-                    <q-icon name="add" @click="tryAdd()" class="cursor-pointer" />
+                    <q-icon v-if="canSave" name="check" @click="update()" class="cursor-pointer">
+                        <q-tooltip content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
+                            שמירה
+                        </q-tooltip>
+                    </q-icon>
+                    <q-icon v-if="canCancel" name="cancel" @click="editText = editedMember = ''" class="cursor-pointer">
+                        <q-tooltip content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
+                            ביטול
+                        </q-tooltip>
+                    </q-icon>
                 </template>
                 <template v-slot:append>
-                    <q-icon name="close" @click="newKeyword = ''" class="cursor-pointer" />
+                    <q-icon name="close" @click="editText = ''" class="cursor-pointer">
+                        <q-tooltip content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
+                            ניקוי
+                        </q-tooltip>
+                    </q-icon>
                 </template>
             </q-input>
         </q-field>
@@ -33,13 +46,20 @@ export default {
     props: ['value', 'editable', 'color', 'hint', 'parentId'],
     data() {
         return {
-            newKeyword: ''
+            editText: '',
+            editedMember: ''
         }
     },
 
     computed: {
         isValid () {
-            return (this.newKeyword.indexOf(' ')<0) && !this.value.includes(this.newKeyword);
+            return this._isValid(this.editText);
+        },
+        canSave () {
+            return this.editText != this.editedMember;
+        },
+        canCancel () {
+            return this.editText != this.editedMember || this.editedMember !== '';
         }
     },
 
@@ -51,15 +71,37 @@ export default {
             });
         },
 
-        tryAdd() {
-            if (this.isValid) {
-                this.value.push(this.newKeyword);
-                this.newKeyword = '';
+        _isValid(w) {
+            return (w.indexOf(' ')<0) && !this.value.includes(w);
+        },
+
+        update() {
+            if (this.editedMember !== '') {
+                // this is updating an existing member
+                var i = this.value.indexOf(this.editedMember);
+                if (i>=0) {
+                    // we have the edited member !
+                    if (this.editText === '') {
+                        // this is deletion
+                        this.value.splice(i,1);
+                        this.editText = this.editedMember = '';
+                    } else if (this.editText !== '' && this._isValid(this.editText)) {
+                        // this is a valid update
+                        this.value[i] = this.editText;
+                        this.editText = this.editedMember = '';
+                    }
+                }
+            } else if (this.editText !== '' && this._isValid(this.editText)) {
+                // this is a new member
+                this.value.push(this.editText);
+                this.editText = this.editedMember = '';
             }
         },
 
-        onSearchClick(query) {
-            if (!this.editable) {
+        onWordClick(query) {
+            if (this.editable) {
+                this.editText = this.editedMember = query;
+            } else {
                 this.$router.push({ name: 'resultGrid', params: { exclude: this.parentId, query: query } });
             }
         },
