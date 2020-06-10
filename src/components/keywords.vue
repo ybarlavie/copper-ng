@@ -11,6 +11,7 @@
                     :class="editable ? '' : 'cursor-pointer'" />
             </div>
 
+            <label v-if="editable && editedMember !== ''">{{editedMember}}</label>
             <q-input v-if="editable"
                 style="max-width: 200px; font-size: 19px;"
                 square
@@ -20,9 +21,9 @@
                 error-message = "כבר קיים או מכיל רווח"
                 :error="!isValid">
                 <template v-slot:prepend>
-                    <q-icon v-if="canSave" name="check" @click="update()" class="cursor-pointer">
+                    <q-icon v-if="canSave" :name="saveName" @click="update()" class="cursor-pointer">
                         <q-tooltip content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
-                            שמירה
+                            {{(editedMember!=='' ? (editText==='' ? 'מחיקת הערך ' + editedMember : 'שינוי הערך ' + editedMember) : 'הוספת הערך ' + editText)}}
                         </q-tooltip>
                     </q-icon>
                     <q-icon v-if="canCancel" name="cancel" @click="editText = editedMember = ''" class="cursor-pointer">
@@ -60,6 +61,9 @@ export default {
         },
         canCancel () {
             return this.editText != this.editedMember || this.editedMember !== '';
+        },
+        saveName () {
+            return this.editedMember!=='' && this.editText==='' ? 'delete' : 'check';
         }
     },
 

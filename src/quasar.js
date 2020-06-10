@@ -31,6 +31,7 @@ import {
   QToggle,
   QLinearProgress,
   QTooltip,
+  QForm,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -63,6 +64,7 @@ Vue.use(Quasar, {
     QToggle,
     QLinearProgress,
     QTooltip,
+    QForm,
   },
   directives: {
   },
