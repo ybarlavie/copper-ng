@@ -5,12 +5,12 @@
             <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
             <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
 
-            <Keywords v-model="aliases" :parentId="document._id" :editable="editable" color="red" hint="שמות נרדפים"/>
-            <Keywords v-model="keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
+            <Keywords v-model="document.aliases" :parentId="document._id" :editable="editable" color="red" hint="שמות נרדפים"/>
+            <Keywords v-model="document.keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
 
             <h4>תמונות</h4>
             <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
-                <q-carousel-slide v-for="item in images"
+                <q-carousel-slide v-for="item in document.images"
                     :key="item.label" 
                     :name="item.label" 
                     :img-src="item.url"
@@ -41,21 +41,17 @@ export default {
     components: {
         Keywords
     },
-    props: ['docId'],
+    props: ['docId', 'editable'],
 
     data() {
         return {
             componentKey: 0,
             document: {},
-            images: [],
-            keywords: [],
-            aliases: [],
             slide: '',
-            editable: false
         }
     },
 
-    mounted() {
+    beforeMount() {
         this.fetchData();
     },
 
@@ -69,7 +65,7 @@ export default {
         },
 
         fetchData() {
-            this.document = null;
+            this.document = {};
             let docQ = {qv:"prsn_id",qe:this.docId};
             console.log("fetching document " + JSON.stringify(docQ));
 
@@ -82,10 +78,7 @@ export default {
                 success: function (result) {
                     if (result.length > 0) {
                         that.document = result[0];
-                        that.images = that.document.images && that.document.images.length > 0 ? that.document.images : [];
-                        that.aliases = that.document.aliases && that.document.aliases.length > 0 ? that.document.aliases : [];
-                        that.keywords = that.document.keywords && that.document.keywords.length > 0 ? that.document.keywords : [];
-                        that.slide = that.images.length > 0 ? that.images[0].label : '';
+                        that.slide = that.document.images.length > 0 ? that.document.images[0].label : '';
                     }
                     that.componentKey += 1;
                 },

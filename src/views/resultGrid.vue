@@ -1,6 +1,6 @@
 <template>
     <div class="q-pa-md" :key="componentKey">
-        <q-linear-progress v-if="fetching" indeterminate />
+        <q-linear-progress v-if="ajaxing" indeterminate />
         <q-table title="תוצאת חיפוש" :data="data" :columns="columns" row-key="name" :visible-columns="visibleColumns"
             style="font-size: 19px;">
             <template v-slot:top="props">
@@ -32,7 +32,7 @@ export default {
     data () {
         return {
             componentKey: 0,
-            fetching: false,
+            ajaxing: false,
             visibleColumns: [ '_id', 'item_id', 'name', 'title', 'keywords', 'sug' ],
             columns: [
                 { name: 'sug', required: true, label: 'סוג', field: "sug", sortable: true },
@@ -52,7 +52,7 @@ export default {
         }
     },
 
-    mounted() {
+    beforeMount() {
         this.fetchData();
     },
 
@@ -62,7 +62,7 @@ export default {
         },
 
         fetchData() {
-            this.fetching = true;
+            this.ajaxing = true;
             this.data = null;
 
             console.log("querying " + JSON.stringify(this.query));
@@ -75,12 +75,12 @@ export default {
                 url: researchURL + 'by_word/' + this.exclude + '/' + QUERY_LIMIT + '/' + encodeURIComponent(this.query),
                 crossdomain: true,
                 success: function (result) {
-                    that.fetching = false;
+                    that.ajaxing = false;
                     that.data = result;
                     that.componentKey += 1;
                 },
                 error: function (xhr, status, err) {
-                    that.fetching = false;
+                    that.ajaxing = false;
                     console.log("failed searching " + that.query);
                     that.componentKey += 1;
                 }

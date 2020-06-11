@@ -26,45 +26,37 @@ router.get('/:collection', function (req, resp) {
     MongoDB.connectDB('copper-db', async (err) => {
         if (err) return resp.status(500).send("cannot connet to DB");
 
-        const collection = MongoDB.getDB().collection(req.params.collection);
-
-        collection.find(filter, projection).toArray(function(err, items) {
+        MongoDB
+        .getDB()
+        .collection(req.params.collection)
+        .find(filter, projection).toArray(function(err, items) {
             MongoDB.disconnectDB();
             return resp.status(200).send(items);
         });
     });
 });
 
+
 router.post('/:collection', async (req, resp, next) => {
     var collName = req.params.collection;
-    var newDoc = req.body;
+    var doc = req.body;
+    var _id = doc.hasOwnProperty('_id') ? doc['_id'] : null;
 
-    if (newDoc.hasOwnProperty('_id')) delete newDoc['_id'];
-    
-    MongoDB.getNextId(collName, newDoc)
-    .then(([nextId, id_col]) => {
-        MongoDB.connectDB('copper-db', async (err) => {
-            if (err) return resp.status(500).send("cannot connet to DB");
+    if (_id) {
+        var dbFunc = null;
+        var docExists = await MongoDB.docExists(collName, _id);
+        if (docExists) {
+            dbFunc = MongoDB.update;
+        } else {
+            dbFunc = MongoDB.insert;
+        }
+    }
 
-            newDoc[id_col] = nextId;
-
-            MongoDB.getDB()
-            .collection(collName)
-            .insertOne(newDoc, function(err1, res1) {
-                MongoDB.disconnectDB();
-
-                if (err1) return resp.status(500).send("failed insert: " + JSON.stringify(newDoc));
-
-                MongoDB.incrementNext(collName)
-                .then(newTadmin => {
-                    return resp.status(200).send(res1.insertedId);
-                }, reason => {
-                    return resp.status(500).send("failed increment for " + collName);
-                });
-            })
-        });
+    dbFunc(collName, doc)
+    .then(id => {
+        return resp.status(200).send(id);
     }, reason => {
-        return resp.status(500).send("failed get nextId for " + collName);
+        return resp.status(500).send(reason);
     });
 });
 
