@@ -179,13 +179,13 @@ export default {
                 }
                 if (document.getElementById("card").checked) {
                     if (sel.hasOwnProperty("doc_id")) {
-                        that.$router.push({ name: 'bcDocument', params: { docId: sel.doc_id, editable: false } });
+                        that.$router.push({ name: 'bcDocument', params: { idCol: 'doc_id', docId: sel.doc_id, editable: false, collName: 'documents' } });
                     } else if (sel.hasOwnProperty("edoc_id")) {
-                        that.$router.push({ name: 'extDocument', params: { docId: sel.edoc_id, editable: false } });
+                        that.$router.push({ name: 'extDocument', params: { idCol: 'edoc_id', docId: sel.edoc_id, editable: false, collName: 'ext_documents' } });
                     } else if (sel.hasOwnProperty("loc_id")) {
-                        that.$router.push({ name: 'Location', params: { docId: sel.loc_id, editable: false } });
+                        that.$router.push({ name: 'Location', params: { idCol: 'loc_id', docId: sel.loc_id, editable: false, collName: 'locations' } });
                     } else if (sel.hasOwnProperty("prsn_id")) {
-                        that.$router.push({ name: 'Person', params: { docId: sel.prsn_id, editable: false } });
+                        that.$router.push({ name: 'Person', params: { idCol: 'prsn_id', docId: sel.prsn_id, editable: false, collName: 'persons' } });
                     } else {
                         alert('אין מידע');
                     }

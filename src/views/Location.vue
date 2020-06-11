@@ -1,55 +1,65 @@
 <template>
     <div class="q-pa-md" :key="componentKey">
-        <div v-if="document" class="q-gutter-md" style="max-width: 1024px">
-            <h4>מיקום: "{{document.title}}" - מזהה: {{document.loc_id}}</h4>
-            <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
-            <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
-            <q-input rounded outlined v-model="document.coordinates" hint="קואורדינטות" style="font-size: 19px;" :readonly="editable ? false : true" />
-            <q-input rounded outlined v-model="document.lat" hint="Latitude" style="font-size: 19px;" :readonly="editable ? false : true" />
-            <q-input rounded outlined v-model="document.lng" hint="Longitude" style="font-size: 19px;" :readonly="editable ? false : true" />
+        <q-linear-progress v-if="ajaxing" indeterminate />
+        <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
+            <div v-if="document" class="q-gutter-md" style="max-width: 1024px;">
+                <h4>מיקום: "{{document.title}}" - מזהה: {{document.loc_id}}</h4>
+                <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.coordinates" hint="קואורדינטות" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.lat" hint="Latitude" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.lng" hint="Longitude" style="font-size: 19px;" :readonly="editable ? false : true" />
 
-            <Keywords v-model="document.keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
+                <Keywords v-model="document.keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
 
-            <h4>תמונות</h4>
-            <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
-                <q-carousel-slide v-for="item in document.images"
-                    :key="item.label" 
-                    :name="item.label" 
-                    :img-src="item.url"
-                    @click="onImageClick(item.url)">
-                    <div class="absolute-bottom custom-caption">
-                        <div class="text-h2">{{item.label}}</div>
-                    </div>
-                </q-carousel-slide>
-                <template v-slot:control>
-                    <q-carousel-control position="top-left" :offset="[18, 18]" class="q-gutter-xs">
-                        <q-btn
-                            push round dense color="orange" text-color="black" icon="arrow_right"
-                            @click="$refs.carousel.next()"
-                        />
-                        <q-btn
-                            push round dense color="orange" text-color="black" icon="arrow_left"
-                            @click="$refs.carousel.previous()"
-                        />
-                    </q-carousel-control>
-                </template>
-            </q-carousel>
-        </div>
+                <h4>תמונות</h4>
+                <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
+                    <q-carousel-slide v-for="item in document.images"
+                        :key="item.label" 
+                        :name="item.label" 
+                        :img-src="item.url"
+                        @click="onImageClick(item.url)">
+                        <div class="absolute-bottom custom-caption">
+                            <div class="text-h2">{{item.label}}</div>
+                        </div>
+                    </q-carousel-slide>
+                    <template v-slot:control>
+                        <q-carousel-control position="top-left" :offset="[18, 18]" class="q-gutter-xs">
+                            <q-btn
+                                push round dense color="orange" text-color="black" icon="arrow_right"
+                                @click="$refs.carousel.next()"
+                            />
+                            <q-btn
+                                push round dense color="orange" text-color="black" icon="arrow_left"
+                                @click="$refs.carousel.previous()"
+                            />
+                        </q-carousel-control>
+                    </template>
+                </q-carousel>
+            </div>
+            <div v-if="editable">
+                <q-btn label="שמירה" type="submit" color="primary"/>
+                <q-btn label="ביטול" type="reset" color="primary" flat class="q-ml-sm" />
+            </div>
+        </q-form>
     </div>
 </template>
 <script>
 import Keywords from '../components/keywords.vue'
+
 export default {
     components: {
         Keywords
     },
-    props: ['docId', 'editable'],
-
+    props: ['idCol', 'docId', 'editable', 'collName'],
+    
     data() {
         return {
             componentKey: 0,
             document: {},
+            origDoc: {},
             slide: '',
+            ajaxing: false,
         }
     },
 
@@ -58,35 +68,88 @@ export default {
     },
 
     methods: {
+        showNotif (ok, msg) {
+            this.$q.notify({
+                message: msg,
+                color: ok ? 'green' : 'red'
+            })
+        },
+
+        onSubmit () {
+            if (Object.entries(this.document).toString() === Object.entries(this.origDoc).toString()) {
+                this.showNotif(false, "לא בוצעו שינויים");
+                return;
+            }
+            var settings = {
+                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName,
+                "method": "POST",
+                "timeout": 0,
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "data": JSON.stringify(this.document),
+            };
+
+            var that = this;
+            this.ajaxing = true;
+            console.log('ajaxing up!');
+            $.ajax(settings).done(function (response) {
+                that.showNotif(true, "השמירה הצליחה");
+            })
+            .fail(function(err) {
+                console.log('error' +  JSON.stringify(err))
+                that.showNotif(false, "השמירה נכשלה");
+            })
+            .always(function() {
+                that.ajaxing = false;
+            });
+        },
+
+        onReset () {
+            this.fetchData(true);
+        },
+
         onImageClick(url) {
             window.open(url);
         },
-        
+
         onSearchClick(query) {
             this.$router.push({ name: 'resultGrid', params: { exclude: this.document._id, query: query } });
         },
 
-        fetchData() {
+        fetchData(noisy) {
+            this.ajaxing = true;
             this.document = {};
-            let docQ = {qv:"loc_id",qe:this.docId};
+            this.origDoc = {};
+            this.docId = this.docId || this.$route.query.docId;
+            let docQ = {qv:this.idCol,qe:this.docId};
             console.log("fetching document " + JSON.stringify(docQ));
 
-            let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/locations';
+            let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName;
             let that = this;
             $.ajax({
                 type: "GET",
                 url: dbURL + "?q=" + encodeURIComponent(JSON.stringify(docQ)),
                 crossdomain: true,
                 success: function (result) {
+                    that.ajaxing = false;
                     if (result.length > 0) {
                         that.document = result[0];
+                        that.origDoc = JSON.parse(JSON.stringify(that.document));
                         that.slide = that.document.images.length > 0 ? that.document.images[0].label : '';
                     }
                     that.componentKey += 1;
+                    if (noisy) {
+                        that.showNotif(true, "המסמך נטען");
+                    }
                 },
                 error: function (xhr, status, err) {
+                    that.ajaxing = false;
                     console.log("failed fetching document " + that.docId);
                     that.componentKey += 1;
+                    if (noisy) {
+                        that.showNotif(false, "טעינה נכשלה");
+                    }
                 }
             });
         },

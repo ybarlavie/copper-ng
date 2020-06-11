@@ -32,10 +32,10 @@ import {
   QLinearProgress,
   QTooltip,
   QForm,
+  Notify,
 } from 'quasar'
 
 Vue.use(Quasar, {
-  config: {},
   components: {
     QLayout,
     QHeader,
@@ -65,9 +65,13 @@ Vue.use(Quasar, {
     QLinearProgress,
     QTooltip,
     QForm,
+    
+  },
+  config: {
   },
   directives: {
   },
   plugins: {
+    Notify,
   }
  })

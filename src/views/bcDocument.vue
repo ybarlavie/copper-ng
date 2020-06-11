@@ -55,12 +55,13 @@ export default {
     components: {
         Keywords
     },
-    props: ['docId', 'editable'],
+    props: ['idCol', 'docId', 'editable', 'collName'],
     
     data() {
         return {
             componentKey: 0,
             document: {},
+            origDoc: {},
             slide: '',
             ajaxing: false,
         }
@@ -71,10 +72,20 @@ export default {
     },
 
     methods: {
+        showNotif (ok, msg) {
+            this.$q.notify({
+                message: msg,
+                color: ok ? 'green' : 'red'
+            })
+        },
+
         onSubmit () {
-            
+            if (Object.entries(this.document).toString() === Object.entries(this.origDoc).toString()) {
+                this.showNotif(false, "לא בוצעו שינויים");
+                return;
+            }
             var settings = {
-                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/documents',
+                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName,
                 "method": "POST",
                 "timeout": 0,
                 "headers": {
@@ -87,19 +98,19 @@ export default {
             this.ajaxing = true;
             console.log('ajaxing up!');
             $.ajax(settings).done(function (response) {
-                console.log('OK! ' + JSON.stringify(response));
+                that.showNotif(true, "השמירה הצליחה");
             })
             .fail(function(err) {
                 console.log('error' +  JSON.stringify(err))
+                that.showNotif(false, "השמירה נכשלה");
             })
             .always(function() {
-                console.log('ajaxing down!');
                 that.ajaxing = false;
             });
         },
 
         onReset () {
-            this.fetchData();
+            this.fetchData(true);
         },
 
         onImageClick(url) {
@@ -110,14 +121,15 @@ export default {
             this.$router.push({ name: 'resultGrid', params: { exclude: this.document._id, query: query } });
         },
 
-        fetchData() {
+        fetchData(noisy) {
             this.ajaxing = true;
             this.document = {};
+            this.origDoc = {};
             this.docId = this.docId || this.$route.query.docId;
-            let docQ = {qv:"doc_id",qe:this.docId};
+            let docQ = {qv:this.idCol,qe:this.docId};
             console.log("fetching document " + JSON.stringify(docQ));
 
-            let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/documents';
+            let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName;
             let that = this;
             $.ajax({
                 type: "GET",
@@ -127,14 +139,21 @@ export default {
                     that.ajaxing = false;
                     if (result.length > 0) {
                         that.document = result[0];
+                        that.origDoc = JSON.parse(JSON.stringify(that.document));
                         that.slide = that.document.images.length > 0 ? that.document.images[0].label : '';
                     }
                     that.componentKey += 1;
+                    if (noisy) {
+                        that.showNotif(true, "המסמך נטען");
+                    }
                 },
                 error: function (xhr, status, err) {
                     that.ajaxing = false;
                     console.log("failed fetching document " + that.docId);
                     that.componentKey += 1;
+                    if (noisy) {
+                        that.showNotif(false, "טעינה נכשלה");
+                    }
                 }
             });
         },
