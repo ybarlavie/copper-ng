@@ -1,12 +1,9 @@
 var express = require('express');
-var ObjectID = require('mongodb').ObjectID;
 var MongoDB = require('../mongoUtils');
 
 var router = express.Router();
 
 router.get('/:collection', function (req, resp) {
-    console.log(req.params.collection + ' get');
-
     let filter = {};
     let projection = {};
 
@@ -24,7 +21,7 @@ router.get('/:collection', function (req, resp) {
     }
 
     MongoDB.connectDB('copper-db', async (err) => {
-        if (err) return resp.status(500).send("cannot connet to DB");
+        if (err) return resp.status(500).send("cannot connect to DB");
 
         MongoDB
         .getDB()
