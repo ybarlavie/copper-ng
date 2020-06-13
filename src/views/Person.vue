@@ -3,6 +3,15 @@
         <q-linear-progress v-if="ajaxing" indeterminate />
         <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
             <div v-if="document" class="q-gutter-md" style="max-width: 1024px;">
+                <q-btn push round dense color="orange" text-color="black" :icon="editable ? 'cancel' : 'edit'" @click="toggleEditable()">
+                    <q-tooltip outline content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
+                        {{ editable
+                            ?
+                            'ביטול עריכה'
+                            :
+                            'עריכת המסמך' }}
+                    </q-tooltip>
+                </q-btn>
                 <h4>דמות: "{{document.title}}" - מזהה: {{document.prsn_id}}</h4>
                 <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
@@ -66,6 +75,13 @@ export default {
     },
 
     methods: {
+        toggleEditable() {
+            this.editable = !this.editable;
+            if (!this.editable) {
+                this.fetchData();
+            }
+        },
+
         showNotif (ok, msg) {
             this.$q.notify({
                 message: msg,

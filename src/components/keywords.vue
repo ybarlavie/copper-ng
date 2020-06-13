@@ -18,7 +18,7 @@
                 filled
                 dense
                 v-model="editText" 
-                error-message = "כבר קיים או מכיל רווח"
+                error-message = "כבר קיים"
                 :error="!isValid">
                 <template v-slot:prepend>
                     <q-icon v-if="canSave" :name="saveName" @click="update()" class="cursor-pointer">
@@ -68,15 +68,15 @@ export default {
     },
 
     methods: {
-        updateKeywords() {
-            this.$emit('input', {
-                // month: +this.$refs.monthPicker.value,
-                // year: +this.$refs.yearPicker.value
-            });
-        },
+        // updateKeywords() {
+        //     this.$emit('input', {
+        //         // month: +this.$refs.monthPicker.value,
+        //         // year: +this.$refs.yearPicker.value
+        //     });
+        // },
 
         _isValid(w) {
-            return (w.indexOf(' ')<0) && !this.value.includes(w);
+            return !this.value.includes(w);
         },
 
         update() {
