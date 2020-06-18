@@ -1,110 +1,94 @@
 <template>
-        <q-field rounded outlined :hint="hint" :readonly="editable ? false : true" >
-            <div class="q-pa-md q-gutter-md">
-                <q-badge v-for="kw in value" 
-                    :key="kw"
-                    :label="kw"
-                    :color="color" 
-                    @click="onWordClick(kw)"
-                    outline 
-                    style="font-size: 19px;"
-                    :class="editable ? '' : 'cursor-pointer'" />
-            </div>
-
-            <label v-if="editable && editedMember !== ''">{{editedMember}}</label>
-            <q-input v-if="editable"
-                style="max-width: 200px; font-size: 19px;"
-                square
-                filled
-                dense
-                v-model="editText" 
-                error-message = "כבר קיים"
-                :error="!isValid">
-                <template v-slot:prepend>
-                    <q-icon v-if="canSave" :name="saveName" @click="update()" class="cursor-pointer">
-                        <q-tooltip content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
-                            {{(editedMember!=='' ? (editText==='' ? 'מחיקת הערך ' + editedMember : 'שינוי הערך ' + editedMember) : 'הוספת הערך ' + editText)}}
-                        </q-tooltip>
-                    </q-icon>
-                    <q-icon v-if="canCancel" name="cancel" @click="editText = editedMember = ''" class="cursor-pointer">
-                        <q-tooltip content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
-                            ביטול
-                        </q-tooltip>
-                    </q-icon>
-                </template>
-                <template v-slot:append>
-                    <q-icon name="close" @click="editText = ''" class="cursor-pointer">
-                        <q-tooltip content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
-                            ניקוי
-                        </q-tooltip>
-                    </q-icon>
-                </template>
-            </q-input>
-        </q-field>
+    <q-field rounded outlined :hint="hint" :readonly="editable ? false : true" >
+        <div class="q-pa-md q-gutter-md">
+            <q-badge v-for="kw in value" 
+                :key="kw"
+                :label="kw"
+                :color="color"
+                @click="onWordClick(kw)"
+                outline 
+                style="font-size: 19px;"
+                :class="editable ? '' : 'cursor-pointer'"
+            >
+            </q-badge>
+            <q-badge v-if="editable" 
+                label="חדש" color="purple" filled style="font-size: 19px;" 
+                @click="onWordClick('')"
+            />
+        </div>
+        <q-popup-edit v-model="editedMember" :validate="val => _isValid(val)" @save="onSave">
+            <template v-slot="{ initialValue, value, emitValue, validate, set, cancel }" >
+                <q-input
+                    autofocus
+                    dense
+                    :value="editedMember"
+                    @input="emitValue"
+                    input-style="text-align: right;"
+                >
+                    <template v-slot:after>
+                        <q-btn flat dense color="negative" icon="delete" @click.stop="onClear(initialValue, set)"/>
+                        <q-btn flat dense color="negative" icon="cancel" @click.stop="cancel" />
+                        <q-btn flat dense color="positive" icon="check_circle" @click.stop="set" :disable="validate(value) === false || initialValue === value" />
+                    </template>
+                </q-input>
+            </template>
+        </q-popup-edit>
+    </q-field>
 </template>
 <script>
 export default {
     props: ['value', 'editable', 'color', 'hint', 'parentId'],
     data() {
         return {
-            editText: '',
             editedMember: ''
         }
     },
 
     computed: {
-        isValid () {
-            return this._isValid(this.editText);
-        },
-        canSave () {
-            return this.editText != this.editedMember;
-        },
-        canCancel () {
-            return this.editText != this.editedMember || this.editedMember !== '';
-        },
-        saveName () {
-            return this.editedMember!=='' && this.editText==='' ? 'delete' : 'check';
-        }
     },
 
     methods: {
-        // updateKeywords() {
-        //     this.$emit('input', {
-        //         // month: +this.$refs.monthPicker.value,
-        //         // year: +this.$refs.yearPicker.value
-        //     });
-        // },
-
         _isValid(w) {
             return !this.value.includes(w);
         },
 
-        update() {
-            if (this.editedMember !== '') {
+        onSave(newVal, initialValue) {
+            console.log('saving ' + newVal, initialValue);
+            this.update(newVal, initialValue);
+        },
+
+        onClear(initialValue, next) {
+            console.log('deleteing ' + initialValue);
+            this.update('', initialValue);
+            next.apply(null);
+        },
+
+        update(newVal, initialValue) {
+            if (initialValue !== '') {
                 // this is updating an existing member
-                var i = this.value.indexOf(this.editedMember);
+                var i = this.value.indexOf(initialValue);
                 if (i>=0) {
                     // we have the edited member !
-                    if (this.editText === '') {
+                    if (newVal === '') {
                         // this is deletion
                         this.value.splice(i,1);
-                        this.editText = this.editedMember = '';
-                    } else if (this.editText !== '' && this._isValid(this.editText)) {
+                        this.editedMember = '';
+                    } else if (newVal !== '' && this._isValid(newVal)) {
                         // this is a valid update
-                        this.value[i] = this.editText;
-                        this.editText = this.editedMember = '';
+                        this.value[i] = newVal;
+                        this.editedMember = '';
                     }
                 }
-            } else if (this.editText !== '' && this._isValid(this.editText)) {
+            } else if (newVal !== '' && this._isValid(newVal)) {
                 // this is a new member
-                this.value.push(this.editText);
-                this.editText = this.editedMember = '';
+                this.value.push(newVal);
+                this.editedMember = '';
             }
         },
 
         onWordClick(query) {
             if (this.editable) {
-                this.editText = this.editedMember = query;
+                this.editedMember = query;
             } else {
                 this.$router.push({ name: 'resultGrid', params: { exclude: this.parentId, query: query } });
             }

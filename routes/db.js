@@ -38,14 +38,12 @@ router.post('/:collection', async (req, resp, next) => {
     var collName = req.params.collection;
     var doc = req.body;
     var _id = doc.hasOwnProperty('_id') ? doc['_id'] : null;
+    var dbFunc = MongoDB.insert;
 
     if (_id) {
-        var dbFunc = null;
         var docExists = await MongoDB.docExists(collName, _id);
         if (docExists) {
             dbFunc = MongoDB.update;
-        } else {
-            dbFunc = MongoDB.insert;
         }
     }
 

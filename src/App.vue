@@ -15,6 +15,34 @@
           <div style="font-size: 12px;" >גרסה v0.12.1</div>
         </q-toolbar-title>
 
+        <q-btn-dropdown split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
+          <q-list dir="rtl">
+            <q-item clickable v-close-popup @click="addItemType = 'תעודת בר כוכבא'">
+              <q-item-section>
+                <q-item-label>תעודת בר כוכבא</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable v-close-popup @click="addItemType = 'תעודה חיצונית'">
+              <q-item-section>
+                <q-item-label>תעודה חיצונית</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable v-close-popup @click="addItemType = 'דמות'">
+              <q-item-section>
+                <q-item-label>דמות</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable v-close-popup @click="addItemType = 'מיקום'">
+              <q-item-section>
+                <q-item-label>מיקום</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+
         <div class="q-pl-md q-gutter-sm row no-wrap items-center">
           <q-btn color="light-green" icon="device_hub" label="גרף" style="font-size: 15px;" to="/" />
         </div>
@@ -66,6 +94,7 @@ export default {
   data () {
     return {
       leftDrawerOpen: false,
+      addItemType: 'ישות',
       search: ''
     }
   },
@@ -73,6 +102,24 @@ export default {
     searchClicked() {
       this.$router.push({ name: 'Blank' });
       this.$router.push({ name: 'resultGrid', params: { exclude: '1', query: this.search } });
+    },
+    onMainClick(evt) {
+      switch(this.addItemType) {
+        case 'תעודת בר כוכבא':
+          this.$router.push({ name: 'bcDocument', params: { idCol: 'doc_id', docId: null, state: 'ADD', collName: 'documents' } });
+          break;
+        case 'תעודה חיצונית':
+          this.$router.push({ name: 'extDocument', params: { idCol: 'edoc_id', docId: null, state: 'ADD', collName: 'ext_documents' } });
+          break;
+        case 'דמות':
+          this.$router.push({ name: 'Person', params: { idCol: 'prsn_id', docId: null, state: 'ADD', collName: 'persons' } });
+          break;
+        case 'מיקום':
+          this.$router.push({ name: 'Location', params: { idCol: 'loc_id', docId: null, state: 'ADD', collName: 'locations' } });
+          break;
+        default:
+          alert('יש לבחור סוג ישות להוספה');
+      }
     }
   }
 }

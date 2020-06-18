@@ -65,7 +65,7 @@ export default {
     components: {
         Keywords
     },
-    props: ['idCol', 'docId', 'editable', 'collName'],
+    props: ['idCol', 'docId', 'collName'],
     
     data() {
         return {
@@ -74,6 +74,8 @@ export default {
             origDoc: {},
             slide: '',
             ajaxing: false,
+            editable: false,
+            docExists: false,
         }
     },
 

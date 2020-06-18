@@ -12,6 +12,7 @@ import {
   QToolbar,
   QToolbarTitle,
   QBtn,
+  QBtnDropdown,
   QIcon,
   QList,
   QItem,
@@ -33,6 +34,8 @@ import {
   QTooltip,
   QForm,
   Notify,
+  ClosePopup,
+  QPopupEdit,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -45,6 +48,7 @@ Vue.use(Quasar, {
     QToolbar,
     QToolbarTitle,
     QBtn,
+    QBtnDropdown,
     QIcon,
     QList,
     QItem,
@@ -65,11 +69,12 @@ Vue.use(Quasar, {
     QLinearProgress,
     QTooltip,
     QForm,
-    
+    QPopupEdit,
   },
   config: {
   },
   directives: {
+    ClosePopup,
   },
   plugins: {
     Notify,

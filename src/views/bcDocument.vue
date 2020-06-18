@@ -1,18 +1,29 @@
 <template>
     <div class="q-pa-md" :key="componentKey">
         <q-linear-progress v-if="ajaxing" indeterminate />
+
         <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
             <div v-if="document" class="q-gutter-md" style="max-width: 1024px;">
-                <q-btn push round dense color="orange" text-color="black" :icon="editable ? 'cancel' : 'edit'" @click="toggleEditable()">
-                    <q-tooltip outline content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
-                        {{ editable
-                            ?
-                            'ביטול עריכה'
-                            :
-                            'עריכת המסמך' }}
-                    </q-tooltip>
-                </q-btn>
-                <h4>תעודה: "{{document.title}}" - מזהה: {{document.doc_id}}</h4>
+                <div v-if="docExists">
+                    <q-btn push round dense color="green" text-color="black" icon="add" @click="startAdd()">
+                        <q-tooltip outline content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
+                            יצירת מסמך חדש
+                        </q-tooltip>
+                    </q-btn>
+                    <q-btn push round dense color="orange" text-color="black" :icon="editable ? 'cancel' : 'edit'" @click="toggleEditable()">
+                        <q-tooltip outline content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
+                            {{ editable
+                                ?
+                                'ביטול עריכה'
+                                :
+                                'עריכת המסמך' }}
+                        </q-tooltip>
+                    </q-btn>
+                    <h4>תעודה: "{{document.title}}" - מזהה: {{document.doc_id}}</h4>
+                </div>
+                <div v-else>
+                    <h4>מסמך חדש</h4>
+                </div>
 
                 <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב ב.כ." style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.material" hint="חומר" style="font-size: 19px;" :readonly="editable ? false : true" />
@@ -64,7 +75,7 @@ export default {
     components: {
         Keywords
     },
-    props: ['idCol', 'docId', 'editable', 'collName'],
+    props: ['idCol', 'docId', 'collName'],
     
     data() {
         return {
@@ -73,6 +84,8 @@ export default {
             origDoc: {},
             slide: '',
             ajaxing: false,
+            editable: false,
+            docExists: false,
         }
     },
 
@@ -81,6 +94,15 @@ export default {
     },
 
     methods: {
+        startAdd() {
+            this.document = { keywords: [] };
+            this.origDoc = {};
+            this.editable = true;
+            this.docExists = false;
+            this.slide = '';
+            this.ajaxing = false;
+        },
+
         toggleEditable() {
             this.editable = !this.editable;
             if (!this.editable) {
@@ -115,6 +137,7 @@ export default {
             console.log('ajaxing up!');
             $.ajax(settings).done(function (response) {
                 that.showNotif(true, "השמירה הצליחה");
+                that.editable = false;
             })
             .fail(function(err) {
                 console.log('error' +  JSON.stringify(err))
@@ -138,15 +161,16 @@ export default {
         },
 
         fetchData(noisy) {
-            this.ajaxing = true;
             this.document = {};
             this.origDoc = {};
-            this.docId = this.docId || this.$route.query.docId;
+            this.docExists = false;
+            //this.docId = this.docId || this.$route.query.docId;
             let docQ = {qv:this.idCol,qe:this.docId};
             console.log("fetching document " + JSON.stringify(docQ));
 
             let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName;
             let that = this;
+            this.ajaxing = true;
             $.ajax({
                 type: "GET",
                 url: dbURL + "?q=" + encodeURIComponent(JSON.stringify(docQ)),
@@ -157,15 +181,16 @@ export default {
                         that.document = result[0];
                         that.origDoc = JSON.parse(JSON.stringify(that.document));
                         that.slide = that.document.images.length > 0 ? that.document.images[0].label : '';
+
+                        that.docExists = true;
+                        if (noisy) {
+                            that.showNotif(true, "המסמך נטען");
+                        }
                     }
                     that.componentKey += 1;
-                    if (noisy) {
-                        that.showNotif(true, "המסמך נטען");
-                    }
                 },
                 error: function (xhr, status, err) {
                     that.ajaxing = false;
-                    console.log("failed fetching document " + that.docId);
                     that.componentKey += 1;
                     if (noisy) {
                         that.showNotif(false, "טעינה נכשלה");
