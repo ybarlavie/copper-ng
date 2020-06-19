@@ -5,7 +5,7 @@
         <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
             <div v-if="document" class="q-gutter-md" style="max-width: 1024px;">
                 <div v-if="docExists">
-                    <q-btn push round dense color="green" text-color="black" icon="add" @click="startAdd()">
+                    <q-btn push round dense color="green" text-color="black" icon="add" @click="startAdd">
                         <q-tooltip outline content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
                             יצירת מסמך חדש
                         </q-tooltip>
@@ -26,6 +26,7 @@
                 </div>
 
                 <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב ב.כ." style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.title" hint="כותרת" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.material" hint="חומר" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined type="date" v-model="document.date" hint="תאריך" style="font-size: 19px;" :readonly="editable ? false : true" />
@@ -61,6 +62,7 @@
                     </template>
                 </q-carousel>
             </div>
+
             <div v-if="editable">
                 <q-btn label="שמירה" type="submit" color="primary"/>
                 <q-btn label="ביטול" type="reset" color="primary" flat class="q-ml-sm" />
@@ -77,10 +79,10 @@ export default {
     },
     props: ['idCol', 'docId', 'collName'],
     
-    data() {
+    data: () => {
         return {
             componentKey: 0,
-            document: {},
+            document: { keywords: [] },
             origDoc: {},
             slide: '',
             ajaxing: false,
@@ -164,7 +166,6 @@ export default {
             this.document = {};
             this.origDoc = {};
             this.docExists = false;
-            //this.docId = this.docId || this.$route.query.docId;
             let docQ = {qv:this.idCol,qe:this.docId};
             console.log("fetching document " + JSON.stringify(docQ));
 
@@ -180,7 +181,7 @@ export default {
                     if (result.length > 0) {
                         that.document = result[0];
                         that.origDoc = JSON.parse(JSON.stringify(that.document));
-                        that.slide = that.document.images.length > 0 ? that.document.images[0].label : '';
+                        that.slide = (that.document.images && that.document.images.length > 0) ? that.document.images[0].label : '';
 
                         that.docExists = true;
                         if (noisy) {
