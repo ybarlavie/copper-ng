@@ -5,10 +5,10 @@ var MongoDB = require('../mongoUtils');
 const router = express.Router();
 
 const searches = [
-    { coll: 'documents', fields: [ 'text', 'keywords' ], prj: { sug: 'מסמך בר כוכבא', item_id: '$doc_id', name: 1, title: 1, keywords: 1 } },
-    { coll: 'ext_documents', fields: [ 'text', 'keywords' ], prj: { sug: 'מסמך חיצוני', item_id: '$edoc_id', name: 1, title: 1, keywords: 1 } },
-    { coll: 'locations', fields: [ 'keywords' ], prj: { sug: 'מיקום', item_id: '$loc_id', name: 1, title: 1, keywords: 1 } },
-    { coll: 'persons', fields: [ 'name', 'aliases', 'keywords'], prj: { sug: 'דמות', item_id: '$prsn_id', name: 1, title: 1, keywords: 1 } }
+    { coll: 'documents', fields: [ 'title', 'text', 'keywords' ], prj: { sug: 'מסמך בר כוכבא', item_id: '$doc_id', name: 1, title: 1, keywords: 1 } },
+    { coll: 'ext_documents', fields: [ 'title', 'text', 'keywords' ], prj: { sug: 'מסמך חיצוני', item_id: '$edoc_id', name: 1, title: 1, keywords: 1 } },
+    { coll: 'locations', fields: [ 'title', 'keywords' ], prj: { sug: 'מיקום', item_id: '$loc_id', name: 1, title: 1, keywords: 1 } },
+    { coll: 'persons', fields: [ 'title', 'name', 'aliases', 'keywords'], prj: { sug: 'דמות', item_id: '$prsn_id', name: 1, title: 1, keywords: 1 } }
 ];
 
 const _regexBuilder = ((word) => {
