@@ -100,7 +100,7 @@ export default {
 
             let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
             let that = this;
-            const QUERY_LIMIT = 10;
+            const QUERY_LIMIT = 500;
             $.ajax({
                 type: "GET",
                 url: researchURL + 'by_word/' + this.exclude + '/' + QUERY_LIMIT + '/' + encodeURIComponent(this.query),
