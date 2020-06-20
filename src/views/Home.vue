@@ -122,12 +122,24 @@ export default {
                     results.forEach(res => {
                         let idFieldName = '';
                         let group = '';
-                        let fI = (res && res.value && res.value.length >
-                            0) ? res.value[0] : null;
+                        let fI = (res && res.value && res.value.length > 0) ? res.value[0] : null;
                         if (fI) {
                             if (fI.hasOwnProperty('ref_id')) {
                                 res.value.forEach(item => {
                                     item.id = item.ref_id;
+                                    item.title = item.type;
+                                    switch (item.type) {
+                                        case 'referred at document':
+                                        case 'visit at':
+                                            item.arrows = 'to';
+                                            break;
+                                        case 'child of':
+                                            item.arrows = 'from';
+                                            break;
+                                        case 'sibling':
+                                        case 'spouse':
+                                            item.arrows = 'to, from';
+                                    }
                                     edgesDS.add([item]);
                                 });
                             } else if (fI.hasOwnProperty('doc_id')) {
