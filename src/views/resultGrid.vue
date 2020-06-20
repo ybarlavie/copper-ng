@@ -31,9 +31,9 @@
             <template v-slot:body="props">
                 <q-tr :props="props" @click="onRowClicked(props)">
                     <q-td v-for="col in props.cols"
-                    :key="col.name" 
-                    :props="props"
-                    :style="'text-align: ' + col.align + ';'"
+                        :key="col.name" 
+                        :props="props"
+                        :style="'text-align: ' + col.align + ';'"
                     >
                         {{ col.value }}
                     </q-td>
@@ -57,6 +57,7 @@ export default {
                 { name: 'name', required: true, label: 'שם', field: "name", sortable: true, align: "right" },
                 { name: 'title', required: true, label: 'כותרת', field: "title", sortable: true, align: "right" },
                 { name: 'keywords', required: true, label: 'מילות מפתח', field: "keywords", sortable: true, align: "right" },
+                { name: 'aliases', required: false, label: 'שמות נרדפים', field: "aliases", sortable: true, align: "right" },
             ],
             data: []
         }

@@ -134,6 +134,7 @@ export default {
             $.ajax(settings).done(function (response) {
                 that.showNotif(true, "השמירה הצליחה");
                 that.editable = false;
+                that.fetchData();
             })
             .fail(function(err) {
                 console.log('error' +  JSON.stringify(err))
