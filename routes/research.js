@@ -42,7 +42,7 @@ const _queryBuilder = ((exclude_id, fields, re) => {
 router.get('/by_word/:id/:limit/:word', function (req, resp) {
     console.log('by_word: exclude id:' + req.params.id + ' searh for "' + req.params.word +'"');
 
-    const limit = req.params.limit<100 ? parseInt(req.params.limit) : 5;
+    const limit = req.params.limit<=500 ? parseInt(req.params.limit) : 5;
     const re = _regexBuilder(req.params.word);
 
     exclude_id = null;
