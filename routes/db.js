@@ -26,8 +26,12 @@ router.get('/:collection', function (req, resp) {
         MongoDB
         .getDB()
         .collection(req.params.collection)
-        .find(filter, projection).toArray(function(err, items) {
-            MongoDB.disconnectDB();
+        .find(filter, projection).toArray(function(err1, items) {
+            if (err1) {
+                console.log(req.params.collection + " had error: " + JSON.stringify(err1));
+                return resp.status(500).send(err1);
+            }
+            console.log(req.params.collection + " returning " + items.length + " items.");
             return resp.status(200).send(items);
         });
     });
