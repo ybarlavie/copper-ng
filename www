@@ -92,7 +92,7 @@ app.get('/auth/google/callback', function (req, res) {
                     authUtils.updateToken(data.emailAddress, tokens)
                     .then(result => {
                         res.cookie(TOKEN_COOKIE_NAME, tokens.access_token);
-                        res.redirect('/');    
+                        res.redirect('/copper/');    
                     }, err => {
                         res.redirect('/AuthError.html?err=' + JSON.stringify(err));
                     });
