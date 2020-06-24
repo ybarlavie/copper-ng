@@ -37,6 +37,9 @@ const staticConf = { maxAge: '1y', etag: false }
 // AUTHING
 const TOKEN_COOKIE_NAME = "copper_ng_token";
 const tokenValidMiddleware = (req, res, next) => {
+
+    res.header("Access-Control-Allow-Origin", "*");
+    
     if (!req.path.startsWith('/api/')) {
         return next();
     }
