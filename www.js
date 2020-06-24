@@ -15,9 +15,9 @@ const CLIENT_ID = OAuth2Data.client.id;
 const CLIENT_SECRET = OAuth2Data.client.secret;
 
 // DEBUG ONLY - UNCOMMENT !!!!
-const REDIRECT_URL = OAuth2Data.client.redirect;
+//const REDIRECT_URL = OAuth2Data.client.redirect;
 // DEBUG ONLY - REMOVE !!!!
-//const REDIRECT_URL = "http://localhost:" + PORT + "/auth/google/callback";
+const REDIRECT_URL = "http://localhost:" + PORT + "/auth/google/callback";
 // DEBUG ONLY - REMOVE !!!!
 
 const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
@@ -38,12 +38,6 @@ const staticConf = { maxAge: '1y', etag: false }
 // AUTHING
 const TOKEN_COOKIE_NAME = "copper_ng_token";
 const tokenValidMiddleware = (req, res, next) => {
-    if (!req.path.startsWith('/api/')) {
-        return next();
-    }
-
-    console.log('req = ' + req.path);
-    
     var token = req.cookies[TOKEN_COOKIE_NAME];
     if (token) {
         var tc = tokensCache[token];
@@ -52,12 +46,20 @@ const tokenValidMiddleware = (req, res, next) => {
             if (tc.expiry_date > now.getTime()) {
                 return next();
             }
-            console.log('token expired');
             delete tokensCache[token];
         }
     }
-
     res.clearCookie(TOKEN_COOKIE_NAME);
+
+    console.log('token invalid');
+
+    if (req.path.startsWith('/api/')) {
+        // invalid token for api call. block!
+        res.send(401, "Unauthorized");
+        return next('invalid user');
+    } else if (req.path.startsWith('/auth/google/')) {
+        return next();
+    }
 
     // Generate an OAuth URL and redirect there
     const url = oAuth2Client.generateAuthUrl({
