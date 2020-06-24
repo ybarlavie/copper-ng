@@ -5,12 +5,14 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "start": "node ./www"
+    "start": "node ./www.js"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "cookie-parser": "1.4.5",
     "core-js": "^3.6.5",
     "express": "4.17.1",
+    "googleapis": "52.1.0",
     "mongodb": "3.5.8",
     "morgan": "1.10.0",
     "quasar": "^1.0.0",

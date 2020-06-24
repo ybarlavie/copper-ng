@@ -1,0 +1,25 @@
+{
+    "web": {
+        "client_id": "679988559533-jf4qr30ga6uqidscf4o9t5pb0n7tr4f2.apps.googleusercontent.com",
+        "project_id": "copper-ng",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "VmQBjRq1ecp_Jxqsxq1QdGFV",
+        "redirect_uris": ["http://blcloud.ddns.net/copper/auth/google/callback"],
+        "javascript_origins": ["http://blcloud.ddns.net"]
+    },
+
+    "client": {
+        "id": "679988559533-jf4qr30ga6uqidscf4o9t5pb0n7tr4f2.apps.googleusercontent.com",
+        "secret": "VmQBjRq1ecp_Jxqsxq1QdGFV",
+        "redirect": "http://blcloud.ddns.net/copper/auth/google/callback"
+    },
+
+    "credentials": {
+        "access_token": "your access_token",
+        "token_type": "Bearer",
+        "expires_in": 3600,
+        "refresh_token": "your refresh_token"
+    }
+}
