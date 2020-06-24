@@ -4,6 +4,7 @@ const express = require('express');
 const configureAPI = require('./configure');
 const authUtils = require('./authUtils');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 
 const { PORT = 3000 } = process.env
 
@@ -27,8 +28,8 @@ tokensCache = {};
 
 const app = express();
 
-// cookie parser
 app.use(cookieParser());
+app.use(cors());
 
 // UI
 const publicPath = resolve(__dirname, './dist')
@@ -37,9 +38,6 @@ const staticConf = { maxAge: '1y', etag: false }
 // AUTHING
 const TOKEN_COOKIE_NAME = "copper_ng_token";
 const tokenValidMiddleware = (req, res, next) => {
-
-    res.header("Access-Control-Allow-Origin", "*");
-    
     if (!req.path.startsWith('/api/')) {
         return next();
     }
