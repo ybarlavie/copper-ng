@@ -1,15 +1,17 @@
 <template>
     <div class="q-pa-md" :key="componentKey">
         <q-linear-progress v-if="ajaxing" indeterminate />
-        <q-form v-if="!isLoggedIn" @submit="onSubmit" class="q-gutter-md" style="max-width: 500px;">
+        <q-form @submit="onSubmit" class="q-gutter-md" style="max-width: 500px;">
             <q-input rounded outlined v-model="email" hint="כתובת דואל" style="font-size: 25px;" dir="ltr" />
             <q-input rounded outlined v-model="authCode" hint="קוד עדכני של Google Authenticator" style="font-size: 25px;" dir="ltr" />
-            <q-btn label="בצע הזדהות" type="submit" color="primary" />
+            
+            <div class="q-pa-md q-gutter-md">
+                <q-btn v-if="submitOK" label="בצע הזדהות" type="submit" color="primary" />
+                <q-btn v-if="email!=''" label="בקש QRCode" @click="onReqQR" color="primary" />
+                <q-btn v-if="isLoggedIn" label="ניקוי הזדהות ישנה" @click="onClear" color="primary" />
+            </div>
         </q-form>
 
-        <q-btn v-if="email!=''" label="בקש QRCode" @click="onReqQR" color="primary" />
-        <q-btn v-if="isLoggedIn" label="היכנס למערכת" @click="onEnter" color="primary" />
-        <q-btn v-if="isLoggedIn" label="ניקוי" @click="onClear" color="primary" />
     </div>
 </template>
 <script>
@@ -24,6 +26,10 @@ export default {
     },
 
     computed: {
+        submitOK() {
+            return this.email.indexOf('@') > 0 && this.authCode.length == 6 && !isNaN(this.authCode);
+        },
+
         isLoggedIn () {
             try {
                 window.tokenData = JSON.parse(window.localStorage.getItem(window.JWT_COOKIE));
