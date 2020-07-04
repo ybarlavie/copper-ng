@@ -1,0 +1,83 @@
+<template>
+    <div class="q-pa-md" :key="componentKey">
+        <q-linear-progress v-if="ajaxing" indeterminate />
+        <q-form v-if="!isLoggedIn" @submit="onSubmit" class="q-gutter-md" style="max-width: 500px;">
+            <q-input rounded outlined v-model="email" hint="כתובת דואל" style="font-size: 25px;" dir="ltr" />
+            <q-input rounded outlined v-model="authCode" hint="קוד עדכני של Google Authenticator" style="font-size: 25px;" dir="ltr" />
+            <q-btn label="בצע הזדהות" type="submit" color="primary" />
+        </q-form>
+
+        <q-btn v-if="isLoggedIn" label="היכנס למערכת" @click="onEnter" color="primary" />
+        <q-btn v-if="isLoggedIn" label="ניקוי" @click="onClear" color="primary" />
+    </div>
+</template>
+<script>
+export default {
+    data: () => {
+        return {
+            componentKey: 0,
+            email: '',
+            authCode: '',
+            ajaxing: false,
+        }
+    },
+
+    computed: {
+        isLoggedIn () {
+            try {
+                window.tokenData = JSON.parse(window.localStorage.getItem(window.JWT_COOKIE));
+                return (window.tokenData && window.tokenData.expires > Math.floor(Date.now() / 1000));
+            } catch(err) {
+                return false;
+            }
+        }
+    },
+
+    methods: {
+        showNotif (ok, msg) {
+            this.$q.notify({
+                message: msg,
+                color: ok ? 'green' : 'red'
+            })
+        },
+
+        onEnter() {
+            this.$router.push({ path : '/' });
+        },
+
+        onClear() {
+            window.tokenData = {};
+            window.localStorage.setItem(window.JWT_COOKIE, "");
+        },
+
+        onSubmit () {
+            this.onClear();
+
+            let verifyUrl =  window.apiURL.replace(this.$route.matched[0].path, '') + 'auth/verifyTOTP';
+            let authURL = `${verifyUrl}/${this.email}?t=${this.authCode}`;
+            console.log('authing: ' + authURL);
+            let that = this;
+            this.ajaxing = true;
+            $.ajax({
+                type: "GET",
+                url: authURL,
+                crossdomain: true,
+                success: function (result) {
+                    console.log("login OK: " + JSON.stringify(result));
+                    window.localStorage.setItem(window.JWT_COOKIE, JSON.stringify(result));
+                    window.tokenData = JSON.parse(window.localStorage.getItem(window.JWT_COOKIE));
+                    that.ajaxing = false;
+                    that.componentKey += 1;
+
+                    that.$router.push({ path : '/' });
+                },
+                error: function (xhr, status, err) {
+                    that.showNotif(false, "ההזדהות נכשלה");
+                    that.ajaxing = false;
+                    that.componentKey += 1;
+                }
+            });
+        },
+    }
+}
+</script>

@@ -88,6 +88,9 @@ export default {
                     type: "GET",
                     url: dbURL + collection + "?q=" + encodeURIComponent(JSON.stringify(query)),
                     crossdomain: true,
+                    headers: {
+                        "x-access-token": window.tokenData.token
+                    },
                     success: function (result) {
                         resolve(result);
                     },

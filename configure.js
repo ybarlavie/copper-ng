@@ -3,9 +3,23 @@ const logger = require('morgan');
 const dbRouter = require('./routes/db');
 const researchRouter = require('./routes/research');
 const batchRouter = require('./routes/batch');
+const authRouter = require('./routes/auth');
+const cookieParser = require('cookie-parser');
+const cors = require('cors');
+const { tokenValidMiddleware } = require('./authUtils');
 
 module.exports = (app) => {
-    app.use(bodyParser.json());
+
+    require('dotenv').config()
+    var det = JSON.parse(process.env.SECRETS);
+    process.env.GMAIL_USER = det.username;
+    process.env.GMAIL_PASS = det.password;
+    process.env.JWT_SECRET = new Buffer(det.jwt_secret, "base64");
+
+    app.use(cookieParser());
+    app.use(cors());
+    app.use(tokenValidMiddleware);
+
     app.use(logger('dev'));
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({
@@ -15,4 +29,5 @@ module.exports = (app) => {
     app.use('/api/db', dbRouter);
     app.use('/api/research', researchRouter);
     app.use('/api/batch', batchRouter);
+    app.use('/api/auth', authRouter);
 }

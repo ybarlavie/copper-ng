@@ -8,19 +8,19 @@ const cors = require('cors');
 
 const { PORT = 3000 } = process.env
 
-const { google } = require('googleapis');
-const OAuth2Data = require('./google_key.json');
+// const { google } = require('googleapis');
+// const OAuth2Data = require('./google_key.json');
 
-const CLIENT_ID = OAuth2Data.client.id;
-const CLIENT_SECRET = OAuth2Data.client.secret;
+// const CLIENT_ID = OAuth2Data.client.id;
+// const CLIENT_SECRET = OAuth2Data.client.secret;
 
-// DEBUG ONLY - UNCOMMENT !!!!
-const REDIRECT_URL = OAuth2Data.client.redirect;
-// DEBUG ONLY - REMOVE !!!!
-//const REDIRECT_URL = "http://localhost:" + PORT + "/auth/google/callback";
-// DEBUG ONLY - REMOVE !!!!
+// // DEBUG ONLY - UNCOMMENT !!!!
+// //const REDIRECT_URL = OAuth2Data.client.redirect;
+// // DEBUG ONLY - REMOVE !!!!
+// const REDIRECT_URL = "http://localhost:" + PORT + "/auth/google/callback";
+// // DEBUG ONLY - REMOVE !!!!
 
-const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+// const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 
 // global tokenCache - avalable app-wide - must not be declared with var/const
 tokensCache = {};
@@ -61,14 +61,15 @@ const tokenValidMiddleware = (req, res, next) => {
         return next();
     }
 
-    // Generate an OAuth URL and redirect there
-    const url = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: 'https://www.googleapis.com/auth/gmail.readonly'
-    });
+    // // Generate an OAuth URL and redirect there
+    // const url = oAuth2Client.generateAuthUrl({
+    //     access_type: 'offline',
+    //     scope: 'https://www.googleapis.com/auth/gmail.readonly'
+    // });
 
-    console.log("redirecting to: " + url);
-    res.redirect(url);
+    // console.log("redirecting to: " + url);
+    // res.redirect(url);
+    this.$router.push({ name: 'Login', params: { } });
 }
 
 app.use(tokenValidMiddleware);

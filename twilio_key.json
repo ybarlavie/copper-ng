@@ -1,0 +1,25 @@
+{
+    "web": {
+        "client_id": "ACf3f5487894683d20e80a3fc46bfa154d",
+        "project_id": "Copper-NG-Twilio",
+        "auth_uri": "",
+        "token_uri": "",
+        "auth_provider_x509_cert_url": "",
+        "client_secret": "1cc7349de37fa5d8067bc7798382f8d7",
+        "redirect_uris": ["http://blcloud.ddns.net/copper/auth/twilio/callback"],
+        "javascript_origins": ["http://blcloud.ddns.net"]
+    },
+
+    "client": {
+        "id": "ACf3f5487894683d20e80a3fc46bfa154d",
+        "secret": "1cc7349de37fa5d8067bc7798382f8d7",
+        "redirect": "http://blcloud.ddns.net/copper/auth/twilio/callback"
+    },
+
+    "credentials": {
+        "access_token": "your access_token",
+        "token_type": "Bearer",
+        "expires_in": 3600,
+        "refresh_token": "your refresh_token"
+    }
+}

@@ -37,7 +37,6 @@ router.get('/:collection', function (req, resp) {
     });
 });
 
-
 router.post('/:collection', async (req, resp, next) => {
     var collName = req.params.collection;
     var doc = req.body;

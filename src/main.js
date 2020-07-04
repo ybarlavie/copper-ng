@@ -9,6 +9,9 @@ window.apiURL = window.location.origin + window.location.pathname;
 if (!window.apiURL.endsWith('/')) window.apiURL += '/';
 window.apiURL += 'api/';
 
+window.JWT_COOKIE = "copper-ng-jwt";
+window.tokenData = {};
+
 new Vue({
   router,
   render: h => h(App)

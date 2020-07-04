@@ -125,7 +125,8 @@ export default {
                 "method": "POST",
                 "timeout": 0,
                 "headers": {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "x-access-token": window.tokenData.token
                 },
                 "data": JSON.stringify(this.document),
             };
@@ -173,6 +174,9 @@ export default {
                 type: "GET",
                 url: dbURL + "?q=" + encodeURIComponent(JSON.stringify(docQ)),
                 crossdomain: true,
+                headers: {
+                    "x-access-token": window.tokenData.token
+                },
                 success: function (result) {
                     that.ajaxing = false;
                     if (result.length > 0) {

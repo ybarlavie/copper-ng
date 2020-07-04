@@ -105,6 +105,9 @@ export default {
                 type: "GET",
                 url: researchURL + 'by_word/' + this.exclude + '/' + QUERY_LIMIT + '/' + encodeURIComponent(this.query),
                 crossdomain: true,
+                headers: {
+                    "x-access-token": window.tokenData.token
+                },
                 success: function (result) {
                     that.ajaxing = false;
                     that.data = result;

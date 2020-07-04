@@ -62,7 +62,17 @@
       content-class="bg-grey-2"
     >
       <q-list dir="rtl">
-        <q-item-label header>קישורים חשובים</q-item-label>
+        <q-item-label header>משתמש</q-item-label>
+        <q-item clickable @click="logoutClicked">
+          <q-item-section avatar>
+            <q-icon name="exit_to_app" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>התנתקות</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item-label header>קישורים חיצוניים</q-item-label>
         <q-item clickable tag="a" target="_blank" href="http://blcloud.ddns.net:8081/db/copper-db">
           <q-item-section avatar>
             <q-icon name="school" />
@@ -99,6 +109,12 @@ export default {
     }
   },
   methods: {
+    logoutClicked() {
+      window.tokenData = {};
+      window.localStorage.setItem(window.JWT_COOKIE, "");
+
+      this.$router.push({ name: 'Login' });
+    },
     searchClicked() {
       this.$router.push({ name: 'Blank' });
       this.$router.push({ name: 'resultGrid', params: { exclude: '1', query: this.search } });
