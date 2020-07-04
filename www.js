@@ -14,9 +14,6 @@ tokensCache = {};
 
 const app = express();
 
-//app.use(cookieParser());
-//app.use(cors());
-
 // UI
 const publicPath = resolve(__dirname, './dist')
 const staticConf = { maxAge: '1y', etag: false }
