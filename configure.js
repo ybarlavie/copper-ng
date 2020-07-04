@@ -8,12 +8,17 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { tokenValidMiddleware } = require('./authUtils');
 
+// global tokenCache - avalable app-wide - must not be declared with var/const
+tokensCache = {};
+// global tokenCache - avalable app-wide - must not be declared with var/const
+
 module.exports = (app) => {
 
     require('dotenv').config()
     var det = JSON.parse(process.env.SECRETS);
     process.env.GMAIL_USER = det.username;
     process.env.GMAIL_PASS = det.password;
+    console.log("gmail password: " + process.env.GMAIL_PASS);
     process.env.JWT_SECRET = new Buffer(det.jwt_secret, "base64");
 
     app.use(cookieParser());

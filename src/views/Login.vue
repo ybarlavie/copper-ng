@@ -7,6 +7,7 @@
             <q-btn label="בצע הזדהות" type="submit" color="primary" />
         </q-form>
 
+        <q-btn v-if="email!=''" label="בקש QRCode" @click="onReqQR" color="primary" />
         <q-btn v-if="isLoggedIn" label="היכנס למערכת" @click="onEnter" color="primary" />
         <q-btn v-if="isLoggedIn" label="ניקוי" @click="onClear" color="primary" />
     </div>
@@ -48,6 +49,34 @@ export default {
         onClear() {
             window.tokenData = {};
             window.localStorage.setItem(window.JWT_COOKIE, "");
+        },
+
+        onReqQR() {
+            window.tokenData = {};
+            window.localStorage.setItem(window.JWT_COOKIE, "");
+
+            console.log('requesting QR for: ' + this.email);
+            let verifyUrl =  window.apiURL.replace(this.$route.matched[0].path, '') + 'auth/reqQR';
+            let authURL = `${verifyUrl}/${this.email}`;
+
+            let that = this;
+            this.ajaxing = true;
+            $.ajax({
+                type: "GET",
+                url: authURL,
+                crossdomain: true,
+                success: function (result) {
+                    that.showNotif(false, `הבקשה נקלטה, הודעה נשלחה לדואל ${that.email}`);
+                    that.ajaxing = false;
+                    that.componentKey += 1;
+                },
+                error: function (xhr, status, err) {
+                    that.showNotif(false, "ההזדהות נכשלה");
+                    that.ajaxing = false;
+                    that.componentKey += 1;
+                }
+            });
+
         },
 
         onSubmit () {

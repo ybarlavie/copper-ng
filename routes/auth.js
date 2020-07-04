@@ -18,6 +18,8 @@ router.get('/verifyTOTP/:email', function (req, resp) {
 router.get('/reqQR/:email', function (req, resp) {
     var email = req.params.email;
     
+    console.log("requesting QR for: " +  email);
+
     authUtils.sendQRCodeToUser(email)
     .then(result => {
         return resp.status(200).send(`<html><head /><body dir="rtl"><H1>הבקשה נקלטה, הודעה נשלחה לדואל ${email}</H1></body></html>`);

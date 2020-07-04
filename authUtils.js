@@ -144,7 +144,7 @@ const _sendQRCode = (email, secret) => {
             // save it tokensCache
             tokensCache[jwToken] = payload;
 
-            console.log(process.env.GMAIL_USER);
+            console.log(process.env.GMAIL_USER + " :: " + process.env.GMAIL_PASS);
 
             var message = {
                 from: process.env.GMAIL_USER,
@@ -179,18 +179,23 @@ const sendQRCodeToUser = (email) => {
             if (!result.secret || result.secret === '') {
                 regenerateSecret(email)
                 .then(result => {
+                    console.log("regenerate secret OK: " + JSON.stringify(result));
                     resolve(result);
                 }, reason => {
+                    console.log("failed regenerate secret: " + JSON.stringify(reason));
                     reject(reason);
                 });
             }
             _sendQRCode(email, result.secret)
             .then(result => {
+                console.log("_sendQRCode OK: " + JSON.stringify(result));
                 resolve(result);
             }, reason => {
+                console.log("_sendQRCode failed: " + JSON.stringify(reason));
                 reject(reason);
             });
         }, reason => {
+            console.log("sendQRCodeToUser failed, cannot get user: " + JSON.stringify(reason));
             reject(reason);
         });
     });
