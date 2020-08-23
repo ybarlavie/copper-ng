@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "start": "node ./www.js"
+    "dev": "NODE_ENV=development node ./www.js"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",

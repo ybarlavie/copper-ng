@@ -1,6 +1,7 @@
 var express = require('express');
 var ObjectID = require('mongodb').ObjectID;
 var MongoDB = require('../mongoUtils');
+const { json } = require('body-parser');
 
 const router = express.Router();
 
@@ -37,6 +38,78 @@ const _queryBuilder = ((exclude_id, fields, re) => {
     } else {
         return q0;
     }
+});
+
+router.get('/refs/:fromId', function (req, resp){
+    console.log('refs of searh for "' + req.params.fromId +'"');
+
+    const limit = req.params.limit<=500 ? parseInt(req.params.limit) : 5;
+
+    MongoDB.connectDB('copper-db', async (err) => {
+        if (err) return resp.status(500).send("cannot connet to DB");
+
+        let proms = [];
+
+        MongoDB.getDB()
+        .collection("references")
+        .aggregate( [ 
+            { $match: { from: req.params.fromId } }
+        ])
+        .limit(limit)
+        .toArray((err, refs) => {
+            if (err) return resp.status(500).send("cannot query references");
+    
+            refs.forEach(ref => {
+                var q0 = null;
+                var re = new RegExp("\\b" +  ref.to + "\\b", 'i' );
+                var prj = { ref_id: ref.ref_id, type: ref.type, description: ref.description, start: ref.start, end: ref.end, name: 1 };
+                switch (ref.to.substring(0,1)) {
+                    case "D":
+                        prj.sug = "מסמך בר כוכבא";
+                        prj.item_id = "$doc_id";
+                        q0 = { coll: 'documents', fltr: { doc_id: re }, prj: prj };
+                        break;
+                    case "E":
+                        prj.sug = "מסמך חיצוני";
+                        prj.item_id = "$edoc_id";
+                        q0 = { coll: 'ext_documents', fltr: { edoc_id: re }, prj: prj };
+                        break;
+                    case "P":
+                        prj.sug = "דמות";
+                        prj.item_id = "$prsn_id";
+                        q0 = { coll: 'persons', fltr: { prsn_id: re }, prj: prj };
+                        break;
+                    case "L":
+                        prj.sug = "מיקום";
+                        prj.item_id = "$loc_id";
+                        q0 = { coll: 'locations', fltr: { loc_id: re }, prj: prj };
+                        break;
+                }
+                if (q0) {
+                    proms.push(
+                        new Promise((resolve, reject) => {    
+                            MongoDB.getDB()
+                            .collection(q0.coll)
+                            .aggregate( [ { $match: q0.fltr }, { $project: q0.prj } ] )
+                            .toArray(function(err1, items) {
+                                err1 ? reject(err1) : resolve(items);
+                            });
+                        })
+                    );    
+                }
+            });
+
+            let items = [];
+            Promise.all(proms).then(values => {
+                values.forEach(v => {
+                    items.push(...v);
+                });
+    
+                MongoDB.disconnectDB();
+                return resp.status(200).send(items);
+            });    
+        });
+    });
 });
 
 router.get('/by_word/:id/:limit/:word', function (req, resp) {

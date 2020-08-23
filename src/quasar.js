@@ -36,6 +36,10 @@ import {
   Notify,
   ClosePopup,
   QPopupEdit,
+  QExpansionItem,
+  QCard,
+  QCardSection,
+  QCardActions,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -70,6 +74,10 @@ Vue.use(Quasar, {
     QTooltip,
     QForm,
     QPopupEdit,
+    QExpansionItem,
+    QCard,
+    QCardSection,
+    QCardActions,
   },
   config: {
   },

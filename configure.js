@@ -15,6 +15,9 @@ tokensCache = {};
 module.exports = (app) => {
 
     require('dotenv').config()
+
+    console.log("NODE_ENV: " + process.env.NODE_ENV);
+
     var det = JSON.parse(process.env.SECRETS);
     process.env.GMAIL_USER = det.username;
     process.env.GMAIL_PASS = det.password;
@@ -23,7 +26,13 @@ module.exports = (app) => {
 
     app.use(cookieParser());
     app.use(cors());
-    app.use(tokenValidMiddleware);
+
+    if (process.env.NODE_ENV !== "development") {
+        console.log("non-development env");
+        app.use(tokenValidMiddleware);
+    } else {
+        console.log("development env");
+    }
 
     app.use(logger('dev'));
     app.use(bodyParser.json());

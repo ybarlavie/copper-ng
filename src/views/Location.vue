@@ -33,6 +33,8 @@
 
                 <Keywords v-model="document.keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
 
+                <LinksEditor :from="document.loc_id" :editable="editable" color="primary" hint="קשרים" />
+
                 <h4>תמונות</h4>
                 <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
                     <q-carousel-slide v-for="item in document.images"
@@ -68,10 +70,12 @@
 </template>
 <script>
 import Keywords from '../components/keywords.vue'
+import LinksEditor from '../components/linksEditor.vue'
 
 export default {
     components: {
-        Keywords
+        Keywords,
+        LinksEditor
     },
     props: ['idCol', 'docId', 'collName'],
     
