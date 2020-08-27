@@ -3,30 +3,23 @@ var MongoDB = require('../mongoUtils');
 
 var router = express.Router();
 
-router.post('/:collection', async (req, resp, next) => {
+router.get('/:collection', async (req, resp) => {
     var collName = req.params.collection;
-    var docs = req.body;
-    var i = 0;
 
-    while(i < docs.length) {
-        var doc = docs[i];
-        var newDoc = { 
-            arch_id: doc,
-            material: 'copper',
-            text: '',
-            label: doc,
-            title: doc,
-            date: '',
-            authenticity: 0,
-            images: [],
-            keywords: []
-        }
-        await MongoDB.insert(collName, newDoc);
+    MongoDB.connectDB('copper-db', async (err) => {
+        if (err) return resp.status(500).send("cannot connect to DB");
 
-        i++;
-    } 
-
-    return resp.status(200).send('OK');
+        MongoDB
+        .getDB()
+        .collection(req.params.collection)
+        .updateMany( {}, { $rename: { "loc_id" : "item_id" } } )
+        .then(result => {
+            return resp.status(200).send('OK');
+        })
+        .catch(err => {
+            return resp.status(500).send(`Failed to update items: ${err}`);
+        });
+    });
 });
 
 module.exports = router;

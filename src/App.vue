@@ -92,13 +92,10 @@
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
 export default {
   name: 'LayoutDefault',
 
   components: {
-    HelloWorld
   },
 
   data () {
@@ -122,16 +119,16 @@ export default {
     onMainClick(evt) {
       switch(this.addItemType) {
         case 'תעודת בר כוכבא':
-          this.$router.push({ name: 'bcDocument', params: { idCol: 'doc_id', docId: null, state: 'ADD', collName: 'documents' } });
+          this.$router.push({ name: 'bcDocument', params: { itemId: null, state: 'ADD', collName: 'documents' } });
           break;
         case 'תעודה חיצונית':
-          this.$router.push({ name: 'extDocument', params: { idCol: 'edoc_id', docId: null, state: 'ADD', collName: 'ext_documents' } });
+          this.$router.push({ name: 'extDocument', params: { itemId: null, state: 'ADD', collName: 'ext_documents' } });
           break;
         case 'דמות':
-          this.$router.push({ name: 'Person', params: { idCol: 'prsn_id', docId: null, state: 'ADD', collName: 'persons' } });
+          this.$router.push({ name: 'Person', params: { itemId: null, state: 'ADD', collName: 'persons' } });
           break;
         case 'מיקום':
-          this.$router.push({ name: 'Location', params: { idCol: 'loc_id', docId: null, state: 'ADD', collName: 'locations' } });
+          this.$router.push({ name: 'Location', params: { itemId: null, state: 'ADD', collName: 'locations' } });
           break;
         default:
           alert('יש לבחור סוג ישות להוספה');

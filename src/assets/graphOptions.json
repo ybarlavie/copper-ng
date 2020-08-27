@@ -12,7 +12,7 @@
         "width": 1.0
     },
     "groups": {
-        "doc_id": {
+        "documents": {
             "shape": "icon",
             "icon": {
                 "face": "'Font Awesome 5 Free'",
@@ -22,7 +22,7 @@
                 "color": "#ff0000"
             }
         },
-        "edoc_id": {
+        "ext_documents": {
             "shape": "icon",
             "icon": {
                 "face": "'Font Awesome 5 Free'",
@@ -32,7 +32,7 @@
                 "color": "#00ff00"
             }
         },
-        "loc_id": {
+        "locations": {
             "shape": "icon",
             "icon": {
                 "face": "'Font Awesome 5 Free'",
@@ -42,7 +42,7 @@
                 "color": "#ff00aa"
             }
         },
-        "prsn_id": {
+        "persons": {
             "shape": "icon",
             "icon": {
                 "face": "'Font Awesome 5 Free'",

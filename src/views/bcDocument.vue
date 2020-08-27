@@ -37,7 +37,7 @@
 
                 <Keywords v-model="document.keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
 
-                <LinksEditor :from="document.doc_id" :editable="editable" color="primary" hint="קשרים" />
+                <LinksEditor :fromEntity="document" :editable="editable" color="primary" hint="קשרים" />
 
                 <h4>תמונות</h4>
                 <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
@@ -81,7 +81,7 @@ export default {
         Keywords,
         LinksEditor
     },
-    props: ['idCol', 'docId', 'collName'],
+    props: ['itemId', 'collName'],
     
     data: () => {
         return {
@@ -172,7 +172,7 @@ export default {
             this.document = {};
             this.origDoc = {};
             this.docExists = false;
-            let docQ = {qv:this.idCol,qe:this.docId};
+            let docQ = { qv:"item_id", qe:this.itemId };
             console.log("fetching document " + JSON.stringify(docQ));
 
             let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName;

@@ -6,10 +6,10 @@ const { json } = require('body-parser');
 const router = express.Router();
 
 const searches = [
-    { coll: 'documents', fields: [ 'title', 'text', 'keywords' ], prj: { sug: 'מסמך בר כוכבא', item_id: '$doc_id', name: 1, title: 1, keywords: 1 } },
-    { coll: 'ext_documents', fields: [ 'title', 'text', 'keywords' ], prj: { sug: 'מסמך חיצוני', item_id: '$edoc_id', name: 1, title: 1, keywords: 1 } },
-    { coll: 'locations', fields: [ 'title', 'keywords' ], prj: { sug: 'מיקום', item_id: '$loc_id', name: 1, title: 1, keywords: 1 } },
-    { coll: 'persons', fields: [ 'title', 'name', 'aliases', 'keywords'], prj: { sug: 'דמות', item_id: '$prsn_id', name: 1, title: 1, keywords: 1 } }
+    { coll: 'documents', fields: [ 'title', 'text', 'keywords' ], prj: { sug: 'מסמך בר כוכבא', item_id: 1, name: 1, title: 1, keywords: 1 } },
+    { coll: 'ext_documents', fields: [ 'title', 'text', 'keywords' ], prj: { sug: 'מסמך חיצוני', item_id: 1, name: 1, title: 1, keywords: 1 } },
+    { coll: 'locations', fields: [ 'title', 'keywords' ], prj: { sug: 'מיקום', item_id: 1, name: 1, title: 1, keywords: 1 } },
+    { coll: 'persons', fields: [ 'title', 'name', 'aliases', 'keywords'], prj: { sug: 'דמות', item_id: 1, name: 1, title: 1, keywords: 1 } }
 ];
 
 const _regexBuilder = ((word) => {
@@ -66,23 +66,23 @@ router.get('/refs/:fromId', function (req, resp){
                 switch (ref.to.substring(0,1)) {
                     case "D":
                         prj.sug = "מסמך בר כוכבא";
-                        prj.item_id = "$doc_id";
-                        q0 = { coll: 'documents', fltr: { doc_id: re }, prj: prj };
+                        prj.item_id = "$item_id";
+                        q0 = { coll: 'documents', fltr: { item_id: re }, prj: prj };
                         break;
                     case "E":
                         prj.sug = "מסמך חיצוני";
-                        prj.item_id = "$edoc_id";
-                        q0 = { coll: 'ext_documents', fltr: { edoc_id: re }, prj: prj };
+                        prj.item_id = "$item_id";
+                        q0 = { coll: 'ext_documents', fltr: { item_id: re }, prj: prj };
                         break;
                     case "P":
                         prj.sug = "דמות";
-                        prj.item_id = "$prsn_id";
-                        q0 = { coll: 'persons', fltr: { prsn_id: re }, prj: prj };
+                        prj.item_id = "$item_id";
+                        q0 = { coll: 'persons', fltr: { item_id: re }, prj: prj };
                         break;
                     case "L":
                         prj.sug = "מיקום";
-                        prj.item_id = "$loc_id";
-                        q0 = { coll: 'locations', fltr: { loc_id: re }, prj: prj };
+                        prj.item_id = "$item_id";
+                        q0 = { coll: 'locations', fltr: { item_id: re }, prj: prj };
                         break;
                 }
                 if (q0) {

@@ -6,7 +6,8 @@ let _db
 
 const connectDB = async (database, callback) => {
     try {
-        MongoClient.connect(uri, (err, client) => {
+        var cli = new MongoClient(uri, { useUnifiedTopology: true } );
+        cli.connect((err, client) => {
             _client = client
             _db = client.db(database);
             return callback(err)

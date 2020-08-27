@@ -34,7 +34,7 @@ let currQuery = {
         }
     },
     documents: {
-        qv: 'doc_id',
+        qv: 'item_id',
         qe: 'D\\d+',
         prj: {
             'text': 0,
@@ -42,7 +42,7 @@ let currQuery = {
         }
     },
     ext_documents: {
-        qv: 'edoc_id',
+        qv: 'item_id',
         qe: 'ED\\d+',
         prj: {
             'text': 0,
@@ -50,7 +50,7 @@ let currQuery = {
         }
     },
     persons: {
-        qv: 'prsn_id',
+        qv: 'item_id',
         qe: 'P\\d+',
         prj: {
             'text': 0,
@@ -58,7 +58,7 @@ let currQuery = {
         }
     },
     locations: {
-        qv: 'loc_id',
+        qv: 'item_id',
         qe: 'L\\d+',
         prj: {
             'text': 0,
@@ -92,7 +92,7 @@ export default {
                         "x-access-token": window.tokenData.token
                     },
                     success: function (result) {
-                        resolve(result);
+                        resolve({ collection: collection, records: result });
                     },
                     error: function (xhr, status, err) {
                         reject(err);
@@ -123,14 +123,16 @@ export default {
 
                 Promise.allSettled(qts).then((results) => {
                     results.forEach(res => {
-                        let idFieldName = '';
-                        let group = '';
-                        let fI = (res && res.value && res.value.length > 0) ? res.value[0] : null;
+                        let collection = res.value.collection;
+                        let records = res.value.records;
+                        let fI = (records.length > 0) ? records[0] : null;
                         if (fI) {
-                            if (fI.hasOwnProperty('ref_id')) {
-                                res.value.forEach(item => {
+                            if (collection == "references")
+                            {
+                                records.forEach(item => {
                                     item.id = item.ref_id;
                                     item.title = item.type;
+                                    item.group = collection;
                                     switch (item.type) {
                                         case 'referred at document':
                                         case 'visit at':
@@ -145,26 +147,13 @@ export default {
                                     }
                                     edgesDS.add([item]);
                                 });
-                            } else if (fI.hasOwnProperty('doc_id')) {
-                                idFieldName = 'doc_id';
-                                group = 'doc_id';
-                            } else if (fI.hasOwnProperty('edoc_id')) {
-                                idFieldName = 'edoc_id';
-                                group = 'edoc_id';
-                            } else if (fI.hasOwnProperty('loc_id')) {
-                                idFieldName = 'loc_id';
-                                group = 'loc_id';
-                            } else if (fI.hasOwnProperty('prsn_id')) {
-                                idFieldName = 'prsn_id';
-                                group = 'prsn_id';
+                            } else {
+                                records.forEach(item => {
+                                    item.id = item.item_id;
+                                    item.group = collection;
+                                    nodesDS.add([item]);
+                                });
                             }
-                        }
-                        if (idFieldName !== '') {
-                            res.value.forEach(item => {
-                                item.id = item[idFieldName];
-                                item.group = idFieldName;
-                                nodesDS.add([item]);
-                            });
                         }
                     });
 
@@ -193,16 +182,23 @@ export default {
                     sel = edgesDS.get(params.edges[0]);
                 }
                 if (document.getElementById("card").checked) {
-                    if (sel.hasOwnProperty("doc_id")) {
-                        that.$router.push({ name: 'bcDocument', params: { idCol: 'doc_id', docId: sel.doc_id, editable: false, collName: 'documents' } });
-                    } else if (sel.hasOwnProperty("edoc_id")) {
-                        that.$router.push({ name: 'extDocument', params: { idCol: 'edoc_id', docId: sel.edoc_id, editable: false, collName: 'ext_documents' } });
-                    } else if (sel.hasOwnProperty("loc_id")) {
-                        that.$router.push({ name: 'Location', params: { idCol: 'loc_id', docId: sel.loc_id, editable: false, collName: 'locations' } });
-                    } else if (sel.hasOwnProperty("prsn_id")) {
-                        that.$router.push({ name: 'Person', params: { idCol: 'prsn_id', docId: sel.prsn_id, editable: false, collName: 'persons' } });
-                    } else {
-                        alert('אין מידע');
+                    var params = { itemId: sel.item_id, editable: false, collName: sel.group };
+                    switch (sel.group)
+                    {
+                        case "documents":
+                            that.$router.push({ name: 'bcDocument', params: params });
+                            break;
+                        case "ext_documents":
+                            that.$router.push({ name: 'extDocument', params: params });
+                            break;
+                        case "locations":
+                            that.$router.push({ name: 'Location', params: params });
+                            break;
+                        case "persons":
+                            that.$router.push({ name: 'Person', params: params });
+                            break;
+                        default:
+                            alert('אין מידע');    
                     }
                 } else if (document.getElementById('map').checked) {
                     if (sel && sel.coordinates) {

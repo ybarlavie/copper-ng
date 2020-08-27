@@ -75,16 +75,16 @@ export default {
             var row = props.row;
             switch(row.sug) {
                 case "מסמך בר כוכבא":
-                    this.$router.push({ name: 'bcDocument', params: { idCol: 'doc_id', docId: row.item_id, editable: false, collName: 'documents' } });
+                    this.$router.push({ name: 'bcDocument', params: { itemId: row.item_id, editable: false, collName: 'documents' } });
                     break;
                 case "מסמך חיצוני":
-                    this.$router.push({ name: 'extDocument', params: { idCol: 'edoc_id', docId: row.item_id, editable: false, collName: 'ext_documents' } });
+                    this.$router.push({ name: 'extDocument', params: { itemId: row.item_id, editable: false, collName: 'ext_documents' } });
                     break;
                 case "מיקום":
-                    this.$router.push({ name: 'Location', params: { idCol: 'loc_id', docId: row.item_id, editable: false, collName: 'locations' } });
+                    this.$router.push({ name: 'Location', params: { itemId: row.item_id, editable: false, collName: 'locations' } });
                     break;
                 case "דמות":
-                    this.$router.push({ name: 'Person', params: { idCol: 'prsn_id', docId: row.item_id, editable: false, collName: 'persons' } });
+                    this.$router.push({ name: 'Person', params: { itemId: row.item_id, editable: false, collName: 'persons' } });
                     break;
             }
         },

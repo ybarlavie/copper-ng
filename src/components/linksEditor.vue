@@ -2,13 +2,13 @@
     <q-expansion-item
         expand-separator
         icon="perm_identity"
-        label="קישורים"
-        caption="קישורים"
+        label="קשרים"
+        caption="קשרים"
         @show="fetchData">
         <q-card>
             <q-card-section>
                 <q-linear-progress v-if="ajaxing" indeterminate />
-                <q-table title="תוצאת חיפוש" 
+                <q-table title="קשרים לישויות אחרות" 
                     :data="data" 
                     :columns="columns"
                     separator="vertical"
@@ -37,11 +37,13 @@
                 </q-table>
             </q-card-section>
         </q-card>
+        <q-card>
+        </q-card>
       </q-expansion-item>
 </template>
 <script>
 export default {
-    props: ['from', 'editable'],
+    props: ['fromEntity', 'editable'],
 
     data () {
         return { 
@@ -73,7 +75,7 @@ export default {
             const QUERY_LIMIT = 500;
             $.ajax({
                 type: "GET",
-                url: researchURL + 'refs/' + this.from,
+                url: researchURL + 'refs/' + this.fromEntity.item_id,
                 crossdomain: true,
                 headers: {
                     "x-access-token": window.tokenData.token
