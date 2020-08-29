@@ -69,12 +69,19 @@ let currQuery = {
 
 export default {
     name: 'home',
-    props: ['fromEntity', 'editable'],
+    props: ['queryData'],
     data: () => ({
         error: '',
     }),
     mounted() {
-        this.draw();
+        if (this.queryData)
+        {
+            this.drawQuery(this.queryData);
+        }
+        else
+        {
+            this.drawEntireGraph();
+        }
     },
     methods: {
         queryMongoCollection: function (collection, query) {
@@ -107,7 +114,74 @@ export default {
                 network = null;
             }
         },
-        draw: function () {
+
+        drawQuery: function (qd) {
+            this.destroy();
+
+            let opdsOpts = {};
+            nodesDS = new vis.DataSet(opdsOpts);
+            edgesDS = new vis.DataSet(opdsOpts);
+
+            var fromEnt = {
+                id: qd.fromEntity.item_id,
+                name: qd.fromEntity.name,
+                label: qd.fromEntity.name
+            };
+            switch (qd.fromEntity.item_id.substring(0,1))
+            {
+                case "E":
+                    fromEnt.group = "ext_documents";
+                    break;
+                case "D":
+                    fromEnt.group = "documents";
+                    break;
+                case "P":
+                    fromEnt.group = "persons";
+                    break;
+                case "L":
+                    fromEnt.group = "locations";
+                    break;
+            }
+            nodesDS.add([fromEnt]);
+
+            qd.refs.forEach(item => {
+                var ref = {
+                    id: item.ref_id,
+                    title: item.type,
+                    from: fromEnt.id,
+                    to: item.item_id,
+                    group: "references"
+                }
+                switch (item.type) {
+                    case 'referred at document':
+                    case 'visit at':
+                        ref.arrows = 'to';
+                        break;
+                    case 'child of':
+                        ref.arrows = 'from';
+                        break;
+                    case 'sibling':
+                    case 'spouse':
+                        ref.arrows = 'to, from';
+                }
+                edgesDS.add([ref]);
+
+                if (!nodesDS.get(item.item_id))
+                {
+                    var toEnt = { 
+                        id: item.item_id, 
+                        name: item.name,
+                        label: item.name,
+                        group: item.collection
+                    }
+                    nodesDS.add([toEnt]);
+                }
+            });
+
+            this.dataReady();
+        },
+
+        drawEntireGraph: function () {
             this.destroy();
 
             let that = this;
@@ -158,12 +232,12 @@ export default {
                         }
                     });
 
-                    that.dataReceived();
+                    that.dataReady();
                 });
             });
         },
 
-        dataReceived: function () {
+        dataReady: function () {
             network = new vis.Network(this.$refs.mynetwork, {
                 nodes: nodesDS,
                 edges: edgesDS,

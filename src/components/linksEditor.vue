@@ -37,18 +37,24 @@
                 </q-table>
             </q-card-section>
         </q-card>
-        <q-card>
+        <q-card v-if="dataReady">
+            <Graph :queryData="graphData" />
         </q-card>
       </q-expansion-item>
 </template>
 <script>
+import Graph from '../components/Graph.vue';
+
 export default {
     props: ['fromEntity', 'editable'],
-
+    components: {
+        Graph
+    },
     data () {
         return { 
             componentKey: 0,
             ajaxing: false,
+            dataReady: false,
             columns: [
                 { name: 'sug', required: true, label: 'סוג ישות', field: "sug", sortable: true, align: "right" },
                 { name: 'item_id', required: true, label: 'מזהה ישות', field: "item_id", sortable: true, align: "left" },
@@ -63,9 +69,16 @@ export default {
         }
     },
 
+    computed: {
+        graphData() {
+            return { fromEntity: this.fromEntity, refs: this.data };
+        }
+    }, 
+
     methods: {
         fetchData() {
             this.ajaxing = true;
+            this.dataReady = false;
             this.data = [];
 
             console.log("querying " + JSON.stringify(this.query));
@@ -82,6 +95,7 @@ export default {
                 },
                 success: function (result) {
                     that.ajaxing = false;
+                    that.dataReady = true;
                     that.data = result;
                     that.componentKey += 1;
                 },
