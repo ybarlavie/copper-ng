@@ -42,7 +42,7 @@
 
 <script>
 export default {
-    props: ['query', 'exclude'],
+    props: ['query', 'exclude', 'rowClickCB'],
     data () {
         return {
             componentKey: 0,
@@ -73,19 +73,24 @@ export default {
     methods: {
         onRowClicked(props) {
             var row = props.row;
-            switch(row.sug) {
-                case "מסמך בר כוכבא":
-                    this.$router.push({ name: 'bcDocument', params: { itemId: row.item_id, editable: false, collName: 'documents' } });
-                    break;
-                case "מסמך חיצוני":
-                    this.$router.push({ name: 'extDocument', params: { itemId: row.item_id, editable: false, collName: 'ext_documents' } });
-                    break;
-                case "מיקום":
-                    this.$router.push({ name: 'Location', params: { itemId: row.item_id, editable: false, collName: 'locations' } });
-                    break;
-                case "דמות":
-                    this.$router.push({ name: 'Person', params: { itemId: row.item_id, editable: false, collName: 'persons' } });
-                    break;
+            if (typeof this.$props.rowClickCB === 'function')
+            {
+                this.$props.rowClickCB.apply(null, [row]);
+            } else {
+                switch(row.sug) {
+                    case "מסמך בר כוכבא":
+                        this.$router.push({ name: 'bcDocument', params: { itemId: row.item_id, editable: false, collName: 'documents' } });
+                        break;
+                    case "מסמך חיצוני":
+                        this.$router.push({ name: 'extDocument', params: { itemId: row.item_id, editable: false, collName: 'ext_documents' } });
+                        break;
+                    case "מיקום":
+                        this.$router.push({ name: 'Location', params: { itemId: row.item_id, editable: false, collName: 'locations' } });
+                        break;
+                    case "דמות":
+                        this.$router.push({ name: 'Person', params: { itemId: row.item_id, editable: false, collName: 'persons' } });
+                        break;
+                }
             }
         },
 

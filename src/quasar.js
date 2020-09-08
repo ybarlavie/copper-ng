@@ -40,6 +40,7 @@ import {
   QCard,
   QCardSection,
   QCardActions,
+  QDialog,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -78,6 +79,7 @@ Vue.use(Quasar, {
     QCard,
     QCardSection,
     QCardActions,
+    QDialog,
   },
   config: {
   },

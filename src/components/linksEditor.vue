@@ -6,6 +6,13 @@
         caption="קשרים"
         @show="fetchData">
         <q-card>
+            <q-toolbar dir="rtl">
+                <div class="GPLAY__toolbar-input-container row no-wrap">
+                    <q-input dense outlined square v-model="search" placeholder="חיפוש" class="bg-white col" />
+                    <q-btn class="GPLAY__toolbar-input-btn" color="primary" icon="search" unelevated @click="searchClicked()" />
+                </div>
+            </q-toolbar>
+
             <q-card-section>
                 <q-linear-progress v-if="ajaxing" indeterminate />
                 <q-table title="קשרים לישויות אחרות" 
@@ -37,6 +44,58 @@
                 </q-table>
             </q-card-section>
         </q-card>
+        <q-dialog v-model="searchDlg">
+            <q-card dir="rtl">
+                <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
+                <q-card-actions align="right" class="text-primary">
+                    <q-btn flat label="ביטול" v-close-popup />
+                    <q-btn flat label="חיבור" v-close-popup />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
+        <!-- <q-dialog v-model="currLink">
+            <q-card class="my-card">
+                <q-img src="https://cdn.quasar.dev/img/chicken-salad.jpg" />
+
+                <q-card-section>
+                <q-btn
+                    fab
+                    color="primary"
+                    icon="place"
+                    class="absolute"
+                    style="top: 0; right: 12px; transform: translateY(-50%);"
+                />
+
+                <div class="row no-wrap items-center">
+                    <div class="col text-h6 ellipsis">
+                    Cafe Basilico
+                    </div>
+                    <div class="col-auto text-grey text-caption q-pt-md row no-wrap items-center">
+                    <q-icon name="place" />
+                    250 ft
+                    </div>
+                </div>
+
+                <q-rating v-model="stars" :max="5" size="32px" />
+                </q-card-section>
+
+                <q-card-section class="q-pt-none">
+                <div class="text-subtitle1">
+                    $・Italian, Cafe
+                </div>
+                <div class="text-caption text-grey">
+                    Small plates, salads & sandwiches in an intimate setting.
+                </div>
+                </q-card-section>
+
+                <q-separator />
+
+                <q-card-actions align="right">
+                    <q-btn v-close-popup flat color="primary" label="Reserve" />
+                    <q-btn v-close-popup flat color="primary" round icon="event" />
+                </q-card-actions>
+            </q-card>
+        </q-dialog> -->
         <q-card v-if="dataReady">
             <Graph :queryData="graphData" />
         </q-card>
@@ -44,17 +103,21 @@
 </template>
 <script>
 import Graph from '../components/Graph.vue';
+import DocsGrid from '../components/docsGrid.vue';
 
 export default {
     props: ['fromEntity', 'editable'],
     components: {
-        Graph
+        Graph,
+        DocsGrid
     },
     data () {
         return { 
             componentKey: 0,
             ajaxing: false,
             dataReady: false,
+            searchDlg: false,
+            search: '',
             columns: [
                 { name: 'sug', required: true, label: 'סוג ישות', field: "sug", sortable: true, align: "right" },
                 { name: 'item_id', required: true, label: 'מזהה ישות', field: "item_id", sortable: true, align: "left" },
@@ -107,8 +170,29 @@ export default {
             });
         },
 
+        onSearchRowClicked(row) {
+            switch(row.sug) {
+                case "מסמך בר כוכבא":
+                    this.$router.push({ name: 'bcDocument', params: { itemId: row.item_id, editable: false, collName: 'documents' } });
+                    break;
+                case "מסמך חיצוני":
+                    this.$router.push({ name: 'extDocument', params: { itemId: row.item_id, editable: false, collName: 'ext_documents' } });
+                    break;
+                case "מיקום":
+                    this.$router.push({ name: 'Location', params: { itemId: row.item_id, editable: false, collName: 'locations' } });
+                    break;
+                case "דמות":
+                    this.$router.push({ name: 'Person', params: { itemId: row.item_id, editable: false, collName: 'persons' } });
+                    break;
+            }
+        },
+
         onRowClicked(props) {
             var row = props.row;
+        },
+
+        searchClicked() {
+            this.searchDlg = true;
         }
     },
 

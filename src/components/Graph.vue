@@ -148,8 +148,8 @@ export default {
                 var ref = {
                     id: item.ref_id,
                     title: item.type,
-                    from: fromEnt.id,
-                    to: item.item_id,
+                    from: item.from,
+                    to: item.to,
                     group: "references"
                 }
                 switch (item.type) {
