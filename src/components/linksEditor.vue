@@ -5,7 +5,7 @@
         label="קשרים"
         caption="קשרים"
         @show="fetchData">
-        <q-card>
+        <q-card v-if="dataReady">
             <q-toolbar dir="rtl">
                 <div class="GPLAY__toolbar-input-container row no-wrap">
                     <q-input dense outlined square v-model="search" placeholder="חיפוש" class="bg-white col" />
@@ -47,55 +47,30 @@
         <q-dialog v-model="searchDlg">
             <q-card dir="rtl">
                 <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
+
+                <q-card-section>
+                    <q-btn-dropdown split push color="primary" :label="newLink.typeAlias || 'בחר סוג קשר'">
+                        <q-list dir="rtl">
+                            <q-item 
+                                v-for="t in availableTypes"
+                                :key="t.name"
+                                clickable
+                                v-close-popup
+                                @click="newLink.type = t.name; newLink.typeAlias = t.alias">
+                                <q-item-section>
+                                    <q-item-label>{{t.alias}}</q-item-label>
+                                </q-item-section>
+                            </q-item>
+                        </q-list>
+                    </q-btn-dropdown>
+                </q-card-section>
+
                 <q-card-actions align="right" class="text-primary">
                     <q-btn flat label="ביטול" v-close-popup />
-                    <q-btn flat label="חיבור" v-close-popup />
+                    <q-btn v-if="newLinkValid" flat label="חיבור" v-close-popup />
                 </q-card-actions>
             </q-card>
         </q-dialog>
-        <!-- <q-dialog v-model="currLink">
-            <q-card class="my-card">
-                <q-img src="https://cdn.quasar.dev/img/chicken-salad.jpg" />
-
-                <q-card-section>
-                <q-btn
-                    fab
-                    color="primary"
-                    icon="place"
-                    class="absolute"
-                    style="top: 0; right: 12px; transform: translateY(-50%);"
-                />
-
-                <div class="row no-wrap items-center">
-                    <div class="col text-h6 ellipsis">
-                    Cafe Basilico
-                    </div>
-                    <div class="col-auto text-grey text-caption q-pt-md row no-wrap items-center">
-                    <q-icon name="place" />
-                    250 ft
-                    </div>
-                </div>
-
-                <q-rating v-model="stars" :max="5" size="32px" />
-                </q-card-section>
-
-                <q-card-section class="q-pt-none">
-                <div class="text-subtitle1">
-                    $・Italian, Cafe
-                </div>
-                <div class="text-caption text-grey">
-                    Small plates, salads & sandwiches in an intimate setting.
-                </div>
-                </q-card-section>
-
-                <q-separator />
-
-                <q-card-actions align="right">
-                    <q-btn v-close-popup flat color="primary" label="Reserve" />
-                    <q-btn v-close-popup flat color="primary" round icon="event" />
-                </q-card-actions>
-            </q-card>
-        </q-dialog> -->
         <q-card v-if="dataReady">
             <Graph :queryData="graphData" />
         </q-card>
@@ -117,7 +92,7 @@ export default {
             ajaxing: false,
             dataReady: false,
             searchDlg: false,
-            search: '',
+            search: "",
             columns: [
                 { name: 'sug', required: true, label: 'סוג ישות', field: "sug", sortable: true, align: "right" },
                 { name: 'item_id', required: true, label: 'מזהה ישות', field: "item_id", sortable: true, align: "left" },
@@ -128,6 +103,8 @@ export default {
                 { name: 'start', required: true, label: 'התחלה', field: "start", sortable: true, align: "left" },
                 { name: 'end', required: true, label: 'סיום', field: "end", sortable: true, align: "left" },
             ],
+            newLink: { type: null,typeAlias: null, start: null, end: null },
+            availableTypes: [],
             data: []
         }
     },
@@ -135,16 +112,20 @@ export default {
     computed: {
         graphData() {
             return { fromEntity: this.fromEntity, refs: this.data };
+        },
+
+        newLinkValid() {
+            return (this.newLink.type != null);
         }
     }, 
 
     methods: {
         fetchData() {
+            if (!this.fromEntity) return;
+
             this.ajaxing = true;
             this.dataReady = false;
             this.data = [];
-
-            console.log("querying " + JSON.stringify(this.query));
 
             let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
             let that = this;
@@ -171,18 +152,28 @@ export default {
         },
 
         onSearchRowClicked(row) {
-            switch(row.sug) {
-                case "מסמך בר כוכבא":
-                    this.$router.push({ name: 'bcDocument', params: { itemId: row.item_id, editable: false, collName: 'documents' } });
+            // reset new link
+            this.newLink = { type: null,typeAlias: null, start: null, end: null };
+            this.availableTypes = [];
+
+            // calculate available types
+            var f0 = this.fromEntity.item_id.substring(0,1);
+            switch (f0) {
+                case "D"://"מסמך בר כוכבא":
+                    this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
                     break;
-                case "מסמך חיצוני":
-                    this.$router.push({ name: 'extDocument', params: { itemId: row.item_id, editable: false, collName: 'ext_documents' } });
+                case "E"://"מסמך חיצוני":
+                    this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
                     break;
-                case "מיקום":
-                    this.$router.push({ name: 'Location', params: { itemId: row.item_id, editable: false, collName: 'locations' } });
+                case "L"://"מיקום":
+                    this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
                     break;
-                case "דמות":
-                    this.$router.push({ name: 'Person', params: { itemId: row.item_id, editable: false, collName: 'persons' } });
+                case "P"://"דמות":
+                    this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                    this.availableTypes.push({ name: 'visit at', alias: 'ביקר ב-' });
+                    this.availableTypes.push({ name: 'child of', alias: 'בן/ת של' });
+                    this.availableTypes.push({ name: 'sibling', alias: 'אח/ות של' });
+                    this.availableTypes.push({ name: 'spouse', alias: 'בן/ת זוג של' });
                     break;
             }
         },
