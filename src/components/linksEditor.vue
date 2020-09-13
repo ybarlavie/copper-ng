@@ -6,7 +6,7 @@
         caption="קשרים"
         @show="fetchData">
         <q-card v-if="dataReady">
-            <q-toolbar dir="rtl">
+            <q-toolbar v-if="editable" dir="rtl">
                 <div class="GPLAY__toolbar-input-container row no-wrap">
                     <q-input dense outlined square v-model="search" placeholder="חיפוש" class="bg-white col" />
                     <q-btn class="GPLAY__toolbar-input-btn" color="primary" icon="search" unelevated @click="searchClicked()" />
@@ -44,11 +44,13 @@
                 </q-table>
             </q-card-section>
         </q-card>
-        <q-dialog v-model="searchDlg">
-            <q-card dir="rtl">
+        <q-dialog v-model="searchDlg" persistent>
+            <q-card dir="rtl" style="width: 100%;">
                 <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
 
-                <q-card-section>
+                <q-card-section class="q-gutter-md">
+                    <q-badge :label="fromEntity.name" align="middle" color="purple" filled style="font-size: 19px;" />
+
                     <q-btn-dropdown split push color="primary" :label="newLink.typeAlias || 'בחר סוג קשר'">
                         <q-list dir="rtl">
                             <q-item 
@@ -56,15 +58,17 @@
                                 :key="t.name"
                                 clickable
                                 v-close-popup
-                                @click="newLink.type = t.name; newLink.typeAlias = t.alias">
+                                @click="onLinkTypeSelected(t)">
                                 <q-item-section>
                                     <q-item-label>{{t.alias}}</q-item-label>
                                 </q-item-section>
                             </q-item>
                         </q-list>
                     </q-btn-dropdown>
-                </q-card-section>
 
+                    <q-badge :label="toEntityName" align="middle" color="purple" filled style="font-size: 19px;" />
+                </q-card-section>
+                
                 <q-card-actions align="right" class="text-primary">
                     <q-btn flat label="ביטול" v-close-popup />
                     <q-btn v-if="newLinkValid" flat label="חיבור" v-close-popup />
@@ -93,6 +97,7 @@ export default {
             dataReady: false,
             searchDlg: false,
             search: "",
+            toEntity: null,
             columns: [
                 { name: 'sug', required: true, label: 'סוג ישות', field: "sug", sortable: true, align: "right" },
                 { name: 'item_id', required: true, label: 'מזהה ישות', field: "item_id", sortable: true, align: "left" },
@@ -103,7 +108,7 @@ export default {
                 { name: 'start', required: true, label: 'התחלה', field: "start", sortable: true, align: "left" },
                 { name: 'end', required: true, label: 'סיום', field: "end", sortable: true, align: "left" },
             ],
-            newLink: { type: null,typeAlias: null, start: null, end: null },
+            newLink: { toEntity: null, type: null,typeAlias: null, start: "-5000000T000000", end: "5000000T000000" },
             availableTypes: [],
             data: []
         }
@@ -115,11 +120,56 @@ export default {
         },
 
         newLinkValid() {
-            return (this.newLink.type != null);
+            var nl = this.newLink;
+
+            if (nl.type != null) {
+                for (var i=0; i<this.data.length; i++) {
+                    var el = this.data[i];  // existing link
+                    
+                    if (nl.toEntity.item_id == el.item_id && nl.type == el.type) {
+                        // link seems a duplicate... check it...
+                        var nl0 = nl.toEntity.item_id.substring(0,1);
+                        if (nl0 == 'L') {
+                            // location can be a dup if the start-end periods are not overlapping
+                            if ((nl.start >= el.start && nl.start <= el.end) 
+                                ||
+                                (nl.end >= el.start && nl.end <= el.end)
+                                ||
+                                (el.start >= nl.start && el.start <= nl.end) 
+                                ||
+                                (el.end >= nl.start && el.end <= nl.end)) 
+                                {
+                                    nl.error = "חפיפה בזמנים בקישור למיקום";
+                                    return false;
+                                }
+                        } else {
+                            nl.error = "קשר כבר קיים";
+                            return false;
+                        }
+                    }
+                }
+            } else {
+                nl.error = "סוג קשר לא מוגדר";
+                return false;
+            }
+
+            nl.error = "קשר תקין";
+            return true;
+        },
+
+        toEntityName() {
+            return this.newLink && this.newLink.toEntity ? this.newLink.toEntity.name : '';
         }
     }, 
 
     methods: {
+        showNotif (ok, msg) {
+            this.$q.notify({
+                message: msg,
+                color: ok ? 'green' : 'red'
+            })
+        },
+
         fetchData() {
             if (!this.fromEntity) return;
 
@@ -153,28 +203,77 @@ export default {
 
         onSearchRowClicked(row) {
             // reset new link
-            this.newLink = { type: null,typeAlias: null, start: null, end: null };
+            this.newLink = { toEntity: null, type: null,typeAlias: null, start: "-5000000T000000", end: "5000000T000000" };
             this.availableTypes = [];
 
             // calculate available types
             var f0 = this.fromEntity.item_id.substring(0,1);
+            var t0 = row ? row.item_id.substring(0,1) : '';
+
             switch (f0) {
                 case "D"://"מסמך בר כוכבא":
-                    this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                    switch (t0) {
+                        case "D"://"מסמך בר כוכבא":
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            break;
+                        case "E"://"מסמך חיצוני":
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            break;
+                    }
                     break;
                 case "E"://"מסמך חיצוני":
-                    this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                    switch (t0) {
+                        case "D"://"מסמך בר כוכבא":
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            break;
+                        case "E"://"מסמך חיצוני":
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            break;
+                    }
                     break;
                 case "L"://"מיקום":
-                    this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                    switch (t0) {
+                        case "D"://"מסמך בר כוכבא":
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            break;
+                        case "E"://"מסמך חיצוני":
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            break;
+                    }
                     break;
                 case "P"://"דמות":
-                    this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
-                    this.availableTypes.push({ name: 'visit at', alias: 'ביקר ב-' });
-                    this.availableTypes.push({ name: 'child of', alias: 'בן/ת של' });
-                    this.availableTypes.push({ name: 'sibling', alias: 'אח/ות של' });
-                    this.availableTypes.push({ name: 'spouse', alias: 'בן/ת זוג של' });
+                    switch (t0) {
+                        case "D"://"מסמך בר כוכבא":
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            break;
+                        case "E"://"מסמך חיצוני":
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            break;
+                        case "L"://"מיקום":
+                            this.availableTypes.push({ name: 'visit at', alias: 'ביקר ב-' });
+                            break;
+                        case "P"://"דמות":
+                            this.availableTypes.push({ name: 'child of', alias: 'בן/ת של' });
+                            this.availableTypes.push({ name: 'sibling', alias: 'אח/ות של' });
+                            this.availableTypes.push({ name: 'spouse', alias: 'בן/ת זוג של' });
+                            break;
+                    }
                     break;
+            }
+
+            if (this.availableTypes.length > 0) {
+                this.newLink.toEntity = row;
+
+            } else {
+                this.showNotif(false, "לא נבחר יעד לקשר");
+            }
+        },
+
+        onLinkTypeSelected(t) {
+            this.newLink.type = t.name;
+            this.newLink.typeAlias = t.alias;
+            if (!this.newLinkValid) {
+                this.showNotif(false, this.newLink.error);
             }
         },
 

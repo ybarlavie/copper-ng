@@ -41,6 +41,7 @@ import {
   QCardSection,
   QCardActions,
   QDialog,
+  QCheckbox,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -80,6 +81,7 @@ Vue.use(Quasar, {
     QCardSection,
     QCardActions,
     QDialog,
+    QCheckbox,
   },
   config: {
   },

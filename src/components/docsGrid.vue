@@ -1,19 +1,24 @@
 <template>
     <div class="q-pa-md" :key="componentKey">
         <q-linear-progress v-if="ajaxing" indeterminate />
-        <q-table title="תוצאת חיפוש" 
+        <q-table title="תוצאת חיפוש"
+        ref="myTable"
         :data="data" 
         :columns="columns"
+        :selected.sync="selectedRows"
+        selection="single"
         separator="vertical"
         row-key="_id"
-        @row-click="onRowClicked"
+        @update:selected="onSelectChanged()"
         style="font-size: 19px;">
             <template v-slot:top="props">
-                <div class="col-4 q-table__title">תוצאות חיפוש הביטוי: '{{query}}' {{exclude != '' ? ' - ללא מסמך ' + exclude : '' }}</div>
+                <q-badge :label="'תוצאות חיפוש הביטוי:'" color="blue" outline style="font-size: 19px;" />
+                <q-badge :label="query" color="green" outline style="font-size: 19px;" />
             </template>
 
             <template v-slot:header="props">
                 <q-tr :props="props">
+                    <q-th />
                     <q-th
                         v-for="col in props.cols"
                         :key="col.name"
@@ -27,6 +32,9 @@
 
             <template v-slot:body="props">
                 <q-tr :props="props" @click="onRowClicked(props)">
+                    <q-td>
+                        <q-checkbox v-model="props.selected" dense/>
+                    </q-td>
                     <q-td v-for="col in props.cols"
                         :key="col.name" 
                         :props="props"
@@ -49,14 +57,18 @@ export default {
             ajaxing: false,
             columns: [
                 { name: 'sug', required: true, label: 'סוג', field: "sug", sortable: true, align: "right" },
-                { name: '_id', required: true, label: 'מזהה כללי', field: "_id", sortable: true },
                 { name: 'item_id', required: true, label: 'מזהה', field: "item_id", sortable: true, align: "left" },
                 { name: 'name', required: true, label: 'שם', field: "name", sortable: true, align: "right" },
                 { name: 'title', required: true, label: 'כותרת', field: "title", sortable: true, align: "right" },
                 { name: 'keywords', required: true, label: 'מילות מפתח', field: "keywords", sortable: true, align: "right" },
                 { name: 'aliases', required: false, label: 'שמות נרדפים', field: "aliases", sortable: true, align: "right" },
+                { name: '_id', required: true, label: 'מזהה כללי', sortable: false, field: row => row._id, format: val => `${val}` }
             ],
-            data: []
+            data: [],
+            selectedRows: [],
+            pagination: {
+                rowsPerPage: 0
+            },
         }
     },
 
@@ -71,10 +83,12 @@ export default {
     },
 
     methods: {
-        onRowClicked(props) {
-            var row = props.row;
-            if (typeof this.$props.rowClickCB === 'function')
-            {
+        onSelectChanged: function() {
+            var row = null;
+            if (this.selectedRows.length > 0) {
+                row = this.selectedRows[0];
+            }
+            if (typeof this.$props.rowClickCB === 'function') {
                 this.$props.rowClickCB.apply(null, [row]);
             } else {
                 switch(row.sug) {
