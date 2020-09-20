@@ -5,6 +5,76 @@
         label="קשרים"
         caption="קשרים"
         @show="fetchData">
+
+        <q-dialog v-model="searchDlg">
+            <q-card dir="rtl" style="width: 800px; max-width: 800px;">
+                <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
+
+                <q-card-section class="q-gutter-md">
+                    <q-badge :label="fromEntity.name" align="middle" color="purple" filled style="font-size: 19px;" />
+
+                    <q-btn-dropdown split push color="primary" :label="newLink.typeAlias || 'בחר סוג קשר'">
+                        <q-list dir="rtl">
+                            <q-item 
+                                v-for="t in availableTypes"
+                                :key="t.name"
+                                clickable
+                                v-close-popup
+                                @click="onLinkTypeSelected(t)">
+                                <q-item-section>
+                                    <q-item-label>{{t.alias}}</q-item-label>
+                                </q-item-section>
+                            </q-item>
+                        </q-list>
+                    </q-btn-dropdown>
+
+                    <q-badge :label="toEntityName" align="middle" color="purple" filled style="font-size: 19px;" />
+                </q-card-section>
+
+                <q-card-section v-if="newLink.needDates" class="row">
+                    <q-badge label="בין התאריכים -" align="top" color="green" filled style="font-size: 19px;" />
+                    <q-input filled v-model="newLink.range.from" mask="date" :rules="['newLink.range.from']" style="max-width: 150px;">
+                        <template v-slot:append>
+                            <q-icon name="event" class="cursor-pointer">
+                                <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                                    <q-date v-model="newLink.range.from">
+                                        <div class="row items-center justify-end">
+                                            <q-btn v-close-popup label="סגור" color="primary" flat />
+                                        </div>
+                                    </q-date>
+                                </q-popup-proxy>
+                            </q-icon>
+                        </template>
+                    </q-input>
+
+                    <q-badge label="ו -" align="top" color="green" filled style="font-size: 19px;" />
+                    <q-input filled v-model="newLink.range.to" hint="עד תאריך" mask="date" :rules="['newLink.range.to']" style="max-width: 150px;">
+                        <template v-slot:append>
+                            <q-icon name="event" class="cursor-pointer">
+                                <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
+                                    <q-date v-model="newLink.range.to">
+                                        <div class="row items-center justify-end">
+                                            <q-btn v-close-popup label="סגור" color="primary" flat />
+                                        </div>
+                                    </q-date>
+                                </q-popup-proxy>
+                            </q-icon>
+                        </template>
+                    </q-input>
+
+                </q-card-section>
+
+                <q-card-section class="row">
+                    <q-input rounded outlined type="textarea" v-model="newLink.descr" hint="תיאור הקשר" style="font-size: 19px; width:100%;" />
+                </q-card-section>
+
+                <q-card-actions align="right" class="text-primary">
+                    <q-btn flat label="ביטול" v-close-popup />
+                    <q-btn v-if="newLinkValid" flat label="חיבור" @click="onSubmit" v-close-popup />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
+
         <q-card v-if="dataReady">
             <q-toolbar v-if="editable" dir="rtl">
                 <div class="GPLAY__toolbar-input-container row no-wrap">
@@ -44,37 +114,6 @@
                 </q-table>
             </q-card-section>
         </q-card>
-        <q-dialog v-model="searchDlg" persistent>
-            <q-card dir="rtl" style="width: 100%;">
-                <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
-
-                <q-card-section class="q-gutter-md">
-                    <q-badge :label="fromEntity.name" align="middle" color="purple" filled style="font-size: 19px;" />
-
-                    <q-btn-dropdown split push color="primary" :label="newLink.typeAlias || 'בחר סוג קשר'">
-                        <q-list dir="rtl">
-                            <q-item 
-                                v-for="t in availableTypes"
-                                :key="t.name"
-                                clickable
-                                v-close-popup
-                                @click="onLinkTypeSelected(t)">
-                                <q-item-section>
-                                    <q-item-label>{{t.alias}}</q-item-label>
-                                </q-item-section>
-                            </q-item>
-                        </q-list>
-                    </q-btn-dropdown>
-
-                    <q-badge :label="toEntityName" align="middle" color="purple" filled style="font-size: 19px;" />
-                </q-card-section>
-                
-                <q-card-actions align="right" class="text-primary">
-                    <q-btn flat label="ביטול" v-close-popup />
-                    <q-btn v-if="newLinkValid" flat label="חיבור" v-close-popup />
-                </q-card-actions>
-            </q-card>
-        </q-dialog>
         <q-card v-if="dataReady">
             <Graph :queryData="graphData" />
         </q-card>
@@ -108,7 +147,7 @@ export default {
                 { name: 'start', required: true, label: 'התחלה', field: "start", sortable: true, align: "left" },
                 { name: 'end', required: true, label: 'סיום', field: "end", sortable: true, align: "left" },
             ],
-            newLink: { toEntity: null, type: null,typeAlias: null, start: "-5000000T000000", end: "5000000T000000" },
+            newLink: { toEntity: null, type: null,typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , needDates: false, descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } },
             availableTypes: [],
             data: []
         }
@@ -170,6 +209,46 @@ export default {
             })
         },
 
+        onSubmit () {
+            var nl = {
+                from: this.fromEntity.item_id,
+                to: this.newLink.toEntity.item_id,
+                type: this.newLink.type,
+                created_by: 'yonib',
+                description: this.newLink.descr
+            };
+            if (this.newLink.needDates) {
+                nl.start = this.newLink.range.from;
+                nl.end = this.newLink.range.to;
+            }
+            var settings = {
+                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/references',
+                "method": "POST",
+                "timeout": 0,
+                "headers": {
+                    "Content-Type": "application/json",
+                    "x-access-token": window.tokenData.token
+                },
+                "data": JSON.stringify(nl),
+            };
+
+            var that = this;
+            this.ajaxing = true;
+            console.log('ajaxing up!');
+            $.ajax(settings).done(function (response) {
+                that.showNotif(true, "השמירה הצליחה");
+                that.editable = false;
+                that.fetchData();
+            })
+            .fail(function(err) {
+                console.log('error' +  JSON.stringify(err))
+                that.showNotif(false, "השמירה נכשלה");
+            })
+            .always(function() {
+                that.ajaxing = false;
+            });
+        },
+
         fetchData() {
             if (!this.fromEntity) return;
 
@@ -203,7 +282,7 @@ export default {
 
         onSearchRowClicked(row) {
             // reset new link
-            this.newLink = { toEntity: null, type: null,typeAlias: null, start: "-5000000T000000", end: "5000000T000000" };
+            this.newLink = { toEntity: null, type: null,typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , needDates: false, descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
             this.availableTypes = [];
 
             // calculate available types
@@ -214,48 +293,48 @@ export default {
                 case "D"://"מסמך בר כוכבא":
                     switch (t0) {
                         case "D"://"מסמך בר כוכבא":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
                             break;
                         case "E"://"מסמך חיצוני":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
                             break;
                     }
                     break;
                 case "E"://"מסמך חיצוני":
                     switch (t0) {
                         case "D"://"מסמך בר כוכבא":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
                             break;
                         case "E"://"מסמך חיצוני":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
                             break;
                     }
                     break;
                 case "L"://"מיקום":
                     switch (t0) {
                         case "D"://"מסמך בר כוכבא":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
                             break;
                         case "E"://"מסמך חיצוני":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
                             break;
                     }
                     break;
                 case "P"://"דמות":
                     switch (t0) {
                         case "D"://"מסמך בר כוכבא":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
                             break;
                         case "E"://"מסמך חיצוני":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה'});
+                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
                             break;
                         case "L"://"מיקום":
-                            this.availableTypes.push({ name: 'visit at', alias: 'ביקר ב-' });
+                            this.availableTypes.push({ name: 'visit at', alias: 'ביקר ב-', needDates: true});
                             break;
                         case "P"://"דמות":
-                            this.availableTypes.push({ name: 'child of', alias: 'בן/ת של' });
-                            this.availableTypes.push({ name: 'sibling', alias: 'אח/ות של' });
-                            this.availableTypes.push({ name: 'spouse', alias: 'בן/ת זוג של' });
+                            this.availableTypes.push({ name: 'child of', alias: 'בן/ת של', needDates: false});
+                            this.availableTypes.push({ name: 'sibling', alias: 'אח/ות של', needDates: false});
+                            this.availableTypes.push({ name: 'spouse', alias: 'בן/ת זוג של', needDates: false});
                             break;
                     }
                     break;
@@ -272,6 +351,7 @@ export default {
         onLinkTypeSelected(t) {
             this.newLink.type = t.name;
             this.newLink.typeAlias = t.alias;
+            this.newLink.needDates = t.needDates;
             if (!this.newLinkValid) {
                 this.showNotif(false, this.newLink.error);
             }

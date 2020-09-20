@@ -36,12 +36,14 @@ import {
   Notify,
   ClosePopup,
   QPopupEdit,
+  QPopupProxy,
   QExpansionItem,
   QCard,
   QCardSection,
   QCardActions,
   QDialog,
   QCheckbox,
+  QDate,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -76,12 +78,14 @@ Vue.use(Quasar, {
     QTooltip,
     QForm,
     QPopupEdit,
+    QPopupProxy,
     QExpansionItem,
     QCard,
     QCardSection,
     QCardActions,
     QDialog,
     QCheckbox,
+    QDate,
   },
   config: {
   },
