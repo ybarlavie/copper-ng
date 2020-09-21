@@ -218,8 +218,10 @@ export default {
                 description: this.newLink.descr
             };
             if (this.newLink.needDates) {
-                nl.start = this.newLink.range.from;
-                nl.end = this.newLink.range.to;
+                var d = new Date(this.newLink.range.from);
+                nl.start = d.toISOString().replace(/-|:|.\d\d\dZ/g,'');
+                d = new Date(this.newLink.range.to);
+                nl.end = d.toISOString().replace(/-|:|.\d\d\dZ/g,'');
             }
             var settings = {
                 "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/references',
