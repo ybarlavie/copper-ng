@@ -12,7 +12,8 @@ router.get('/:collection', async (req, resp) => {
         MongoDB
         .getDB()
         .collection(req.params.collection)
-        .updateMany( {}, { $rename: { "loc_id" : "item_id" } } )
+        //.updateMany( {}, { $rename: { "loc_id" : "item_id" } } )
+        .updateMany( {}, [ { "$set": { name: "$label" } } ] )
         .then(result => {
             return resp.status(200).send('OK');
         })

@@ -82,7 +82,7 @@ export default {
         Keywords,
         LinksEditor
     },
-    props: ['itemId', 'collName'],
+    props: ['itemId', 'state', 'collName'],
     
     data: () => {
         return {
@@ -97,7 +97,14 @@ export default {
     },
 
     beforeMount() {
-        this.fetchData();
+        if (this.state === "ADD")
+        {
+            this.startAdd();
+        }
+        else
+        {
+            this.fetchData();
+        }
     },
 
     methods: {

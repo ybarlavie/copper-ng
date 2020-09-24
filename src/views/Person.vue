@@ -75,12 +75,12 @@ export default {
         Keywords,
         LinksEditor
     },
-    props: ['itemId', 'collName'],
+    props: ['itemId', 'state', 'collName'],
     
     data: () => {
         return {
             componentKey: 0,
-            document: { keywords: [], aliases: [] },
+            document: { keywords: [] },
             origDoc: {},
             slide: '',
             ajaxing: false,
@@ -90,7 +90,14 @@ export default {
     },
 
     beforeMount() {
-        this.fetchData();
+        if (this.state === "ADD")
+        {
+            this.startAdd();
+        }
+        else
+        {
+            this.fetchData();
+        }
     },
 
     methods: {
