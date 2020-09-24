@@ -21,7 +21,7 @@
                     <h4>דמות: "{{document.title}}" - מזהה: {{document.prsn_id}}</h4>
                 </div>
                 <div v-else>
-                    <h4>מסמך חדש</h4>
+                    <h4>דמות חדשה</h4>
                 </div>
 
                 <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />

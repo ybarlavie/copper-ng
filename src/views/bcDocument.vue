@@ -22,7 +22,7 @@
                     <h4>תעודה: "{{document.title}}" - מזהה: {{document.doc_id}}</h4>
                 </div>
                 <div v-else>
-                    <h4>מסמך חדש</h4>
+                    <h4>תעודת בר-כוכבא חדשה</h4>
                 </div>
 
                 <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב ב.כ." style="font-size: 19px;" :readonly="editable ? false : true" />

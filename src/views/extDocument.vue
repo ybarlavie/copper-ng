@@ -21,7 +21,7 @@
                     <h4>תעודה חיצונית: "{{document.title}}" - מזהה: {{document.edoc_id}}</h4>
                 </div>
                 <div v-else>
-                    <h4>מסמך חדש</h4>
+                    <h4>תעודה חיצונית חדשה</h4>
                 </div>
 
                 <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב חיצוני" style="font-size: 19px;" :readonly="editable ? false : true" />
