@@ -136,6 +136,11 @@ export default {
                 this.showNotif(false, "לא בוצעו שינויים");
                 return;
             }
+            if (!this.name || !this.name.trim() || !this.title || !this.title.trim() || !this.label || !this.label.trim()) {
+                this.showNotif(false, "יש למלא לפחות את השדות: שם, כותרת ותגית");
+                return;
+            }
+
             var settings = {
                 "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName,
                 "method": "POST",
