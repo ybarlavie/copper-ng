@@ -118,6 +118,8 @@ export default {
         drawQuery: function (qd) {
             this.destroy();
 
+            if (!qd.fromEntity.item_id) return;
+
             let opdsOpts = {};
             nodesDS = new vis.DataSet(opdsOpts);
             edgesDS = new vis.DataSet(opdsOpts);
@@ -277,8 +279,7 @@ export default {
                     }
                 } else if (document.getElementById('map').checked) {
                     if (sel && sel.coordinates) {
-                        window.open('https://maps.google.com/?hl=iw&q=' + sel
-                            .coordinates);
+                        window.open('https://maps.google.com/?hl=iw&q=' + sel.coordinates);
                     } else {
                         alert('אין מידע על מיקום');
                     }

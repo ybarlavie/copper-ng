@@ -33,7 +33,7 @@
 
                 <Keywords v-model="document.keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
 
-                <LinksEditor :fromEntity="document" :editable="editable" color="primary" hint="קשרים" />
+                <LinksEditor :fromEntity="document" :editable="editable && state !== 'ADD'" color="primary" hint="קשרים" />
 
                 <h4>תמונות</h4>
                 <q-carousel v-model="slide" swipeable animated infinite ref="carousel" height="480px">
