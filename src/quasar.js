@@ -44,6 +44,8 @@ import {
   QDialog,
   QCheckbox,
   QDate,
+  QSeparator,
+  QSpace,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -86,6 +88,8 @@ Vue.use(Quasar, {
     QDialog,
     QCheckbox,
     QDate,
+    QSeparator,
+    QSpace,
   },
   config: {
   },

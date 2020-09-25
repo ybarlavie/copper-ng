@@ -1,11 +1,11 @@
 <template>
     <div dir="rtl">
-        <div style="display:flex; flex-direction: row;">
-            <input id="btnRefresh" type="button" value="Refresh" onclick="draw()">
-            <input id="findNode" type="text" dir="ltr">
-            <input id="btnFind" type="button" value="איתור" onclick="findNode()">
-            <span> </span>
-            <label>לחיצה בגרף :</label>
+        <div style="display:flex; flex-direction: row; align-items: center">
+            <q-input rounded dense outlined type="text" v-model="nodeQuery" style="font-size: 19px;" />
+            <q-btn rounded dense label="חיפוש בגרף לפי שם" @click="findNode" />
+            <q-badge />
+            <q-separator vertical />
+            <q-badge outline label=" לחיצה בגרף " color="purple" style="font-size: 19px;" />
             <input type="radio" id="card" name="graphClick" value="card" checked>
             <label for="card">כרטיס</label><br>
             <input type="radio" id="map" name="graphClick" value="map">
@@ -27,7 +27,7 @@ let customNodes = null;
 let currQuery = {
     references: {
         qv: 'ref_id',
-        qe: '[A-Z]+_[A-Z]+_\\d+',
+        qe: '[A-Z]+\\d*_[A-Z]+\\d*_\\d+',
         prj: {
             'text': 0,
             'images': 0
@@ -72,6 +72,7 @@ export default {
     props: ['queryData'],
     data: () => ({
         error: '',
+        nodeQuery: ''
     }),
     mounted() {
         if (this.queryData)
@@ -286,6 +287,28 @@ export default {
                 }
             });
         },
+
+        findNode: function() {
+            var q = this.nodeQuery;
+            var sel = nodesDS.get({
+                filter: function (item) {
+                    return item.name == q;
+                }
+            });
+            if (sel && sel.length > 0) {
+                var xy = network.getPosition(sel[0].id);
+                var newPos = {
+                    position: xy,
+                    scale: 1.5,
+                    offset: {
+                        x: 0,
+                        y: 0
+                    },
+                    animation: false
+                };
+                network.moveTo(newPos);
+            }
+        }
     },
 };
 </script>

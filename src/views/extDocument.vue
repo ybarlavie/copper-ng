@@ -18,7 +18,7 @@
                                 'עריכת המסמך' }}
                         </q-tooltip>
                     </q-btn>
-                    <h4>תעודה חיצונית: "{{document.title}}" - מזהה: {{document.edoc_id}}</h4>
+                    <h4>תעודה חיצונית: "{{document.title}}" - מזהה: {{document.item_id}}</h4>
                 </div>
                 <div v-else>
                     <h4>תעודה חיצונית חדשה</h4>

@@ -18,7 +18,7 @@
                                 'עריכת המסמך' }}
                         </q-tooltip>
                     </q-btn>
-                    <h4>דמות: "{{document.title}}" - מזהה: {{document.prsn_id}}</h4>
+                    <h4>דמות: "{{document.title}}" - מזהה: {{document.item_id}}</h4>
                 </div>
                 <div v-else>
                     <h4>דמות חדשה</h4>

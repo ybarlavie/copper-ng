@@ -19,7 +19,7 @@
                                 'עריכת המסמך' }}
                         </q-tooltip>
                     </q-btn>
-                    <h4>תעודה: "{{document.title}}" - מזהה: {{document.doc_id}}</h4>
+                    <h4>תעודה: "{{document.title}}" - מזהה: {{document.item_id}}</h4>
                 </div>
                 <div v-else>
                     <h4>תעודת בר-כוכבא חדשה</h4>
