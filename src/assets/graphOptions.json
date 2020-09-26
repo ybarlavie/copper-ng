@@ -39,7 +39,7 @@
                 "weight": "bold",
                 "size": 20,
                 "code": "\uf57d",
-                "color": "#ff00aa"
+                "color": "#0000ff"
             }
         },
         "persons": {
@@ -49,7 +49,7 @@
                 "weight": "bold",
                 "size": 20,
                 "code": "\uf007",
-                "color": "#ff00ff"
+                "color": "#9e9e9e"
             }
         },
         "unselected": {

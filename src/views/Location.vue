@@ -31,6 +31,7 @@
                 <q-input rounded outlined v-model="document.lat" hint="Latitude" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.lng" hint="Longitude" style="font-size: 19px;" :readonly="editable ? false : true" />
 
+                <Keywords v-model="document.aliases" :parentId="document._id" :editable="editable" color="red" hint="שמות נרדפים"/>
                 <Keywords v-model="document.keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
 
                 <LinksEditor :fromEntity="document" :editable="editable && state !== 'ADD'" color="primary" hint="קשרים" />
@@ -82,7 +83,7 @@ export default {
     data: () => {
         return {
             componentKey: 0,
-            document: { keywords: [] },
+            document: { keywords: [], aliases: [] },
             origDoc: {},
             slide: '',
             ajaxing: false,
@@ -104,7 +105,7 @@ export default {
 
     methods: {
         startAdd() {
-            this.document = { keywords: [] };
+            this.document = { keywords: [], aliases: [] };
             this.origDoc = {};
             this.editable = true;
             this.docExists = false;
@@ -126,12 +127,20 @@ export default {
             })
         },
 
+        isValid() {
+            try {
+                return (this.document.name.trim() && this.document.title.trim() && this.document.label.trim());
+            } catch (e) {
+                return false;
+            }
+        },
+
         onSubmit () {
             if (Object.entries(this.document).toString() === Object.entries(this.origDoc).toString()) {
                 this.showNotif(false, "לא בוצעו שינויים");
                 return;
             }
-            if (!this.name || !this.name.trim() || !this.title || !this.title.trim() || !this.label || !this.label.trim()) {
+            if (!this.isValid()) {
                 this.showNotif(false, "יש למלא לפחות את השדות: שם, כותרת ותגית");
                 return;
             }
@@ -196,7 +205,11 @@ export default {
                 success: function (result) {
                     that.ajaxing = false;
                     if (result.length > 0) {
-                        that.document = result[0];
+                        var res = result[0];
+                        if (!res.keywords) res.keywords = [];
+                        if (!res.aliases) res.aliases = [];
+                        that.document = res;
+
                         that.origDoc = JSON.parse(JSON.stringify(that.document));
                         that.slide = (that.document.images && that.document.images.length > 0) ? that.document.images[0].label : '';
 

@@ -44,11 +44,9 @@ export default {
         }
     },
 
-    computed: {
-    },
-
     methods: {
         _isValid(w) {
+            if (!this.value) return true;
             return !this.value.includes(w);
         },
 

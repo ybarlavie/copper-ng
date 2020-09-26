@@ -31,7 +31,7 @@
             </template>
 
             <template v-slot:body="props">
-                <q-tr :props="props" @click="onRowClicked(props)">
+                <q-tr :props="props">
                     <q-td>
                         <q-checkbox v-model="props.selected" dense/>
                     </q-td>
