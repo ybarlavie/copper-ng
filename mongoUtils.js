@@ -61,6 +61,24 @@ const nameExists = (collName, name) => {
     });
 }
 
+const firstOrDefault = (collName, query) => {
+    return new Promise((resolve, reject) => {
+        connectDB('copper-db', async (err) => {
+            if (err) resolve(null);
+
+            getDB()
+            .collection(collName)
+            .find(query)
+            .limit(1)
+            .toArray(function(err, data) {
+                disconnectDB();
+                if (err || data.length <= 0) resolve(null);
+                
+                resolve(data[0]);
+            });
+        });
+    });
+}
 
 const getNextId = (collName, newDoc) => {
     return new Promise((resolve, reject) => {
@@ -167,4 +185,4 @@ const getClient = () => _client
 const getDB = () => _db
 const disconnectDB = () => _client.close()
 
-module.exports = { connectDB, getClient, getDB, disconnectDB, docExists, nameExists, getNextId, incrementNext, insert, update }
+module.exports = { connectDB, getClient, getDB, disconnectDB, docExists, nameExists, firstOrDefault, getNextId, incrementNext, insert, update }

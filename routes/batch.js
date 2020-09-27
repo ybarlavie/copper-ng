@@ -124,4 +124,65 @@ router.get('/import/buildings/:jsonName', async (req, resp) => {
     }
     return resp.status(200).send('Inserted: ' + inserted);
 });
+
+router.get('/import/refs/:jsonName', async (req, resp) => {
+    var jsonName = './documents/' + req.params.jsonName;
+    var excel = JSON.parse(fs.readFileSync(jsonName));
+    var sheet = null;
+    var inserted = 0;
+
+    for (sheetName in excel) {
+        if (excel[sheetName].length > 0) {
+            sheet = excel[sheetName];
+            break;
+        }
+    }
+    if (!sheet) return resp.status(500).send(`cannot find sheet in : ${jsonName}`);
+
+    for (var i=0; i< sheet.length; i++) {
+        var rec = sheet[i];
+        var refs = rec.references ? rec.references.split(',').map(item => item.trim()) : [];
+        if (refs.length > 0) {
+            var locDoc = await MongoDB.firstOrDefault('locations', {name:rec.name});
+            if (locDoc) {
+                for (var j=0; j<refs.length; j++) {
+                    var ref = refs[j];
+                    var bcDoc = await MongoDB.firstOrDefault('documents', {name:ref});
+                    if (!bcDoc) {
+                        // add a new doc
+                        newDoc = {
+                            arch_id: ref,
+                            material: '',
+                            text: '',
+                            label: ref,
+                            title: ref,
+                            date: '',
+                            authenticity: 0,
+                            images: [],
+                            keywords: [],
+                            name: ref
+                        }
+                        await MongoDB.insert('documents', newDoc);
+                        bcDoc = await MongoDB.firstOrDefault('documents', {name:ref});
+                    }
+
+                    var refDoc = await MongoDB.firstOrDefault('references', { from: locDoc.item_id, to: bcDoc.item_id, type: 'referred at document'});
+                    if (!refDoc) {
+                        var newRef = {
+                            from: locDoc.item_id,
+                            to: bcDoc.item_id,
+                            type: 'referred at document',
+                            created_by: 'yonib',
+                            description: '',
+                            source: 'batch buildings refs'
+                        }
+                        await MongoDB.insert('references', newRef);
+                        inserted++;
+                    }
+                }
+            }    
+        }
+    }
+    return resp.status(200).send('Inserted: ' + inserted);
+});
 module.exports = router;
