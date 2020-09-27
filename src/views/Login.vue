@@ -7,7 +7,7 @@
             
             <div class="q-pa-md q-gutter-md">
                 <q-btn v-if="submitOK" label="בצע הזדהות" type="submit" color="primary" />
-                <q-btn v-if="email!=''" label="בקש QRCode" @click="onReqQR" color="primary" />
+                <q-btn v-if="email!='' && authCode=='reset'" label="בקש QRCode" @click="onReqQR" color="primary" />
                 <q-btn v-if="isLoggedIn" label="ניקוי הזדהות ישנה" @click="onClear" color="primary" />
             </div>
         </q-form>
@@ -82,7 +82,6 @@ export default {
                     that.componentKey += 1;
                 }
             });
-
         },
 
         onSubmit () {

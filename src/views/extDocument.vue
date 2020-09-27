@@ -24,11 +24,12 @@
                     <h4>תעודה חיצונית חדשה</h4>
                 </div>
 
-                <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב חיצוני" style="font-size: 19px;" :readonly="editable ? false : true" />
+                
                 <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.title" hint="כותרת" style="font-size: 19px;" :readonly="editable ? false : true" />
-                <q-input rounded outlined v-model="document.material" hint="חומר" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב חיצוני" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.material" hint="חומר" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.date" type="date" hint="תאריך" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-field rounded outlined hint="רמת אותנטיות">
                     <q-slider v-model="document.authenticity" :min="0.1" :max="1.0" :step="0.1" color="light-green" :readonly="editable ? false : true" />
