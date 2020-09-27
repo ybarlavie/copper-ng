@@ -25,10 +25,11 @@
                     <h4>תעודת בר-כוכבא חדשה</h4>
                 </div>
 
-                <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב ב.כ." style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.name" hint="שם" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.title" hint="כותרת" style="font-size: 19px;" :readonly="editable ? false : true" />
-                <q-input rounded outlined v-model="document.material" hint="חומר" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.label" hint="תגית" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.arch_id" hint="מזהה בארכיב ב.כ." style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.material" hint="חומר" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined type="date" v-model="document.date" hint="תאריך" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-field rounded outlined hint="רמת אותנטיות" :readonly="editable ? false : true" >
                     <q-slider v-model="document.authenticity" :min="0.1" :max="1.0" :step="0.1" color="light-green" :readonly="editable ? false : true" />
