@@ -31,9 +31,9 @@
                     <q-badge :label="toEntityName" align="middle" color="purple" filled style="font-size: 19px;" />
                 </q-card-section>
 
-                <q-card-section v-if="newLink.needDates" class="row">
+                <q-card-section v-if="newLink.uniqueType == 'from-to-date'" class="row">
                     <q-badge label="בין התאריכים -" align="top" color="green" filled style="font-size: 19px;" />
-                    <q-input filled v-model="newLink.range.from" mask="date" :rules="['newLink.range.from']" style="max-width: 150px;">
+                    <q-input filled v-model="newLink.range.from" hint="מתאריך" mask="date" :rules="['newLink.range.from']" style="max-width: 150px;">
                         <template v-slot:append>
                             <q-icon name="event" class="cursor-pointer">
                                 <q-popup-proxy ref="qDateProxy" transition-show="scale" transition-hide="scale">
@@ -147,7 +147,7 @@ export default {
                 { name: 'start', required: true, label: 'התחלה', field: "start", sortable: true, align: "left" },
                 { name: 'end', required: true, label: 'סיום', field: "end", sortable: true, align: "left" },
             ],
-            newLink: { toEntity: null, type: null,typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , needDates: false, descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } },
+            newLink: { toEntity: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } },
             availableTypes: [],
             data: []
         }
@@ -167,8 +167,7 @@ export default {
                     
                     if (nl.toEntity.item_id == el.item_id && nl.type == el.type) {
                         // link seems a duplicate... check it...
-                        var nl0 = nl.toEntity.item_id.substring(0,1);
-                        if (nl0 == 'L') {
+                        if (nl.uniqueType == 'from-to-date') {
                             // location can be a dup if the start-end periods are not overlapping
                             if ((nl.start >= el.start && nl.start <= el.end) 
                                 ||
@@ -217,7 +216,7 @@ export default {
                 created_by: 'yonib',
                 description: this.newLink.descr
             };
-            if (this.newLink.needDates) {
+            if (this.newLink.uniqueType == 'from-to-date') {
                 var d = new Date(this.newLink.range.from);
                 nl.start = d.toISOString().replace(/-|:|.\d\d\dZ/g,'');
                 d = new Date(this.newLink.range.to);
@@ -284,76 +283,23 @@ export default {
 
         onSearchRowClicked(row) {
             // reset new link
-            this.newLink = { toEntity: null, type: null,typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , needDates: false, descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
-            this.availableTypes = [];
-
-            // calculate available types
-            var f0 = this.fromEntity.item_id.substring(0,1);
-            var t0 = row ? row.item_id.substring(0,1) : '';
-
-            switch (f0) {
-                case "D"://"מסמך בר כוכבא":
-                    switch (t0) {
-                        case "D"://"מסמך בר כוכבא":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
-                            break;
-                        case "E"://"מסמך חיצוני":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
-                            break;
-                    }
-                    break;
-                case "E"://"מסמך חיצוני":
-                    switch (t0) {
-                        case "D"://"מסמך בר כוכבא":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
-                            break;
-                        case "E"://"מסמך חיצוני":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
-                            break;
-                    }
-                    break;
-                case "L"://"מיקום":
-                    switch (t0) {
-                        case "D"://"מסמך בר כוכבא":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
-                            break;
-                        case "E"://"מסמך חיצוני":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
-                            break;
-                    }
-                    break;
-                case "P"://"דמות":
-                    switch (t0) {
-                        case "D"://"מסמך בר כוכבא":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
-                            break;
-                        case "E"://"מסמך חיצוני":
-                            this.availableTypes.push({ name: 'referred at document', alias: 'מוזכר בתעודה', needDates: false});
-                            break;
-                        case "L"://"מיקום":
-                            this.availableTypes.push({ name: 'visit at', alias: 'ביקר ב-', needDates: true});
-                            break;
-                        case "P"://"דמות":
-                            this.availableTypes.push({ name: 'child of', alias: 'בן/ת של', needDates: false});
-                            this.availableTypes.push({ name: 'sibling', alias: 'אח/ות של', needDates: false});
-                            this.availableTypes.push({ name: 'spouse', alias: 'בן/ת זוג של', needDates: false});
-                            break;
-                    }
-                    break;
-            }
+            this.newLink = { toEntity: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
+            
+            this.availableTypes = window.store.ref_types.filter(t => 
+                ( this.fromEntity.item_id.match(t.fromRegEx) && row.item_id.match(t.toRegex) )
+            );
 
             if (this.availableTypes.length > 0) {
                 this.newLink.toEntity = row;
-
             } else {
                 this.showNotif(false, "לא נבחר יעד לקשר");
             }
         },
 
         onLinkTypeSelected(t) {
-            this.newLink.type = t.name;
+            this.newLink.type = t.type;
             this.newLink.typeAlias = t.alias;
-            this.newLink.needDates = t.needDates;
+            this.newLink.uniqueType = t.uniqueType;
             if (!this.newLinkValid) {
                 this.showNotif(false, this.newLink.error);
             }

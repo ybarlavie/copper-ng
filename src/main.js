@@ -12,6 +12,8 @@ window.apiURL += 'api/';
 window.JWT_COOKIE = "copper-ng-jwt";
 window.tokenData = {};
 
+window.store = {};
+
 new Vue({
   router,
   render: h => h(App)

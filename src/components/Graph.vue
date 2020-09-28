@@ -153,20 +153,12 @@ export default {
                     title: item.type,
                     from: item.from,
                     to: item.to,
-                    group: "references"
+                    group: "references",
+                    arrows: ''
                 }
-                switch (item.type) {
-                    case 'referred at document':
-                    case 'visit at':
-                        ref.arrows = 'to';
-                        break;
-                    case 'child of':
-                        ref.arrows = 'from';
-                        break;
-                    case 'sibling':
-                    case 'spouse':
-                        ref.arrows = 'to, from';
-                }
+                var types = window.store.ref_types.filter(rt => rt.type === item.type);
+                if (types.length > 0) ref.arrows = types[0].arrows;
+
                 edgesDS.add([ref]);
 
                 if (!nodesDS.get(item.item_id))
@@ -211,18 +203,10 @@ export default {
                                     item.id = item.ref_id;
                                     item.title = item.type;
                                     item.group = collection;
-                                    switch (item.type) {
-                                        case 'referred at document':
-                                        case 'visit at':
-                                            item.arrows = 'to';
-                                            break;
-                                        case 'child of':
-                                            item.arrows = 'from';
-                                            break;
-                                        case 'sibling':
-                                        case 'spouse':
-                                            item.arrows = 'to, from';
-                                    }
+
+                                    var types = window.store.ref_types.filter(rt => rt.type === item.type);
+                                    if (types.length > 0) item.arrows = types[0].arrows;
+
                                     edgesDS.add([item]);
                                 });
                             } else {
