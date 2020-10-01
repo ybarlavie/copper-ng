@@ -46,6 +46,7 @@ import {
     QDate,
     QSeparator,
     QSpace,
+    QSelect,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -90,6 +91,7 @@ Vue.use(Quasar, {
         QDate,
         QSeparator,
         QSpace,
+        QSelect,
     },
     config: {},
     directives: {

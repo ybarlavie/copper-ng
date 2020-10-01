@@ -32,7 +32,8 @@
                 <q-input rounded outlined v-model="document.lng" hint="Longitude" style="font-size: 19px;" :readonly="editable ? false : true" />
 
                 <Keywords v-model="document.aliases" :parentId="document._id" :editable="editable" color="red" hint="שמות נרדפים"/>
-                <Keywords v-model="document.keywords" :parentId="document._id" :editable="editable" color="primary" hint="מילות מפתח"/>
+
+                <KeywordsNew :value="document.keywords" :parentId="document.item_id" :editable="editable" @update-keywords="document.keywords = $event"/>
 
                 <LinksEditor :fromEntity="document" :editable="editable && state !== 'ADD'" color="primary" hint="קשרים" />
 
@@ -71,11 +72,13 @@
 </template>
 <script>
 import Keywords from '../components/keywords.vue'
+import KeywordsNew from '../components/keywordsNew.vue'
 import LinksEditor from '../components/linksEditor.vue'
 
 export default {
     components: {
         Keywords,
+        KeywordsNew,
         LinksEditor
     },
     props: ['itemId', 'state', 'collName'],

@@ -109,6 +109,9 @@ export default {
         queryMongoAsync(this, 'keywords')
         .then(result => {
             window.store.keywords = result;
+            window.store.keywords.forEach(t => {
+                t.itemsRegEx = new RegExp(t.itemsRegEx, 'g');
+            });
         });
     },
 
