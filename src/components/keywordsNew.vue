@@ -5,6 +5,7 @@
         :options-dense="true"
         :readonly="editable ? false : true"
         :options="filterOptions"
+        new-value-mode="add-unique"
         @filter="filterFn"
         @input="submitModel"
         hint="מילות מפתח" />
