@@ -8,7 +8,7 @@
 
         <q-dialog v-model="searchDlg">
             <q-card dir="rtl" style="width: 800px; max-width: 800px;">
-                <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
+                <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" :rowClickContext="this" />
 
                 <q-card-section class="q-gutter-md">
                     <q-badge :label="fromEntity.name" align="middle" color="purple" filled style="font-size: 19px;" />
@@ -22,7 +22,7 @@
                                 v-close-popup
                                 @click="onLinkTypeSelected(t)">
                                 <q-item-section>
-                                    <q-item-label>{{t.alias}}</q-item-label>
+                                    <q-item-label>{{t.rev ? t.revAlias : t.alias}}</q-item-label>
                                 </q-item-section>
                             </q-item>
                         </q-list>
@@ -159,7 +159,11 @@ export default {
         },
 
         newLinkValid() {
-            var nl = this.newLink;
+            var nl = JSON.parse(JSON.stringify(this.newLink));
+            if (nl.rev) {
+                nl.fromEntity = JSON.parse(JSON.stringify(this.newLink.toEntity));
+                nl.toEntity = JSON.parse(JSON.stringify(this.newLink.fromEntity));
+            }
 
             if (nl.type != null) {
                 for (var i=0; i<this.data.length; i++) {
@@ -210,8 +214,8 @@ export default {
 
         onSubmit () {
             var nl = {
-                from: this.fromEntity.item_id,
-                to: this.newLink.toEntity.item_id,
+                from: this.newLink.rev ? this.newLink.toEntity.item_id : this.fromEntity.item_id,
+                to: this.newLink.rev ? this.fromEntity.item_id : this.newLink.toEntity.item_id,
                 type: this.newLink.type,
                 created_by: 'yonib',
                 description: this.newLink.descr
@@ -238,7 +242,6 @@ export default {
             console.log('ajaxing up!');
             $.ajax(settings).done(function (response) {
                 that.showNotif(true, "השמירה הצליחה");
-                that.editable = false;
                 that.fetchData();
             })
             .fail(function(err) {
@@ -284,10 +287,26 @@ export default {
         onSearchRowClicked(row) {
             // reset new link
             this.newLink = { toEntity: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
-            
-            this.availableTypes = window.store.ref_types.filter(t => 
-                ( this.fromEntity.item_id.match(t.fromRegEx) && row.item_id.match(t.toRegex) )
-            );
+
+            var that = this;
+            this.availableTypes = window.store.ref_types.flatMap( t => {
+                if (that.fromEntity.item_id.match(t.fromRegEx) && row.item_id.match(t.toRegEx)) 
+                {
+                    var tt = JSON.parse(JSON.stringify(t));
+                    tt.rev = false; 
+                    return [tt];
+                } 
+                else if (row.item_id.match(t.fromRegEx) && that.fromEntity.item_id.match(t.toRegEx) && t.alias != t.revAlias)
+                {
+                    var tt = JSON.parse(JSON.stringify(t));
+                    tt.rev = true; 
+                    return [tt];
+                }
+                return [];
+            });
+            // this.availableTypes = window.store.ref_types.filter(t => 
+            //     ( this.fromEntity.item_id.match(t.fromRegEx) && row.item_id.match(t.toRegex) )
+            // );
 
             if (this.availableTypes.length > 0) {
                 this.newLink.toEntity = row;
@@ -298,8 +317,9 @@ export default {
 
         onLinkTypeSelected(t) {
             this.newLink.type = t.type;
-            this.newLink.typeAlias = t.alias;
+            this.newLink.typeAlias = t.rev ? t.revAlias : t.alias;
             this.newLink.uniqueType = t.uniqueType;
+            this.newLink.reversed = t.rev;
             if (!this.newLinkValid) {
                 this.showNotif(false, this.newLink.error);
             }

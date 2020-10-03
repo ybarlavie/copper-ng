@@ -242,6 +242,8 @@ export default {
                     sel = nodesDS.get(params.nodes[0]);
                 } else if (params.edges.length > 0) {
                     sel = edgesDS.get(params.edges[0]);
+                } else {
+                    return;
                 }
                 if (document.getElementById("card").checked) {
                     var params = { itemId: sel.item_id, editable: false, collName: sel.group };
