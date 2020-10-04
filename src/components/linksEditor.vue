@@ -8,7 +8,7 @@
 
         <q-dialog v-model="searchDlg">
             <q-card dir="rtl" style="width: 800px; max-width: 800px;">
-                <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" :rowClickContext="this" />
+                <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
 
                 <q-card-section class="q-gutter-md">
                     <q-badge :label="fromEntity.name" align="middle" color="purple" filled style="font-size: 19px;" />
@@ -60,7 +60,7 @@
                                 </q-popup-proxy>
                             </q-icon>
                         </template>
-                    </q-input>
+                    </q-input>referred at document
 
                 </q-card-section>
 
@@ -136,7 +136,6 @@ export default {
             dataReady: false,
             searchDlg: false,
             search: "",
-            toEntity: null,
             columns: [
                 { name: 'sug', required: true, label: 'סוג ישות', field: "sug", sortable: true, align: "right" },
                 { name: 'item_id', required: true, label: 'מזהה ישות', field: "item_id", sortable: true, align: "left" },
@@ -147,7 +146,7 @@ export default {
                 { name: 'start', required: true, label: 'התחלה', field: "start", sortable: true, align: "left" },
                 { name: 'end', required: true, label: 'סיום', field: "end", sortable: true, align: "left" },
             ],
-            newLink: { toEntity: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } },
+            newLink: { fromEntity: JSON.parse(JSON.stringify(this.fromEntity)), toEntity: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } },
             availableTypes: [],
             data: []
         }
@@ -160,12 +159,13 @@ export default {
 
         newLinkValid() {
             var nl = JSON.parse(JSON.stringify(this.newLink));
-            if (nl.rev) {
-                nl.fromEntity = JSON.parse(JSON.stringify(this.newLink.toEntity));
-                nl.toEntity = JSON.parse(JSON.stringify(this.newLink.fromEntity));
-            }
 
             if (nl.type != null) {
+                if (nl.reversed == true) {
+                    nl.fromEntity = JSON.parse(JSON.stringify(this.newLink.toEntity));
+                    nl.toEntity = JSON.parse(JSON.stringify(this.newLink.fromEntity));
+                }
+
                 for (var i=0; i<this.data.length; i++) {
                     var el = this.data[i];  // existing link
                     
@@ -214,12 +214,18 @@ export default {
 
         onSubmit () {
             var nl = {
-                from: this.newLink.rev ? this.newLink.toEntity.item_id : this.fromEntity.item_id,
-                to: this.newLink.rev ? this.fromEntity.item_id : this.newLink.toEntity.item_id,
+                from: JSON.parse(JSON.stringify(this.newLink.fromEntity.item_id)),
+                to: JSON.parse(JSON.stringify(this.newLink.toEntity.item_id)),
                 type: this.newLink.type,
                 created_by: 'yonib',
                 description: this.newLink.descr
             };
+            if (this.newLink.reversed == true)
+            {
+                nl.from = JSON.parse(JSON.stringify(this.newLink.toEntity.item_id));
+                nl.to = JSON.parse(JSON.stringify(this.newLink.fromEntity.item_id));
+            }
+
             if (this.newLink.uniqueType == 'from-to-date') {
                 var d = new Date(this.newLink.range.from);
                 nl.start = d.toISOString().replace(/-|:|.\d\d\dZ/g,'');
@@ -286,17 +292,17 @@ export default {
 
         onSearchRowClicked(row) {
             // reset new link
-            this.newLink = { toEntity: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
+            this.newLink = { fromEntity: JSON.parse(JSON.stringify(this.fromEntity)), toEntity: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
 
-            var that = this;
+            var from_item_id = JSON.parse(JSON.stringify(this.fromEntity.item_id));
             this.availableTypes = window.store.ref_types.flatMap( t => {
-                if (that.fromEntity.item_id.match(t.fromRegEx) && row.item_id.match(t.toRegEx)) 
+                if (from_item_id.match(t.fromRegEx) && row.item_id.match(t.toRegEx)) 
                 {
                     var tt = JSON.parse(JSON.stringify(t));
                     tt.rev = false; 
                     return [tt];
                 } 
-                else if (row.item_id.match(t.fromRegEx) && that.fromEntity.item_id.match(t.toRegEx) && t.alias != t.revAlias)
+                else if (row.item_id.match(t.fromRegEx) && from_item_id.match(t.toRegEx) && t.alias != t.revAlias)
                 {
                     var tt = JSON.parse(JSON.stringify(t));
                     tt.rev = true; 
@@ -304,9 +310,6 @@ export default {
                 }
                 return [];
             });
-            // this.availableTypes = window.store.ref_types.filter(t => 
-            //     ( this.fromEntity.item_id.match(t.fromRegEx) && row.item_id.match(t.toRegex) )
-            // );
 
             if (this.availableTypes.length > 0) {
                 this.newLink.toEntity = row;
