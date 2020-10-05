@@ -5,11 +5,11 @@ const configureAPI = require('./configure');
 const authUtils = require('./authUtils');
 const cookieParser = require('cookie-parser');
 
-
 const { PORT = 3000 } = process.env
 
 // global tokenCache - avalable app-wide - must not be declared with var/const
 tokensCache = {};
+loggedInTokens = {};
 // global tokenCache - avalable app-wide - must not be declared with var/const
 
 const app = express();
@@ -22,8 +22,11 @@ const staticConf = { maxAge: '1y', etag: false }
 configureAPI(app)
 
 // PUBLICS
-app.use(express.static(publicPath, staticConf))
+app.use('/', express.static(publicPath, staticConf))
 app.use('/', history())
 
+
+
 // Go
-app.listen(PORT, () => console.log(`App running on port ${PORT}!`))
+var server = app.listen(PORT, () => console.log(`App running on port ${PORT}!`));
+server.setTimeout(600000);

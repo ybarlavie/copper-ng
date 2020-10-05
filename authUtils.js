@@ -8,6 +8,18 @@ const totp = require('./totp');
 
 const USERS_COLLECTION = "users";
 
+const getEmailByRequest = (req) => {
+    if (req && req.headers) {
+        let jwToken = req.headers["x-access-token"];
+
+        if (loggedInTokens.hasOwnProperty(jwToken)) {
+            return loggedInTokens[jwToken];
+        }    
+    }
+
+    return '';
+}
+
 const tokenValidMiddleware = (req, res, next) => {
     console.log('path=' + req.path);
 
@@ -52,6 +64,18 @@ const verifyTOTP = (email, token) => {
                 var payload = { exp: expiryTime, type: "JWT", email: email };
                 var jwToken = jwt.sign(payload, process.env.JWT_SECRET);
                 var client_jwt = { token: jwToken, expires: expiryTime };
+
+                var removes = [];
+                for (var k in loggedInTokens) {
+                    if (loggedInTokens[k] == email) {
+                        removes.push(k);
+                    }
+                }
+                removes.forEach(k => {
+                    delete loggedInTokens[k];
+                });
+
+                loggedInTokens[jwToken] = email;
 
                 console.log("client_jwt: " + JSON.stringify(client_jwt));
 
@@ -262,4 +286,4 @@ const updateToken = (email, token) => {
     });
 }
 
-module.exports = { verifyTOTP, getQRImage, verifyJWToken, sendQRCodeToUser, tokenValidMiddleware, getUser, updateToken }
+module.exports = { verifyTOTP, getQRImage, verifyJWToken, sendQRCodeToUser, tokenValidMiddleware, getEmailByRequest, getUser, updateToken }

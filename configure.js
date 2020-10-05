@@ -10,6 +10,7 @@ const { tokenValidMiddleware } = require('./authUtils');
 
 // global tokenCache - avalable app-wide - must not be declared with var/const
 tokensCache = {};
+loggedInTokens = {};
 // global tokenCache - avalable app-wide - must not be declared with var/const
 
 module.exports = (app) => {

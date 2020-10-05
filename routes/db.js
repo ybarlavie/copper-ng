@@ -1,5 +1,6 @@
 var express = require('express');
 var MongoDB = require('../mongoUtils');
+var Auth = require('../authUtils');
 
 var router = express.Router();
 
@@ -49,6 +50,10 @@ router.post('/:collection', async (req, resp, next) => {
             dbFunc = MongoDB.update;
         }
     }
+
+    var who = Auth.getEmailByRequest(req);
+    doc['_who'] = who || 'unknown';
+    doc['_when'] = Date.now();
 
     dbFunc(collName, doc)
     .then(id => {
