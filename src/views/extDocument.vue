@@ -76,7 +76,7 @@
     </div>
 </template>
 <script>
-import Keywords from '../components/keywordsNew.vue'
+import KeywordsNew from '../components/keywordsNew.vue'
 import LinksEditor from '../components/linksEditor.vue'
 
 export default {
