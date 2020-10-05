@@ -30,7 +30,12 @@ let currQuery = {
         qe: '[A-Z]+\\d*_[A-Z]+\\d*_\\d+',
         prj: {
             'text': 0,
-            'images': 0
+            'images': 0,
+            'images': 0,
+            'keywords': 0,
+            'aliases': 0,
+            '_who': 0,
+            '_when': 0
         }
     },
     documents: {
@@ -38,7 +43,11 @@ let currQuery = {
         qe: 'D\\d+',
         prj: {
             'text': 0,
-            'images': 0
+            'images': 0,
+            'keywords': 0,
+            'aliases': 0,
+            '_who': 0,
+            '_when': 0
         }
     },
     ext_documents: {
@@ -46,7 +55,11 @@ let currQuery = {
         qe: 'ED\\d+',
         prj: {
             'text': 0,
-            'images': 0
+            'images': 0,
+            'keywords': 0,
+            'aliases': 0,
+            '_who': 0,
+            '_when': 0
         }
     },
     persons: {
@@ -54,7 +67,11 @@ let currQuery = {
         qe: 'P\\d+',
         prj: {
             'text': 0,
-            'images': 0
+            'images': 0,
+            'keywords': 0,
+            'aliases': 0,
+            '_who': 0,
+            '_when': 0
         }
     },
     locations: {
@@ -62,7 +79,11 @@ let currQuery = {
         qe: 'L\\d+',
         prj: {
             'text': 0,
-            'images': 0
+            'images': 0,
+            'keywords': 0,
+            'aliases': 0,
+            '_who': 0,
+            '_when': 0
         }
     }
 };

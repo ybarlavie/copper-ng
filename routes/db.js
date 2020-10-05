@@ -52,7 +52,7 @@ router.post('/:collection', async (req, resp, next) => {
     }
 
     var who = Auth.getEmailByRequest(req);
-    doc['_who'] = who || 'unknown';
+    doc['_who'] = who || 'n/a';
     doc['_when'] = Date.now();
 
     dbFunc(collName, doc)

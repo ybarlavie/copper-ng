@@ -17,7 +17,7 @@ const getEmailByRequest = (req) => {
         }    
     }
 
-    return '';
+    return 'n/a';
 }
 
 const tokenValidMiddleware = (req, res, next) => {
