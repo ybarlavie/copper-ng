@@ -47,6 +47,7 @@ import {
     QSeparator,
     QSpace,
     QSelect,
+    QOptionGroup,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -92,6 +93,7 @@ Vue.use(Quasar, {
         QSeparator,
         QSpace,
         QSelect,
+        QOptionGroup,
     },
     config: {},
     directives: {

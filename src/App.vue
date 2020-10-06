@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v1.76.164</div>
+                    <div style="font-size: 12px;">גרסה v1.76.178</div>
                 </q-toolbar-title>
 
                 <q-btn-dropdown split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
@@ -41,11 +41,12 @@
                     <q-btn color="light-green" icon="device_hub" label="גרף" style="font-size: 15px;" to="/" />
                 </div>
 
-                <div class="GPLAY__toolbar-input-container row no-wrap">
-                    <q-input dense outlined square v-model="search" placeholder="חיפוש" class="bg-white col" />
-                    <q-btn class="GPLAY__toolbar-input-btn" color="primary" icon="search" unelevated
+                <SearchParams @search-options="searchClicked($event)" />
+                <!-- <div class="GPLAY__toolbar-input-container row no-wrap">
+                    <q-input dense outlined square v-model="query" placeholder="חיפוש" class="bg-white col" />
+                    <q-btn class="GPLAY__toolbar-input-btn" color="primary" icon="query" unelevated
                         @click="searchClicked()" />
-                </div>
+                </div> -->
             </q-toolbar>
         </q-header>
 
@@ -82,11 +83,14 @@
 
 <script>
 import queryMongoAsync from './clientMongo'
+import SearchParams from './components/searchParams'
 
 export default {
     name: 'LayoutDefault',
 
-    components: {},
+    components: {
+        SearchParams
+    },
 
     beforeMount() {
         // {
@@ -119,7 +123,7 @@ export default {
         return {
             leftDrawerOpen: false,
             addItemType: 'ישות',
-            search: ''
+            query: ''
         }
     },
     methods: {
@@ -131,17 +135,18 @@ export default {
                 name: 'Login'
             });
         },
-        searchClicked() {
-            this.$router.push({
-                name: 'Blank'
-            });
+        searchClicked(opts) {
+            this.$router.push({ name: 'Blank' });
+
             this.$router.push({
                 name: 'resultGrid',
                 params: {
                     exclude: '1',
-                    query: this.search
+                    query: opts.query,
+                    filterOptions: opts.options
                 }
             });
+
         },
         onMainClick(evt) {
             switch (this.addItemType) {

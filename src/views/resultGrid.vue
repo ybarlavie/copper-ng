@@ -1,5 +1,5 @@
 <template>
-    <DocsGrid :query="query" :exclude="exclude" />
+    <DocsGrid :query="query" :filterOptions="filterOptions" :exclude="exclude" />
 </template>
 
 <script>
@@ -9,7 +9,7 @@ export default {
     components: {
         DocsGrid
     },
-    props: ['query', 'exclude'],
+    props: ['query', 'filterOptions', 'exclude'],
     data () {
         return {}
     }

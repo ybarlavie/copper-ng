@@ -8,7 +8,7 @@
 
         <q-dialog v-model="searchDlg">
             <q-card dir="rtl" style="width: 800px; max-width: 800px;">
-                <DocsGrid :query="search" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
+                <DocsGrid :query="query" :filterOptions="filterOptions" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
 
                 <q-card-section class="q-gutter-md">
                     <q-badge :label="fromEntity.name" align="middle" color="purple" filled style="font-size: 19px;" />
@@ -77,10 +77,11 @@
 
         <q-card v-if="dataReady">
             <q-toolbar v-if="editable" dir="rtl">
-                <div class="GPLAY__toolbar-input-container row no-wrap">
-                    <q-input dense outlined square v-model="search" placeholder="חיפוש" class="bg-white col" />
+                <!-- <div class="GPLAY__toolbar-input-container row no-wrap">
+                    <q-input dense outlined square v-model="query" placeholder="חיפוש" class="bg-white col" />
                     <q-btn class="GPLAY__toolbar-input-btn" color="primary" icon="search" unelevated @click="searchClicked()" />
-                </div>
+                </div> -->
+                <SearchParams @search-options="searchClicked($event)" />
             </q-toolbar>
 
             <q-card-section>
@@ -122,12 +123,14 @@
 <script>
 import Graph from '../components/Graph.vue';
 import DocsGrid from '../components/docsGrid.vue';
+import SearchParams from '../components/searchParams'
 
 export default {
     props: ['fromEntity', 'editable'],
     components: {
         Graph,
-        DocsGrid
+        DocsGrid,
+        SearchParams
     },
     data () {
         return { 
@@ -135,7 +138,8 @@ export default {
             ajaxing: false,
             dataReady: false,
             searchDlg: false,
-            search: "",
+            query: "",
+            filterOptions: [],
             columns: [
                 { name: 'sug', required: true, label: 'סוג ישות', field: "sug", sortable: true, align: "right" },
                 { name: 'item_id', required: true, label: 'מזהה ישות', field: "item_id", sortable: true, align: "left" },
@@ -332,7 +336,9 @@ export default {
             var row = props.row;
         },
 
-        searchClicked() {
+        searchClicked(opts) {
+            this.query = opts.query;
+            this.filterOptions = opts.options;
             this.searchDlg = true;
         }
     },

@@ -12,8 +12,18 @@ const searches = [
     { coll: 'persons', fields: [ 'title', 'name', 'aliases', 'keywords'], prj: { sug: 'דמות', item_id: 1, name: 1, title: 1, keywords: 1 } }
 ];
 
-const _regexBuilder = ((word) => {
-    return new RegExp(word, 'im');
+const _regexBuilder = ((str, wholeWord, ignoreSquare) => {
+    //var expr = wholeWord ? '\\b' : '';
+    var expr = '';
+    if (ignoreSquare) {
+        for (var i=0; i<str.length; i++) {
+            expr += ('' + str.charAt(i) + '[\\[\\]]?');
+        }
+    } else {
+        expr += str;
+    }
+    //expr += wholeWord ? '\\b' : '';
+    return new RegExp(expr, 'im');
 });
 
 const _queryBuilder = ((exclude_id, fields, re) => {
@@ -136,6 +146,111 @@ router.get('/by_word/:id/:limit/:word', function (req, resp) {
 
         let proms = [];
         searches.forEach(s => {
+            proms.push(
+                new Promise((resolve, reject) => {
+                    MongoDB.getDB()
+                    .collection(s.coll)
+                    .aggregate( [ { $match: _queryBuilder(exclude_id, s.fields, re) }, { $project: s.prj } ] )
+                    .limit(limit)
+                    .toArray((err, data) => {
+                        err ? reject(err) : resolve(data);
+                    })
+                })
+            );
+        });
+
+        let items = [];
+        Promise.all(proms).then(values => {
+            values.forEach(v => {
+                items.push(...v);
+            });
+
+            MongoDB.disconnectDB();
+            return resp.status(200).send(items);
+        });
+    });
+});
+
+router.get('/by_word_options/:id/:limit/:json', function (req, resp) {
+    console.log('by_word_options: exclude id:' + req.params.id + ' searh for "' + req.params.json +'"');
+
+    var opts = JSON.parse(req.params.json);
+
+    const limit = req.params.limit<=500 ? parseInt(req.params.limit) : 5;
+    
+    exclude_id = null;
+    try {
+        exclude_id = ObjectID(req.params.id);
+    } catch {
+        exclude_id = null;
+    }
+
+    var collOpts = JSON.parse(JSON.stringify(searches));
+    var wholeWord = false;
+    var ignoreSquare = false;
+    var flds = [];
+
+    if (opts.filterOptions && opts.filterOptions.length > 0) {
+        // we have options... clear collOpts
+        collOpts = [];
+
+        // first pass: expression and fields
+        opts.filterOptions.forEach(o => {
+            switch (o) {
+                case 'wholeWord':
+                    wholeWord = true;
+                    break;
+                case 'ignoreSquare':
+                    ignoreSquare = true;
+                    break;
+                case 'useName':
+                    flds.push('name');
+                    break;
+                case 'useLabel':
+                    flds.push('label');
+                    break;
+                case 'useTitle':
+                    flds.push('title');
+                    break;
+                case 'useKeywords':
+                    flds.push('keywords');
+                    break;
+                case 'useAliases':
+                    flds.push('aliases');
+                    break;
+                case 'useText':
+                    flds.push('text');
+                    break;
+    
+            }
+        });
+    
+        // second pass: collections
+        opts.filterOptions.forEach(o => {
+            switch (o) {
+                case 'useDocuments':
+                    collOpts.push({ coll: 'documents', fields: flds, prj: { sug: 'מסמך בר כוכבא', item_id: 1, name: 1, title: 1, keywords: 1 } });
+                    break;
+                case 'useExtDocuments':
+                    collOpts.push({ coll: 'ext_documents', fields: flds, prj: { sug: 'מסמך חיצוני', item_id: 1, name: 1, title: 1, keywords: 1 } });
+                    break;
+                case 'useLocations':
+                    collOpts.push({ coll: 'locations', fields: flds, prj: { sug: 'מיקום', item_id: 1, name: 1, title: 1, keywords: 1 } });
+                    break;
+                case 'usePersons':
+                    collOpts.push({ coll: 'persons', fields: flds, prj: { sug: 'דמות', item_id: 1, name: 1, title: 1, keywords: 1 } })
+                    break;
+            }
+        });
+    }
+
+    const re = _regexBuilder(opts.query, wholeWord, ignoreSquare);
+
+    MongoDB.connectDB('copper-db', async (err) => {
+        if (err) return resp.status(500).send("cannot connet to DB");
+
+        let proms = [];
+        collOpts.forEach(s => {
             proms.push(
                 new Promise((resolve, reject) => {
                     MongoDB.getDB()

@@ -50,7 +50,7 @@
 
 <script>
 export default {
-    props: ['query', 'exclude', 'rowClickCB'],
+    props: ['query', 'filterOptions', 'exclude', 'rowClickCB'],
     data () {
         return {
             componentKey: 0,
@@ -114,12 +114,18 @@ export default {
 
             console.log("querying " + JSON.stringify(this.query));
 
-            let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
-            let that = this;
             const QUERY_LIMIT = 500;
+
+            let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
+            //researchURL += + 'by_word/' + this.exclude + '/' + QUERY_LIMIT + '/' + encodeURIComponent(this.query);
+
+            var opts = { query: this.query, filterOptions: this.filterOptions }
+            researchURL += 'by_word_options/' + this.exclude + '/' + QUERY_LIMIT + '/' + encodeURIComponent(JSON.stringify(opts));
+
+            let that = this;
             $.ajax({
                 type: "GET",
-                url: researchURL + 'by_word/' + this.exclude + '/' + QUERY_LIMIT + '/' + encodeURIComponent(this.query),
+                url: researchURL,
                 crossdomain: true,
                 headers: {
                     "x-access-token": window.tokenData.token
