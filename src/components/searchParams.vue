@@ -46,7 +46,7 @@
                     //     value: 'wholeWord'
                     // },
                     {
-                        label: 'התעלם מסוגריים מרובעות',
+                        label: 'התעלם מסוגריים מרובעים',
                         value: 'ignoreSquare'
                     },
                     {
