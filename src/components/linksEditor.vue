@@ -285,7 +285,6 @@ export default {
                 },
                 error: function (xhr, status, err) {
                     that.ajaxing = false;
-                    console.log("failed searching " + that.query);
                     that.componentKey += 1;
                 }
             });
@@ -315,6 +314,7 @@ export default {
 
             if (this.availableTypes.length > 0) {
                 this.toEntity = JSON.parse(JSON.stringify(row));
+                this.newLink.to_id = JSON.parse(JSON.stringify(row.item_id));
             } else {
                 this.showNotif(false, "לא נבחר יעד לקשר");
             }

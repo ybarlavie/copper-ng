@@ -68,6 +68,7 @@ router.get('/refs/:fromId', function (req, resp) {
         .limit(limit)
         .toArray((err, refs) => {
             if (err) return resp.status(500).send("cannot query references");
+            if (!refs) return resp.status(500).send("failed querying references");
     
             refs.forEach(ref => {
                 var q0 = null;
