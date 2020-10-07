@@ -136,6 +136,7 @@ export default {
             searchDlg: false,
             query: "",
             filterOptions: [],
+            toEntity: null,
             columns: [
                 { name: 'sug', required: true, label: 'סוג ישות', field: "sug", sortable: true, align: "right" },
                 { name: 'item_id', required: true, label: 'מזהה ישות', field: "item_id", sortable: true, align: "left" },
@@ -146,7 +147,7 @@ export default {
                 { name: 'start', required: true, label: 'התחלה', field: "start", sortable: true, align: "left" },
                 { name: 'end', required: true, label: 'סיום', field: "end", sortable: true, align: "left" },
             ],
-            newLink: { fromEntity: JSON.parse(JSON.stringify(this.fromEntity)), toEntity: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } },
+            newLink: { from_id: null, to_id: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } },
             availableTypes: [],
             data: []
         }
@@ -162,14 +163,14 @@ export default {
 
             if (nl.type != null) {
                 if (nl.reversed == true) {
-                    nl.fromEntity = JSON.parse(JSON.stringify(this.newLink.toEntity));
-                    nl.toEntity = JSON.parse(JSON.stringify(this.newLink.fromEntity));
+                    nl.from_id = JSON.parse(JSON.stringify(this.toEntity.item_id));
+                    nl.to_id = JSON.parse(JSON.stringify(this.fromEntity.item_id));
                 }
 
                 for (var i=0; i<this.data.length; i++) {
                     var el = this.data[i];  // existing link
                     
-                    if (nl.toEntity.item_id == el.item_id && nl.type == el.type) {
+                    if ((nl.reversed ? (nl.from_id == el.item_id) : (nl.to_id == el.item_id)) && nl.type == el.type) {
                         // link seems a duplicate... check it...
                         if (nl.uniqueType == 'from-to-date') {
                             // location can be a dup if the start-end periods are not overlapping
@@ -181,26 +182,26 @@ export default {
                                 ||
                                 (el.end >= nl.start && el.end <= nl.end)) 
                                 {
-                                    nl.error = "חפיפה בזמנים בקישור למיקום";
+                                    this.newLink.error = "חפיפה בזמנים בקישור למיקום";
                                     return false;
                                 }
                         } else {
-                            nl.error = "קשר כבר קיים";
+                            this.newLink.error = "קשר כבר קיים";
                             return false;
                         }
                     }
                 }
             } else {
-                nl.error = "סוג קשר לא מוגדר";
+                this.newLink.error = "סוג קשר לא מוגדר";
                 return false;
             }
 
-            nl.error = "קשר תקין";
+            this.newLink.error = "קשר תקין";
             return true;
         },
 
         toEntityName() {
-            return this.newLink && this.newLink.toEntity ? this.newLink.toEntity.name : '';
+            return this.newLink && this.toEntity ? this.toEntity.name : '';
         }
     }, 
 
@@ -214,16 +215,16 @@ export default {
 
         onSubmit () {
             var nl = {
-                from: JSON.parse(JSON.stringify(this.newLink.fromEntity.item_id)),
-                to: JSON.parse(JSON.stringify(this.newLink.toEntity.item_id)),
+                from: this.newLink.from_id,
+                to: this.newLink.to_id,
                 type: this.newLink.type,
                 created_by: 'yonib',
                 description: this.newLink.descr
             };
             if (this.newLink.reversed == true)
             {
-                nl.from = JSON.parse(JSON.stringify(this.newLink.toEntity.item_id));
-                nl.to = JSON.parse(JSON.stringify(this.newLink.fromEntity.item_id));
+                nl.from = this.newLink.to_id;
+                nl.to = this.newLink.from_id;
             }
 
             if (this.newLink.uniqueType == 'from-to-date') {
@@ -292,7 +293,8 @@ export default {
 
         onSearchRowClicked(row) {
             // reset new link
-            this.newLink = { fromEntity: JSON.parse(JSON.stringify(this.fromEntity)), toEntity: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
+            this.newLink = { from_id: JSON.parse(JSON.stringify(this.fromEntity.item_id)), to_id: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
+            this.toEntity = null;
 
             var from_item_id = JSON.parse(JSON.stringify(this.fromEntity.item_id));
             this.availableTypes = window.store.ref_types.flatMap( t => {
@@ -312,7 +314,7 @@ export default {
             });
 
             if (this.availableTypes.length > 0) {
-                this.newLink.toEntity = row;
+                this.toEntity = JSON.parse(JSON.stringify(row));
             } else {
                 this.showNotif(false, "לא נבחר יעד לקשר");
             }
