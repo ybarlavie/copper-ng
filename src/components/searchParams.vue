@@ -18,6 +18,13 @@
                 <q-card-section class="bg-purple text-white">
                     <div class="text-h5">אפשרויות חיפוש</div>
                 </q-card-section>
+
+                <q-card-section class="row bg-green text-white">
+                    <q-btn label="איפוס הכל" @click="unsetAll" />
+                    <q-space />
+                    <q-btn label="בחירת הכל" @click="setAll" />
+                </q-card-section>
+
                 <q-card-section class="row items-center no-wrap">
                     <div class="q-pa-lg">
                         <q-option-group
@@ -95,6 +102,12 @@
         methods: {
             searchClicked: function() {
                 this.$emit("search-options", { query: this.search, options: this.group } );
+            },
+            setAll: function() {
+                this.group = [ 'ignoreSquare', 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText', 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons'];
+            },
+            unsetAll: function() {
+                this.group = [];
             }
         }
     }

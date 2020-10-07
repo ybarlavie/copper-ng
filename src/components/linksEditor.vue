@@ -77,10 +77,6 @@
 
         <q-card v-if="dataReady">
             <q-toolbar v-if="editable" dir="rtl">
-                <!-- <div class="GPLAY__toolbar-input-container row no-wrap">
-                    <q-input dense outlined square v-model="query" placeholder="חיפוש" class="bg-white col" />
-                    <q-btn class="GPLAY__toolbar-input-btn" color="primary" icon="search" unelevated @click="searchClicked()" />
-                </div> -->
                 <SearchParams @search-options="searchClicked($event)" />
             </q-toolbar>
 

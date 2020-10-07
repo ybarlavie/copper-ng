@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v1.76.178</div>
+                    <div style="font-size: 12px;">גרסה v1.76.179</div>
                 </q-toolbar-title>
 
                 <q-btn-dropdown split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
@@ -42,11 +42,6 @@
                 </div>
 
                 <SearchParams @search-options="searchClicked($event)" />
-                <!-- <div class="GPLAY__toolbar-input-container row no-wrap">
-                    <q-input dense outlined square v-model="query" placeholder="חיפוש" class="bg-white col" />
-                    <q-btn class="GPLAY__toolbar-input-btn" color="primary" icon="query" unelevated
-                        @click="searchClicked()" />
-                </div> -->
             </q-toolbar>
         </q-header>
 
