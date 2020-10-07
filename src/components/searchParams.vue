@@ -20,9 +20,12 @@
                 </q-card-section>
 
                 <q-card-section class="row bg-green text-white">
-                    <q-btn label="איפוס הכל" @click="unsetAll" />
-                    <q-space />
-                    <q-btn label="בחירת הכל" @click="setAll" />
+                    <q-btn label="[ ] הכל" @click="unset('all')" />
+                    <q-btn label="[x] הכל" @click="set('all')" />
+                    <q-btn label="[ ] שדות" @click="unset('fields')" />
+                    <q-btn label="[x] שדות" @click="set('fields')" />
+                    <q-btn label="[ ] ישויות" @click="unset('entities')" />
+                    <q-btn label="[x] ישויות" @click="set('entities')" />
                 </q-card-section>
 
                 <q-card-section class="row items-center no-wrap">
@@ -103,11 +106,34 @@
             searchClicked: function() {
                 this.$emit("search-options", { query: this.search, options: this.group } );
             },
-            setAll: function() {
-                this.group = [ 'ignoreSquare', 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText', 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons'];
+            set: function(what) {
+                if (what == 'all')
+                {
+                    this.group = [ 'ignoreSquare', 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText', 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons' ];
+                } else if (what == 'fields') {
+                    [ 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText' ].forEach(i =>{
+                        if (!this.group.includes(i)) this.group.push(i);
+                    });
+                } else if (what == 'entities') {
+                    [ 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons' ].forEach(i =>{
+                        if (!this.group.includes(i)) this.group.push(i);
+                    });
+                }
             },
-            unsetAll: function() {
-                this.group = [];
+            unset: function(what) {
+                if (what == 'all') {
+                    this.group = [];
+                    return;
+                }
+                
+                this.group = this.group.filter(i => {
+                    if (what == 'fields' && ![ 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText' ].includes(i)) {
+                        return true;
+                    } else if (what == 'entities' && ![ 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons' ].includes(i)) {
+                        return true;
+                    }
+                    return false;
+                });
             }
         }
     }
