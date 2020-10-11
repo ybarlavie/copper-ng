@@ -37,6 +37,7 @@
                 <q-input rounded outlined v-model="document.author" hint="מחבר" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.edition" hint="מהדורה" style="font-size: 19px;" :readonly="editable ? false : true" />
                 <q-input rounded outlined v-model="document.text" type="textarea" hint="טקסט" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.remarks" type="textarea" hint="טקסט" style="font-size: 19px;" :readonly="editable ? false : true" />
 
                 <KeywordsNew :value="document.keywords" :parentId="document.item_id" :editable="editable" @update-keywords="document.keywords = $event"/>
 

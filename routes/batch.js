@@ -123,6 +123,55 @@ router.get('/import/documents/:jsonName', async (req, resp) => {
     return resp.status(200).send('Inserted: ' + inserted + ' Updated: ' + updated);
 });
 
+router.get('/import/ext-documents/:jsonName', async (req, resp) => {
+    var jsonName = './documents/' + req.params.jsonName;
+    var excel = JSON.parse(fs.readFileSync(jsonName));
+    var sheet = null;
+    var inserted = 0;
+    var updated = 0;
+
+    for (sheetName in excel) {
+        if (excel[sheetName].length > 0) {
+            sheet = excel[sheetName];
+            break;
+        }
+    }
+    if (!sheet) return resp.status(500).send(`cannot find sheet in : ${jsonName}`);
+
+    for (var i=0; i<sheet.length; i++) {
+        var rec = sheet[i];
+
+        rec.name = rec.name ? rec.name.trim() : '';
+        rec.text = rec.text ? rec.text.trim() : '';
+        if (rec.name == '' || rec.text == '')
+            continue;
+
+        var extDoc = await MongoDB.firstOrDefault('ext_documents', {name:rec.name});
+        if (!extDoc) {
+            newDoc = {
+                name: rec.name,
+                title: rec.name,
+                label: rec.name,
+                text: rec.text,
+                keywords: rec.keywords ? rec.keywords.split(',').map(item => item.trim()) : [],
+                remarks: rec.remarks,
+                source: 'ext_documents batch'
+            };
+
+            await MongoDB.insert('ext_documents', newDoc);
+            inserted++;
+        } else {
+            extDoc.text = rec.text;
+            extDoc.keywords = rec.keywords ? rec.keywords.split(',').map(item => item.trim()) : [];
+            extDoc.remarks = rec.remarks;
+
+            await MongoDB.update('ext_documents', extDoc);
+            updated++;
+        }
+    }
+    return resp.status(200).send('Inserted: ' + inserted + ' Updated: ' + updated);
+});
+
 router.get('/import/buildings/:jsonName', async (req, resp) => {
     var jsonName = './documents/' + req.params.jsonName;
     var excel = JSON.parse(fs.readFileSync(jsonName));

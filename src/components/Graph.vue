@@ -175,7 +175,9 @@ export default {
                     from: item.from,
                     to: item.to,
                     group: "references",
-                    arrows: ''
+                    arrows: '',
+                    dashes: item._valid ? false : true,
+                    width: item._valid ? 1.0 : 1.5,
                 }
                 var types = window.store.ref_types.filter(rt => rt.type === item.type);
                 if (types.length > 0) ref.arrows = types[0].arrows;
@@ -224,6 +226,8 @@ export default {
                                     item.id = item.ref_id;
                                     item.title = item.type;
                                     item.group = collection;
+                                    item.dashes = item._valid ? false : true;
+                                    item.width = item._valid ? 1.0 : 1.5;
 
                                     var types = window.store.ref_types.filter(rt => rt.type === item.type);
                                     if (types.length > 0) item.arrows = types[0].arrows;

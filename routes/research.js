@@ -50,6 +50,172 @@ const _queryBuilder = ((exclude_id, fields, re) => {
     }
 });
 
+const _by_word_options = (opts, lim, id) => {
+    return new Promise((resolve, reject) => {
+        const limit = lim<=500 ? parseInt(lim) : 5;
+    
+        exclude_id = null;
+        try {
+            exclude_id = ObjectID(id);
+        } catch {
+            exclude_id = null;
+        }
+    
+        var collOpts = JSON.parse(JSON.stringify(searches));
+        var wholeWord = false;
+        var ignoreSquare = false;
+        var flds = [];
+    
+        if (opts.filterOptions && opts.filterOptions.length > 0) {
+            // we have options... clear collOpts
+            collOpts = [];
+    
+            // first pass: expression and fields
+            opts.filterOptions.forEach(o => {
+                switch (o) {
+                    case 'wholeWord':
+                        wholeWord = true;
+                        break;
+                    case 'ignoreSquare':
+                        ignoreSquare = true;
+                        break;
+                    case 'useName':
+                        flds.push('name');
+                        break;
+                    case 'useLabel':
+                        flds.push('label');
+                        break;
+                    case 'useTitle':
+                        flds.push('title');
+                        break;
+                    case 'useKeywords':
+                        flds.push('keywords');
+                        break;
+                    case 'useAliases':
+                        flds.push('aliases');
+                        break;
+                    case 'useText':
+                        flds.push('text');
+                        break;
+        
+                }
+            });
+        
+            // second pass: collections
+            opts.filterOptions.forEach(o => {
+                switch (o) {
+                    case 'useDocuments':
+                        collOpts.push({ coll: 'documents', fields: flds, prj: { sug: 'מסמך בר כוכבא', item_id: 1, name: 1, title: 1, keywords: 1 } });
+                        break;
+                    case 'useExtDocuments':
+                        collOpts.push({ coll: 'ext_documents', fields: flds, prj: { sug: 'מסמך חיצוני', item_id: 1, name: 1, title: 1, keywords: 1 } });
+                        break;
+                    case 'useLocations':
+                        collOpts.push({ coll: 'locations', fields: flds, prj: { sug: 'מיקום', item_id: 1, name: 1, title: 1, keywords: 1 } });
+                        break;
+                    case 'usePersons':
+                        collOpts.push({ coll: 'persons', fields: flds, prj: { sug: 'דמות', item_id: 1, name: 1, title: 1, keywords: 1 } })
+                        break;
+                }
+            });
+        }
+    
+        const re = _regexBuilder(opts.query, wholeWord, ignoreSquare);
+    
+        MongoDB.connectDB('copper-db', async (err) => {
+            if (err) reject("cannot connet to DB");
+    
+            let proms = [];
+            collOpts.forEach(s => {
+                proms.push(
+                    new Promise((resolve, reject) => {
+                        MongoDB.getDB()
+                        .collection(s.coll)
+                        .aggregate( [ { $match: _queryBuilder(exclude_id, s.fields, re) }, { $project: s.prj } ] )
+                        .limit(limit)
+                        .toArray((err, data) => {
+                            err ? reject(err) : resolve(data);
+                        })
+                    })
+                );
+            });
+    
+            let items = [];
+            Promise.all(proms).then(values => {
+                values.forEach(v => {
+                    items.push(...v);
+                });
+    
+                MongoDB.disconnectDB();
+                resolve(items);
+            });
+        });    
+    });
+}
+
+const _to_refs = (docId) => {
+    return new Promise((resolve, reject) => {
+        MongoDB.connectDB('copper-db', async (err) => {
+            if (err) reject(err);
+    
+            MongoDB.getDB().collection("references").find({ to: docId }).toArray((err, items) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(items);
+                }
+            });
+        });    
+    });
+}
+
+router.get('/text/:docId', async (req, resp) => {
+    var text = '';
+    var _id = '';
+    if (req.params.docId.startsWith('D')) {
+        var doc = await MongoDB.firstOrDefault('documents', {item_id:req.params.docId});
+        if (!doc) return resp.status(500).send("cannot find document");
+        text = doc.text;
+        _id = doc._id;
+    } else if (req.params.docId.startsWith('E')) {
+        var doc = await MongoDB.firstOrDefault('ext-documents', {item_id:req.params.docId});
+        if (!doc) return resp.status(500).send("cannot find external document");
+        text = doc.text;
+        _id = doc._id;
+    } else {
+        return resp.status(500).send("bad doc id");
+    }
+    if (text && text.trim()) text = text.trim();
+
+    var tokens = text.split(' ').filter(t => {
+        return t.length >= 3;
+    });
+
+    if (tokens.length<=0) {
+        return resp.status(500).send("text is not valid");
+    }
+
+    var filterOptions = ['useName', 'useLabel', 'useTitle', 'useAliases', 'usePersons', 'useLocations'];
+    var refs = [];
+    _to_refs(docId).then(result => { refs = result }, reason => { refs = [] });
+
+    let proms = []
+    for (var i=0; i<tokens.length; i++) {
+        var t = tokens[i];
+        proms.push(_by_word_options({query: t, filterOptions: filterOptions}, 500, _id));
+    }
+
+    let newRefs = [];
+    Promise.all(proms).then(values => {
+        values.forEach(v => {
+            items.push(...v);
+        });
+
+        MongoDB.disconnectDB();
+        resolve(items);
+    });
+});
+
 router.get('/refs/:fromId', function (req, resp) {
     console.log('refs of searh for "' + req.params.fromId +'"');
 
@@ -177,103 +343,11 @@ router.get('/by_word_options/:id/:limit/:json', function (req, resp) {
 
     var opts = JSON.parse(req.params.json);
 
-    const limit = req.params.limit<=500 ? parseInt(req.params.limit) : 5;
-    
-    exclude_id = null;
-    try {
-        exclude_id = ObjectID(req.params.id);
-    } catch {
-        exclude_id = null;
-    }
-
-    var collOpts = JSON.parse(JSON.stringify(searches));
-    var wholeWord = false;
-    var ignoreSquare = false;
-    var flds = [];
-
-    if (opts.filterOptions && opts.filterOptions.length > 0) {
-        // we have options... clear collOpts
-        collOpts = [];
-
-        // first pass: expression and fields
-        opts.filterOptions.forEach(o => {
-            switch (o) {
-                case 'wholeWord':
-                    wholeWord = true;
-                    break;
-                case 'ignoreSquare':
-                    ignoreSquare = true;
-                    break;
-                case 'useName':
-                    flds.push('name');
-                    break;
-                case 'useLabel':
-                    flds.push('label');
-                    break;
-                case 'useTitle':
-                    flds.push('title');
-                    break;
-                case 'useKeywords':
-                    flds.push('keywords');
-                    break;
-                case 'useAliases':
-                    flds.push('aliases');
-                    break;
-                case 'useText':
-                    flds.push('text');
-                    break;
-    
-            }
-        });
-    
-        // second pass: collections
-        opts.filterOptions.forEach(o => {
-            switch (o) {
-                case 'useDocuments':
-                    collOpts.push({ coll: 'documents', fields: flds, prj: { sug: 'מסמך בר כוכבא', item_id: 1, name: 1, title: 1, keywords: 1 } });
-                    break;
-                case 'useExtDocuments':
-                    collOpts.push({ coll: 'ext_documents', fields: flds, prj: { sug: 'מסמך חיצוני', item_id: 1, name: 1, title: 1, keywords: 1 } });
-                    break;
-                case 'useLocations':
-                    collOpts.push({ coll: 'locations', fields: flds, prj: { sug: 'מיקום', item_id: 1, name: 1, title: 1, keywords: 1 } });
-                    break;
-                case 'usePersons':
-                    collOpts.push({ coll: 'persons', fields: flds, prj: { sug: 'דמות', item_id: 1, name: 1, title: 1, keywords: 1 } })
-                    break;
-            }
-        });
-    }
-
-    const re = _regexBuilder(opts.query, wholeWord, ignoreSquare);
-
-    MongoDB.connectDB('copper-db', async (err) => {
-        if (err) return resp.status(500).send("cannot connet to DB");
-
-        let proms = [];
-        collOpts.forEach(s => {
-            proms.push(
-                new Promise((resolve, reject) => {
-                    MongoDB.getDB()
-                    .collection(s.coll)
-                    .aggregate( [ { $match: _queryBuilder(exclude_id, s.fields, re) }, { $project: s.prj } ] )
-                    .limit(limit)
-                    .toArray((err, data) => {
-                        err ? reject(err) : resolve(data);
-                    })
-                })
-            );
-        });
-
-        let items = [];
-        Promise.all(proms).then(values => {
-            values.forEach(v => {
-                items.push(...v);
-            });
-
-            MongoDB.disconnectDB();
-            return resp.status(200).send(items);
-        });
+    _by_word_options(opts, req.params.limit, req.params.id)
+    .then(result => {
+        return resp.status(200).send(result);
+    }, reason => {
+        return resp.status(500).send(reason);
     });
 });
 
