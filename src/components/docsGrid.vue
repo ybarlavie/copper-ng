@@ -2,15 +2,18 @@
     <div class="q-pa-md" :key="componentKey">
         <q-linear-progress v-if="ajaxing" indeterminate />
         <q-table title="תוצאת חיפוש"
-        ref="myTable"
-        :data="data" 
-        :columns="columns"
-        :selected.sync="selectedRows"
-        selection="single"
-        separator="vertical"
-        row-key="_id"
-        @update:selected="onSelectChanged()"
-        style="font-size: 19px;">
+            dense
+            ref="myTable"
+            :data="data" 
+            :columns="columns"
+            :selected.sync="selectedRows"
+            :pagination="initialPagination"
+            rows-per-page-label="שורות לדף"
+            selection="single"
+            separator="vertical"
+            row-key="_id"
+            @update:selected="onSelectChanged()"
+            style="font-size: 19px;">
             <template v-slot:top="props">
                 <q-badge :label="'תוצאות חיפוש הביטוי:'" color="blue" outline style="font-size: 19px;" />
                 <q-badge :label="query" color="green" outline style="font-size: 19px;" />
@@ -53,6 +56,12 @@ export default {
     props: ['query', 'filterOptions', 'exclude', 'rowClickCB'],
     data () {
         return {
+            initialPagination: {
+                sortBy: 'desc',
+                descending: false,
+                page: 1,
+                rowsPerPage: 15
+            },
             componentKey: 0,
             ajaxing: false,
             columns: [
@@ -117,7 +126,6 @@ export default {
             const QUERY_LIMIT = 500;
 
             let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
-            //researchURL += + 'by_word/' + this.exclude + '/' + QUERY_LIMIT + '/' + encodeURIComponent(this.query);
 
             var opts = { query: this.query, filterOptions: this.filterOptions }
             researchURL += 'by_word_options/' + this.exclude + '/' + QUERY_LIMIT + '/' + encodeURIComponent(JSON.stringify(opts));

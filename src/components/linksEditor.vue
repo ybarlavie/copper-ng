@@ -11,7 +11,7 @@
                 <DocsGrid :query="query" :filterOptions="filterOptions" :exclude="fromEntity._id" :rowClickCB="this.onSearchRowClicked" />
 
                 <q-card-section class="q-gutter-md">
-                    <q-badge :label="fromEntity.name" align="middle" color="purple" filled style="font-size: 19px;" />
+                    <q-badge :label="fromEntity.name" align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
 
                     <q-btn-dropdown split push color="primary" :label="newLink.typeAlias || 'בחר סוג קשר'">
                         <q-list dir="rtl">
@@ -28,7 +28,7 @@
                         </q-list>
                     </q-btn-dropdown>
 
-                    <q-badge :label="toEntityName" align="middle" color="purple" filled style="font-size: 19px;" />
+                    <q-badge :label="toEntityName" align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
                 </q-card-section>
 
                 <q-card-section v-if="newLink.uniqueType == 'from-to-date'" class="row">
@@ -153,6 +153,11 @@ export default {
         }
     },
 
+    beforeMount() {
+        this.newLink = { from_id: JSON.parse(JSON.stringify(this.fromEntity.item_id)), to_id: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
+        this.toEntity = null;
+    },
+
     computed: {
         graphData() {
             return { fromEntity: this.fromEntity, refs: this.data };
@@ -266,6 +271,7 @@ export default {
             this.ajaxing = true;
             this.dataReady = false;
             this.data = [];
+            this.toEntity = null;
 
             let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
             let that = this;
