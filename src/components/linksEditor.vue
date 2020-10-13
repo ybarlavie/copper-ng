@@ -92,6 +92,7 @@
 
                     <template v-slot:header="props">
                         <q-tr :props="props">
+                            <q-th v-if="editable" />
                             <q-th
                                 v-for="col in props.cols"
                                 :key="col.name"
@@ -102,6 +103,9 @@
 
                     <template v-slot:body="props">
                         <q-tr :props="props" @click="onRowClicked(props)">
+                            <q-td v-if="editable">
+                                <q-btn flat dense color="negative" icon="delete" @click.stop="onDelete(props)"/>
+                            </q-td>
                             <q-td v-for="col in props.cols"
                                 :key="col.name" 
                                 :props="props"
@@ -338,6 +342,34 @@ export default {
 
         onRowClicked(props) {
             var row = props.row;
+        },
+
+        onDelete(props) {
+            var settings = {
+                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/references',
+                "method": "DELETE",
+                "timeout": 0,
+                "headers": {
+                    "Content-Type": "application/json",
+                    "x-access-token": window.tokenData.token
+                },
+                "data": JSON.stringify(props),
+            };
+
+            var that = this;
+            this.ajaxing = true;
+            console.log('ajaxing up!');
+            $.ajax(settings).done(function (response) {
+                that.showNotif(true, "המחיקה הצליחה");
+                that.fetchData();
+            })
+            .fail(function(err) {
+                console.log('error' + JSON.stringify(err))
+                that.showNotif(false, "המחיקה נכשלה");
+            })
+            .always(function() {
+                that.ajaxing = false;
+            });
         },
 
         searchClicked(opts) {

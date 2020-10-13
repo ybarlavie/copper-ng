@@ -38,6 +38,24 @@ router.get('/:collection', function (req, resp) {
     });
 });
 
+router.delete('/:collection', async (req, resp, next) => {
+    var collName = req.params.collection;
+    var doc = req.body;
+    var filter = {};
+    if (collName == 'references') {
+        filter['ref_id'] = doc.ref_id;
+    } else {
+        filter['item_id'] = doc.item_id;
+    }
+
+    MongoDB.remove(collName, filter)
+    .then(result => {
+        return resp.status(200).send(result);
+    }, reason => {
+        return resp.status(500).send(reason);
+    });
+});
+
 router.post('/:collection', async (req, resp, next) => {
     var collName = req.params.collection;
     var doc = req.body;

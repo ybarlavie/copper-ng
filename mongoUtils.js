@@ -181,8 +181,28 @@ const update = (collName, doc) => {
     })
 }
 
+const remove = (collName, filter) => {
+    return new Promise((resolve, reject) => {
+        connectDB('copper-db', async (err) => {
+            if (err) reject("cannot connet to DB");
+
+            getDB()
+            .collection(collName)
+            .deleteOne(filter, function(err1, res1) {
+                disconnectDB();
+
+                if (err1)  {
+                    reject("failed remove: " + JSON.stringify(filter));
+                } else {
+                    resolve(res1);
+                }
+            })
+        });
+    })
+}
+
 const getClient = () => _client
 const getDB = () => _db
 const disconnectDB = () => _client.close()
 
-module.exports = { connectDB, getClient, getDB, disconnectDB, docExists, nameExists, firstOrDefault, getNextId, incrementNext, insert, update }
+module.exports = { connectDB, getClient, getDB, disconnectDB, docExists, nameExists, firstOrDefault, getNextId, incrementNext, insert, update, remove }
