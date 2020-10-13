@@ -51,10 +51,10 @@
                 expanded: false,
                 group: [ 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText', 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons'],
                 options: [
-                    // {
-                    //     label: 'חיפוש מילה שלמה',
-                    //     value: 'wholeWord'
-                    // },
+                    {
+                        label: 'חיפוש מילה שלמה',
+                        value: 'wholeWord'
+                    },
                     {
                         label: 'התעלם מסוגריים מרובעים',
                         value: 'ignoreSquare'
@@ -109,7 +109,7 @@
             set: function(what) {
                 if (what == 'all')
                 {
-                    this.group = [ 'ignoreSquare', 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText', 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons' ];
+                    this.group = [ 'wholeWord', 'ignoreSquare', 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText', 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons' ];
                 } else if (what == 'fields') {
                     [ 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText' ].forEach(i =>{
                         if (!this.group.includes(i)) this.group.push(i);

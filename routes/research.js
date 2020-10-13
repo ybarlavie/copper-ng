@@ -13,7 +13,6 @@ const searches = [
 ];
 
 const _regexBuilder = ((str, wholeWord, ignoreSquare) => {
-    //var expr = wholeWord ? '\\b' : '';
     var expr = '';
     if (ignoreSquare) {
         for (var i=0; i<str.length; i++) {
@@ -22,8 +21,24 @@ const _regexBuilder = ((str, wholeWord, ignoreSquare) => {
     } else {
         expr += str;
     }
-    //expr += wholeWord ? '\\b' : '';
+    expr += wholeWord ? '\\s' : '';
     return new RegExp(expr, 'im');
+});
+
+const _inTextQueryBuilder = ((fields, text) => {
+    var result = {};
+    if (fields.length > 1) {
+        var orArray = [];
+        fields.forEach(f => {
+            var expr = { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', '$' + f, '\\s' ] } } }
+            orArray.push(expr);
+        });
+        result["$expr"] = { "$or": orArray };
+    } else {
+        result["$expr"] = { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', '$' + fields[0], '\\s' ] } } };
+    }
+
+    return result;
 });
 
 const _queryBuilder = ((exclude_id, fields, re) => {
@@ -170,50 +185,101 @@ const _to_refs = (docId) => {
 }
 
 router.get('/text/:docId', async (req, resp) => {
+    const limit = 500;
     var text = '';
     var _id = '';
+    var docId = req.params.docId;
+
     if (req.params.docId.startsWith('D')) {
-        var doc = await MongoDB.firstOrDefault('documents', {item_id:req.params.docId});
+        var doc = await MongoDB.firstOrDefault('documents', {item_id:docId});
         if (!doc) return resp.status(500).send("cannot find document");
         text = doc.text;
         _id = doc._id;
     } else if (req.params.docId.startsWith('E')) {
-        var doc = await MongoDB.firstOrDefault('ext-documents', {item_id:req.params.docId});
+        var doc = await MongoDB.firstOrDefault('ext_documents', {item_id:docId});
         if (!doc) return resp.status(500).send("cannot find external document");
         text = doc.text;
         _id = doc._id;
     } else {
         return resp.status(500).send("bad doc id");
     }
-    if (text && text.trim()) text = text.trim();
+    if (text && text.trim()) text = ' ' + text.trim() + ' ';
 
-    var tokens = text.split(' ').filter(t => {
-        return t.length >= 3;
+    let proms = [];
+    var collections = ['persons', 'locations'];
+    ['persons', 'locations'].forEach(collName => {
+        var prj = { sug: '', item_id: 1, name: 1, title: 1 };
+        switch(collName) {
+            case 'persons':
+                prj.sug = 'דמות';
+                break;
+            case 'locations':
+                prj.sug = 'מיקום';
+                break;
+        }
+        var match = _inTextQueryBuilder(['name', 'label', 'title'], text);
+        proms.push(
+            new Promise((resolve, reject) => {
+                MongoDB.connectDB('copper-db', async (err) => {
+                    if (err) reject(err);
+        
+                    MongoDB.getDB()
+                    .collection(collName)
+                    .aggregate( [ { $match: match }, { $project: prj } ] )
+                    .limit(limit)
+                    .toArray((err, data) => {
+                        err ? reject(err) : resolve(data);
+                    })
+                })
+            })
+        );    
     });
 
-    if (tokens.length<=0) {
-        return resp.status(500).send("text is not valid");
-    }
-
-    var filterOptions = ['useName', 'useLabel', 'useTitle', 'useAliases', 'usePersons', 'useLocations'];
-    var refs = [];
-    _to_refs(docId).then(result => { refs = result }, reason => { refs = [] });
-
-    let proms = []
-    for (var i=0; i<tokens.length; i++) {
-        var t = tokens[i];
-        proms.push(_by_word_options({query: t, filterOptions: filterOptions}, 500, _id));
-    }
-
-    let newRefs = [];
-    Promise.all(proms).then(values => {
+    let candidates = [];
+    await Promise.all(proms)
+    .then(values => {
         values.forEach(v => {
-            items.push(...v);
+            candidates.push(...v);
         });
-
-        MongoDB.disconnectDB();
-        resolve(items);
+    }, reason => {
+        return resp.status(500).send(reason);
     });
+
+    var existingRefs = await _to_refs(docId).catch(reason => {
+        return resp.status(500).send(reject);
+    });
+
+    // now create new references
+    var inserted = 0;
+    for (var i=0; i<candidates.length; i++) {
+        var can = candidates[i];
+        var links = existingRefs.filter(ref => {
+            return ref.from == can.item_id;
+        });
+        if (links.length <= 0) {
+            // no matching link exists. we can add the new ref
+            var newRef = {
+                from: can.item_id,
+                to: docId,
+                type: 'referred at document',
+                created_by: 'automatic',
+                description: 'automatic',
+                _who: 'automatic',
+                _when: Date.now(),
+                _valid: false
+            };
+
+            await MongoDB.insert('references', newRef)
+            .then(id => {
+                existingRefs.push(newRef);
+                inserted++;
+            }, reason => {
+                console.log('failed inserting ref: ' + JSON.stringify(reason));
+            });
+        }
+    };
+
+    return resp.status(200).send(existingRefs);
 });
 
 router.get('/refs/:fromId', function (req, resp) {
