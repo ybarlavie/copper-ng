@@ -307,6 +307,9 @@ export default {
             this.ajaxing = true;
             this.dataReady = false;
             this.data = [];
+
+            // reset new link
+            this.newLink = { from_id: JSON.parse(JSON.stringify(this.fromEntity.item_id)), to_id: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
             this.toEntity = null;
 
             let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
