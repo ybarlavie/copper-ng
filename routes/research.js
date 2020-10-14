@@ -203,7 +203,7 @@ router.get('/text/:docId', async (req, resp) => {
     } else {
         return resp.status(500).send("bad doc id");
     }
-    if (text && text.trim()) text = ' ' + text.trim() + ' ';
+    if (text && text.trim()) text = ' ' + text.trim().replace(/[\[|\]|\(|\)]+/g,'') + ' ';
 
     let proms = [];
     var collections = ['persons', 'locations'];
