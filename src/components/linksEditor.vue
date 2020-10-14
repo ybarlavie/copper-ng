@@ -78,6 +78,7 @@
         <q-card v-if="dataReady">
             <q-toolbar v-if="editable" dir="rtl">
                 <SearchParams @search-options="searchClicked($event)" />
+                <q-btn color="positive" v-if="researchTextValid" icon="report" label="חישוב קשרים עפי טקסט התעודה" @click="onResearchText" />
             </q-toolbar>
 
             <q-card-section>
@@ -104,7 +105,12 @@
                     <template v-slot:body="props">
                         <q-tr :props="props" @click="onRowClicked(props)">
                             <q-td v-if="editable">
-                                <q-btn flat dense color="negative" icon="delete" @click.stop="onDelete(props)"/>
+                                <q-btn flat dense color="negative" icon="delete" @click.stop="onDelete(props)" >
+                                    <q-tooltip content-class="bg-accent">מחיקת הקשר</q-tooltip>
+                                </q-btn>
+                                <q-btn flat dense :color="(props.row._valid == 'yes') ? 'positive' : 'negative'" :icon="(props.row._valid == 'yes') ? 'report' : 'check_circle'" @click.stop="onToggleValid(props)"  >
+                                    <q-tooltip content-class="bg-accent">{{ (props.row._valid == 'yes') ? 'הפיכת הקשר ללא מאומות' : 'הפיכת הקשר למאומת'}}</q-tooltip>
+                                </q-btn>
                             </q-td>
                             <q-td v-for="col in props.cols"
                                 :key="col.name" 
@@ -158,7 +164,7 @@ export default {
     },
 
     beforeMount() {
-        this.newLink = { from_id: JSON.parse(JSON.stringify(this.fromEntity.item_id)), to_id: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
+        this.newLink = { from_id: this.fromEntity.item_id, to_id: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
         this.toEntity = null;
     },
 
@@ -211,6 +217,11 @@ export default {
 
         toEntityName() {
             return this.newLink && this.toEntity ? this.toEntity.name : '';
+        },
+
+        researchTextValid() {
+            var f = this.fromEntity.item_id.substring(0,1);
+            return f == 'E' || f == 'D'; 
         }
     }, 
 
@@ -222,13 +233,34 @@ export default {
             })
         },
 
+        onResearchText() {
+            let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
+            var that = this;
+            $.ajax({
+                type: "GET",
+                url: researchURL + 'text/' + this.fromEntity.item_id,
+                crossdomain: true,
+                headers: {
+                    "x-access-token": window.tokenData.token
+                },
+                success: function (result) {
+                    that.showNotif(true, "איתור קשרים הסתיים בהצלחה");
+                    that.fetchData();
+                },
+                error: function (xhr, status, err) {
+                    that.showNotif(false, "איתור קשרים נכשל");
+                }
+            });
+        },
+
         onSubmit () {
             var nl = {
                 from: this.newLink.from_id,
                 to: this.newLink.to_id,
                 type: this.newLink.type,
                 created_by: 'yonib',
-                description: this.newLink.descr
+                description: this.newLink.descr,
+                _valid: 'yes'
             };
             if (this.newLink.reversed == true)
             {
@@ -344,7 +376,37 @@ export default {
             var row = props.row;
         },
 
+        onToggleValid(props) {
+            var row = props.row;
+            var settings = {
+                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/updateFields/references/' + row.ref_id ,
+                "method": "PUT",
+                "timeout": 0,
+                "headers": {
+                    "Content-Type": "application/json",
+                    "x-access-token": window.tokenData.token
+                },
+                "data": JSON.stringify({_valid: (row._valid == 'yes') ? 'no' : 'yes' }),
+            };
+
+            var that = this;
+            this.ajaxing = true;
+            console.log('ajaxing up!');
+            $.ajax(settings).done(function (response) {
+                that.showNotif(true, "העדכון הצליח");
+                that.fetchData();
+            })
+            .fail(function(err) {
+                console.log('error' + JSON.stringify(err))
+                that.showNotif(false, "העדכון נכשל");
+            })
+            .always(function() {
+                that.ajaxing = false;
+            });
+        },
+
         onDelete(props) {
+            var row = props.row;
             var settings = {
                 "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/references',
                 "method": "DELETE",
@@ -353,7 +415,7 @@ export default {
                     "Content-Type": "application/json",
                     "x-access-token": window.tokenData.token
                 },
-                "data": JSON.stringify(props),
+                "data": JSON.stringify(row),
             };
 
             var that = this;

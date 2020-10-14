@@ -176,8 +176,8 @@ export default {
                     to: item.to,
                     group: "references",
                     arrows: '',
-                    dashes: item._valid ? false : true,
-                    width: item._valid ? 1.0 : 1.5,
+                    dashes: item._valid == 'yes' ? false : true,
+                    width: item._valid == 'yes' ? 1.5 : 1.0,
                 }
                 var types = window.store.ref_types.filter(rt => rt.type === item.type);
                 if (types.length > 0) ref.arrows = types[0].arrows;
@@ -226,8 +226,8 @@ export default {
                                     item.id = item.ref_id;
                                     item.title = item.type;
                                     item.group = collection;
-                                    item.dashes = item._valid ? false : true;
-                                    item.width = item._valid ? 1.0 : 1.5;
+                                    item.dashes = item._valid == 'yes' ? false : true;
+                                    item.width = item._valid == 'yes' ? 1.5 : 1.0;
 
                                     var types = window.store.ref_types.filter(rt => rt.type === item.type);
                                     if (types.length > 0) item.arrows = types[0].arrows;

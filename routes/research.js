@@ -266,7 +266,7 @@ router.get('/text/:docId', async (req, resp) => {
                 description: 'automatic',
                 _who: 'automatic',
                 _when: Date.now(),
-                _valid: false
+                _valid: 'no'
             };
 
             await MongoDB.insert('references', newRef)
@@ -306,7 +306,7 @@ router.get('/refs/:fromId', function (req, resp) {
                 var q0 = null;
                 var targetId = ref.from == req.params.fromId ? ref.to : ref.from;
                 var re =  new RegExp("\\b" + targetId + "\\b", 'i' );
-                var prj = { ref_id: ref.ref_id, type: ref.type, description: ref.description, start: ref.start, end: ref.end, from: ref.from, to: ref.to, name: 1 };
+                var prj = { ref_id: ref.ref_id, _valid: ref._valid, type: ref.type, description: ref.description, start: ref.start, end: ref.end, from: ref.from, to: ref.to, name: 1 };
                 switch (targetId.substring(0,1)) {
                     case "D":
                         prj.sug = "מסמך בר כוכבא";

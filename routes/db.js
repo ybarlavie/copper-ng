@@ -81,4 +81,44 @@ router.post('/:collection', async (req, resp, next) => {
     });
 });
 
+router.put('/updateFields/:collection/:id', async (req, resp, next) => {
+    var filter = {};
+    var collName = req.params.collection;
+    var docId = req.params.id;
+
+    var docIdName = 'item_id';
+    if (collName == 'references') {
+        docIdName = 'ref_id';
+        filter[docIdName] = docId;
+    } else {
+        filter[docIdName] = docId;
+    }
+
+    var fv = req.body;
+
+    MongoDB.connectDB('copper-db', async (err) => {
+        if (err) return resp.status(500).send("cannot connect to DB");
+
+        MongoDB.getDB().collection(collName)
+        .find(filter, {}).toArray((err1, items) => {
+            if (err1) return resp.status(500).send(err1);
+            if (items.length <=0) return resp.status(500).send('no document to update');
+            var item = items[0];
+            for (k in fv) {
+                if (k != '_id' && k != docIdName && item.hasOwnProperty(k)) {
+                    item[k] = fv[k];
+                }
+            }
+
+            MongoDB.disconnectDB();
+            MongoDB.update(collName, item)
+            .then(id => {
+                return resp.status(200).send(id);
+            }, reason => {
+                return resp.status(500).send(reason);
+            });
+        });
+    });
+});
+
 module.exports = router;

@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v1.76.184</div>
+                    <div style="font-size: 12px;">גרסה v1.76.187</div>
                 </q-toolbar-title>
 
                 <q-btn-dropdown split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
@@ -88,14 +88,6 @@ export default {
     },
 
     beforeMount() {
-        // {
-        //     qv: 'ref_id',
-        //     qe: '[A-Z]+\\d*_[A-Z]+\\d*_\\d+',
-        //     prj: {
-        //         'text': 0,
-        //         'images': 0
-        //     }
-        // }
         queryMongoAsync(this, 'ref_types')
         .then(result => {
             window.store.ref_types = result;
