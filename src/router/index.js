@@ -80,6 +80,18 @@ const routes = [{
             requiresAuth: false
         }
     },
+
+    //////////////////////////////////
+    // dafualt route - must be last !
+    //////////////////////////////////
+    {
+        path: '*',
+        name: 'notFound',
+        component: Login,
+        meta: {
+            requiresAuth: false
+        }
+    },
 ]
 
 const router = new VueRouter({
