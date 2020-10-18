@@ -25,27 +25,9 @@ const _regexBuilder = ((str, wholeWord, ignoreSquare) => {
     return new RegExp(expr, 'im');
 });
 
-const _inTextRegExp = ((f, text) => {
-    var fld = '$' + f;
-    if (f == 'aliases') {
-        fld = { $reduce : { input: '$aliases', initialValue: '', in: { $concat: ['$$value', {'$cond': [{'$eq': ['$$value', '']}, '', '|']}, '$$this' ] } } };
-    }
-    return { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', fld, '[\,|\.|\-]*\\s' ] } } }
-});
-
-const _inTextQueryBuilder = ((fields, text) => {
-    var result = {};
-    if (fields.length > 1) {
-        var orArray = [];
-        fields.forEach(f => {
-            orArray.push(_inTextRegExp(f, text));
-        });
-        result["$expr"] = { "$or": orArray };
-    } else {
-        result["$expr"] = _inTextRegExp(fields[0], text);
-    }
-
-    return result;
+const _inTextRegExp = ((text) => {
+    var fld = { $reduce : { input: '$aliases', initialValue: '$name', in: { $concat: ['$$value', {'$cond': [{'$eq': ['$$value', '']}, '', '|']}, '$$this' ] } } };
+    return { $expr: { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', fld, '[\,|\.|\-]*\\s' ] } } } };
 });
 
 const _queryBuilder = ((exclude_id, fields, re) => {
@@ -227,7 +209,7 @@ router.get('/text/:docId', async (req, resp) => {
                 prj.sug = 'מיקום';
                 break;
         }
-        var match = _inTextQueryBuilder(['name', 'aliases'], text);
+        var match = _inTextRegExp(text);
         proms.push(
             new Promise((resolve, reject) => {
                 MongoDB.connectDB('copper-db', async (err) => {
