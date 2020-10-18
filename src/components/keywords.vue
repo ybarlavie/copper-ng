@@ -46,18 +46,15 @@ export default {
 
     methods: {
         _isValid(w) {
-            if (!w || w.trim() != '') return false;
             if (!this.value) return true;
             return !this.value.includes(w);
         },
 
         onSave(newVal, initialValue) {
-            console.log('saving ' + newVal, initialValue);
             this.update(newVal, initialValue);
         },
 
         onClear(initialValue, next) {
-            console.log('deleteing ' + initialValue);
             this.update('', initialValue);
             next.apply(null);
         },
@@ -78,9 +75,9 @@ export default {
                         this.editedMember = '';
                     }
                 }
-            } else if (newVal != '' && this._isValid(newVal)) {
+            } else if (newVal.trim() !== '' && this._isValid(newVal)) {
                 // this is a new member
-                this.value.push(newVal);
+                this.value.push(newVal.trim());
                 this.editedMember = '';
             }
         },
