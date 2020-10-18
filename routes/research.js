@@ -195,7 +195,7 @@ const _to_refs = (docId) => {
 }
 
 router.get('/text/:docId', async (req, resp) => {
-    const limit = 500;
+    const limit = 10;
     var text = '';
     var _id = '';
     var docId = req.params.docId;
