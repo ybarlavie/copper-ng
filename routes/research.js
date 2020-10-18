@@ -216,7 +216,7 @@ router.get('/text/:docId', async (req, resp) => {
 
     if (text && text.trim()) {
         text = text.trim().replace(/\.+/g,'. ');
-        text = text.trim().replace(/,+/g,', ');
+        text = text.trim().replace(/\,+/g,', ');
         text = text.trim().replace(/  /g,' ');
         text = ' ' + text.trim().replace(/[\[|\]|\(|\)]+/g,'') + ' ';
     }
