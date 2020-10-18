@@ -25,27 +25,24 @@ const _regexBuilder = ((str, wholeWord, ignoreSquare) => {
     return new RegExp(expr, 'im');
 });
 
+const _inTextRegExp = ((f, text) => {
+    var fld = '$' + f;
+    if (f == 'aliases') {
+        fld = { $reduce : { input: '$aliases', initialValue: '', in: { $concat: ['$$value', {'$cond': [{'$eq': ['$$value', '']}, '', '|']}, '$$this' ] } } };
+    }
+    return { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', fld, '[\,|\.|\-]*\\s' ] } } }
+});
+
 const _inTextQueryBuilder = ((fields, text) => {
     var result = {};
     if (fields.length > 1) {
         var orArray = [];
         fields.forEach(f => {
-            var fld = '$' + f;
-            if (f == 'aliases') {
-                fld = { $reduce : { input: '$aliases', initialValue: '', in: { $concat: ['$$value', {'$cond': [{'$eq': ['$$value', '']}, '', '|']}, '$$this' ] } } };
-            }
-            var expr = { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', fld, '\\s' ] } } }
-            orArray.push(expr);
+            orArray.push(_inTextRegExp(f, text));
         });
         result["$expr"] = { "$or": orArray };
     } else {
-        var fld = '$' + fields[0];
-        if (fields[0] == 'aliases') {
-            fld = { $reduce : { input: '$aliases', initialValue: '', in: { $concat: ['$$value', {'$cond': [{'$eq': ['$$value', '']}, '', '|']}, '$$this' ] } } };
-        }
-        var expr = { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', fld, '\\s' ] } } }
-
-        result["$expr"] = expr;
+        result["$expr"] = _inTextRegExp(fields[0], text);
     }
 
     return result;
@@ -215,9 +212,6 @@ router.get('/text/:docId', async (req, resp) => {
     }
 
     if (text && text.trim()) {
-        text = text.trim().replace(/\.+/g,'. ');
-        text = text.trim().replace(/\,+/g,', ');
-        text = text.trim().replace(/  /g,' ');
         text = ' ' + text.trim().replace(/[\[|\]|\(|\)]+/g,'') + ' ';
     }
 
