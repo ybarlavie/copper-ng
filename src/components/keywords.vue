@@ -46,6 +46,7 @@ export default {
 
     methods: {
         _isValid(w) {
+            if (!w || w.trim() != '') return false;
             if (!this.value) return true;
             return !this.value.includes(w);
         },
@@ -62,7 +63,7 @@ export default {
         },
 
         update(newVal, initialValue) {
-            if (initialValue !== '') {
+            if (initialValue != '') {
                 // this is updating an existing member
                 var i = this.value.indexOf(initialValue);
                 if (i>=0) {
@@ -77,7 +78,7 @@ export default {
                         this.editedMember = '';
                     }
                 }
-            } else if (newVal !== '' && this._isValid(newVal)) {
+            } else if (newVal != '' && this._isValid(newVal)) {
                 // this is a new member
                 this.value.push(newVal);
                 this.editedMember = '';

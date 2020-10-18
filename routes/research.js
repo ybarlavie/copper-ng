@@ -30,12 +30,22 @@ const _inTextQueryBuilder = ((fields, text) => {
     if (fields.length > 1) {
         var orArray = [];
         fields.forEach(f => {
-            var expr = { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', '$' + f, '\\s' ] } } }
+            var fld = '$' + f;
+            if (f == 'aliases') {
+                fld = { $reduce : { input: '$aliases', initialValue: '', in: { $concat: ['$$value', {'$cond': [{'$eq': ['$$value', '']}, '', '|']}, '$$this' ] } } };
+            }
+            var expr = { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', fld, '\\s' ] } } }
             orArray.push(expr);
         });
         result["$expr"] = { "$or": orArray };
     } else {
-        result["$expr"] = { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', '$' + fields[0], '\\s' ] } } };
+        var fld = '$' + fields[0];
+        if (fields[0] == 'aliases') {
+            fld = { $reduce : { input: '$aliases', initialValue: '', in: { $concat: ['$$value', {'$cond': [{'$eq': ['$$value', '']}, '', '|']}, '$$this' ] } } };
+        }
+        var expr = { $regexMatch: { input: text, regex: { $concat: [ '\\s[ו|ב|מ|ל]*', fld, '\\s' ] } } }
+
+        result["$expr"] = expr;
     }
 
     return result;
@@ -203,7 +213,13 @@ router.get('/text/:docId', async (req, resp) => {
     } else {
         return resp.status(500).send("bad doc id");
     }
-    if (text && text.trim()) text = ' ' + text.trim().replace(/[\[|\]|\(|\)]+/g,'') + ' ';
+
+    if (text && text.trim()) {
+        text = text.trim().replace(/\.+/g,'. ');
+        text = text.trim().replace(/,+/g,', ');
+        text = text.trim().replace(/  /g,' ');
+        text = ' ' + text.trim().replace(/[\[|\]|\(|\)]+/g,'') + ' ';
+    }
 
     let proms = [];
     var collections = ['persons', 'locations'];
@@ -217,7 +233,7 @@ router.get('/text/:docId', async (req, resp) => {
                 prj.sug = 'מיקום';
                 break;
         }
-        var match = _inTextQueryBuilder(['name', 'label', 'title'], text);
+        var match = _inTextQueryBuilder(['name', 'aliases'], text);
         proms.push(
             new Promise((resolve, reject) => {
                 MongoDB.connectDB('copper-db', async (err) => {
