@@ -13,7 +13,7 @@
                 <q-card-section class="q-gutter-md">
                     <q-badge :label="fromEntity.name" align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
 
-                    <q-btn-dropdown split push color="primary" :label="newLink.typeAlias || 'בחר סוג קשר'">
+                    <q-btn-dropdown push color="primary" :label="newLink.typeAlias || 'בחר סוג קשר'" >
                         <q-list dir="rtl">
                             <q-item 
                                 v-for="t in availableTypes"
@@ -342,7 +342,20 @@ export default {
 
             var from_item_id = JSON.parse(JSON.stringify(this.fromEntity.item_id));
             this.availableTypes = window.store.ref_types.flatMap( t => {
-                if (from_item_id.match(t.fromRegEx) && row.item_id.match(t.toRegEx)) 
+                if (t.toRegEx.source == t.fromRegEx.source && t.alias != t.revAlias
+                    && from_item_id.match(t.toRegEx) && row.item_id.match(t.toRegEx))
+                {
+                    // this means that type from and to patterns are the same
+                    // and the from_item_id and row.item_id match the pattern
+                    // this means that the link could be both reversed and non-reveresed
+                    // we return both...
+                    var tt1 = JSON.parse(JSON.stringify(t));
+                    tt1.rev = false; 
+                    var tt2 = JSON.parse(JSON.stringify(t));
+                    tt2.rev = true;
+                    return [tt1, tt2];
+                }
+                else if (from_item_id.match(t.fromRegEx) && row.item_id.match(t.toRegEx)) 
                 {
                     var tt = JSON.parse(JSON.stringify(t));
                     tt.rev = false; 
