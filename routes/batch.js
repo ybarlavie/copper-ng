@@ -14,7 +14,7 @@ router.get('/bulk/:collection', async (req, resp) => {
         MongoDB
         .getDB()
         .collection(req.params.collection)
-        .updateMany( {}, [ { "$set": { _valid: "yes" } } ] )
+        .updateMany( { $and: [ {"text": /=/ }, { "arch_id" : null} ] }, [ { "$set": { arch_id: "$name" } } ] )
         .then(result => {
             return resp.status(200).send('OK');
         })

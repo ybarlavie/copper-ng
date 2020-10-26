@@ -34,7 +34,8 @@
                 <q-field rounded outlined hint="רמת אותנטיות" :readonly="editable ? false : true" >
                     <q-slider v-model="document.authenticity" :min="0.1" :max="1.0" :step="0.1" color="light-green" :readonly="editable ? false : true" />
                 </q-field>
-                <q-input rounded outlined v-model="document.text" type="textarea" hint="טקסט" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.text" type="textarea" hint="טקסט התעודה" style="font-size: 19px;" :readonly="editable ? false : true" />
+                <q-input rounded outlined v-model="document.remarks" type="textarea" hint="הערות" style="font-size: 19px;" :readonly="editable ? false : true" />
 
                 <KeywordsNew :value="document.keywords" :parentId="document.item_id" :editable="editable" @update-keywords="document.keywords = $event"/>
 
