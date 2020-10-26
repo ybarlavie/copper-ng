@@ -18,6 +18,12 @@
                                 'עריכת המסמך' }}
                         </q-tooltip>
                     </q-btn>
+                    <q-btn v-if="editable" push round dense icon="save" type="submit" color="primary">
+                        <q-tooltip outline content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
+                            שמירה
+                        </q-tooltip>
+                    </q-btn>
+
                     <h4>תעודה חיצונית: "{{document.title}}" - מזהה: {{document.item_id}}</h4>
                 </div>
                 <div v-else>

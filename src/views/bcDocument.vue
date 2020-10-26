@@ -4,6 +4,7 @@
 
         <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
             <div v-if="document" class="q-gutter-md" style="max-width: 1024px;">
+
                 <div v-if="docExists">
                     <q-btn push round dense color="green" text-color="black" icon="add" @click="startAdd">
                         <q-tooltip outline content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
@@ -19,6 +20,12 @@
                                 'עריכת המסמך' }}
                         </q-tooltip>
                     </q-btn>
+                    <q-btn v-if="editable" push round dense icon="save" type="submit" color="primary">
+                        <q-tooltip outline content-class="bg-purple" content-style="font-size: 16px" :offset="[10, 10]">
+                            שמירה
+                        </q-tooltip>
+                    </q-btn>
+
                     <h4>תעודה: "{{document.title}}" - מזהה: {{document.item_id}}</h4>
                 </div>
                 <div v-else>
@@ -170,7 +177,7 @@ export default {
                 that.fetchData();
             })
             .fail(function(err) {
-                console.log('error' +  JSON.stringify(err))
+                console.log('error' + JSON.stringify(err))
                 that.showNotif(false, "השמירה נכשלה");
             })
             .always(function() {
