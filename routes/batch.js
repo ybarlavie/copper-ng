@@ -79,9 +79,29 @@ router.get('/import/locations/:jsonName', async (req, resp) => {
     return resp.status(200).send('Inserted: ' + inserted);
 });
 
+const _handleKeywords = ((rec, prop, keywords, kw) => {
+    const years = ["לפני המלחמה","שנה א","שנה ב","שנה ג","שנה ד","שנה ה","שנה ו-יא"];
+    if (rec[prop] == "1") {
+        var y = prop[0];
+        var n = prop[1];
+        if (keywords.indexOf(kw) < 0) {
+            // keyword required and does not exist in keywords array
+            keywords.push(kw);
+        }
+        if (y == "y") {
+            var p = years[n];
+            if (keywords.indexOf(p) < 0) {
+                keywords.push(p);
+            }    
+        }
+    }
+    return keywords;
+});
+
 router.get('/import/documents/:jsonName', async (req, resp) => {
     var jsonName = './documents/' + req.params.jsonName;
-    var excel = JSON.parse(fs.readFileSync(jsonName));
+    var json = fs.readFileSync(jsonName);
+    var excel = JSON.parse(json);
     var sheet = null;
     var inserted = 0;
     var updated = 0;
@@ -102,23 +122,98 @@ router.get('/import/documents/:jsonName', async (req, resp) => {
         if (rec.name == '' || rec.text == '')
             continue;
 
-        var bcDoc = await MongoDB.firstOrDefault('documents', {name:rec.name});
-        if (!bcDoc) {
-            newDoc = {
-                name: rec.name,
-                title: rec.name,
-                label: rec.name,
-                text: rec.text,
-                source: 'documents batch'
-            };
+        console.log('processing ' + i + ' ' + rec.name);
 
-            await MongoDB.insert('documents', newDoc);
-            inserted++;
-        } else {
-            bcDoc.text = rec.text
-            await MongoDB.update('documents', bcDoc);
-            updated++;
+        var bcDoc = await MongoDB.firstOrDefault('documents', {name:rec.name});
+        if (bcDoc) {
+            if (!bcDoc.keywords) {
+                bcDoc["keywords"] = [];
+            }
+            var len = bcDoc.keywords.length;
+            var keywords = bcDoc.keywords;
+
+            keywords = _handleKeywords(rec, "before_war", keywords, "לפני המלחמה");
+            keywords = _handleKeywords(rec, "tm_occ", keywords, "כיבוש הר הבית");
+            keywords = _handleKeywords(rec, "y1_army", keywords, "ארגון הצבא");
+            keywords = _handleKeywords(rec, "y1_buildings", keywords, "מבנים");
+            keywords = _handleKeywords(rec, "y1_dibon", keywords, "קשר עם דיבון");
+            keywords = _handleKeywords(rec, "y1_land", keywords, "אדמות");
+            keywords = _handleKeywords(rec, "y1_graves", keywords, "קברים");
+            keywords = _handleKeywords(rec, "y1_elazar", keywords, "בעיית אלעזר");
+            keywords = _handleKeywords(rec, "y1_gov", keywords, "שלטון");
+            keywords = _handleKeywords(rec, "y1_romans", keywords, "רומאים");
+            keywords = _handleKeywords(rec, "y1_ark", keywords, "ארון הברית");
+
+            keywords = _handleKeywords(rec, "y2_army", keywords, "ארגון הצבא");
+            keywords = _handleKeywords(rec, "y2_dibon", keywords, "קשר עם דיבון");
+            keywords = _handleKeywords(rec, "y2_buildings", keywords, "מבנים");
+            keywords = _handleKeywords(rec, "y2_land", keywords, "אדמות");
+            keywords = _handleKeywords(rec, "y2_ph1_romans", keywords, "שלב א מול רומאים");
+            keywords = _handleKeywords(rec, "y2_herdis", keywords, "ירידה להרדיס");
+            keywords = _handleKeywords(rec, "y2_graves", keywords, "קברים");
+            keywords = _handleKeywords(rec, "y2_elazar", keywords, "בעיית אלעזר");
+            keywords = _handleKeywords(rec, "y2_gov", keywords, "שלטון");
+            keywords = _handleKeywords(rec, "y2_ark", keywords, "ארון הברית");
+
+            keywords = _handleKeywords(rec, "y3_dibon", keywords, "קשר עם דיבון");
+            keywords = _handleKeywords(rec, "y3_buildings", keywords, "מבנים");
+            keywords = _handleKeywords(rec, "y3_land", keywords, "אדמות");
+            keywords = _handleKeywords(rec, "y3_graves", keywords, "קברים");
+            keywords = _handleKeywords(rec, "y3_gov", keywords, "שלטון");
+            keywords = _handleKeywords(rec, "y3_elazar", keywords, "בעיית אלעזר");
+            keywords = _handleKeywords(rec, "y3_ph2_romans", keywords, "שלב ב מול רומאים");
+            keywords = _handleKeywords(rec, "y3_samcha_shimon", keywords, "סמחא ושמעון");
+            keywords = _handleKeywords(rec, "y3_evac_dibon", keywords, "פינוי דיבון");
+            keywords = _handleKeywords(rec, "y3_beitar", keywords, "ביתר");
+            keywords = _handleKeywords(rec, "y3_ark", keywords, "ארון הברית");
+
+            keywords = _handleKeywords(rec, "y4_dibon", keywords, "קשר עם דיבון");
+            keywords = _handleKeywords(rec, "y4_buildings", keywords, "מבנים");
+            keywords = _handleKeywords(rec, "y4_land", keywords, "אדמות");
+            keywords = _handleKeywords(rec, "y4_graves", keywords, "קברים");
+            keywords = _handleKeywords(rec, "y4_gen_war", keywords, "מלחמה כללית");
+            keywords = _handleKeywords(rec, "y4_gov", keywords, "שלטון");
+            keywords = _handleKeywords(rec, "y4_shimon_will", keywords, "צוואת שמעון");
+            keywords = _handleKeywords(rec, "y4_samch_shimon", keywords, "סמחא ושמעון");
+            keywords = _handleKeywords(rec, "y4_beitar_war", keywords, "מלחמה בביתר");
+            keywords = _handleKeywords(rec, "y4_ark", keywords, "ארון הברית");
+
+            keywords = _handleKeywords(rec, "y5_dibon", keywords, "קשר עם דיבון");
+            keywords = _handleKeywords(rec, "y5_graves", keywords, "קברים");
+            keywords = _handleKeywords(rec, "y5_land", keywords, "אדמות");
+            keywords = _handleKeywords(rec, "y5_buildings", keywords, "מבנים");
+            keywords = _handleKeywords(rec, "y5_ark", keywords, "ארון הברית");
+
+            keywords = _handleKeywords(rec, "y6_graves", keywords, "קברים");
+            keywords = _handleKeywords(rec, "y6_land", keywords, "אדמות");
+            keywords = _handleKeywords(rec, "y6_burial", keywords, "קבורה");
+
+            if (len != keywords.length) {
+                bcDoc.keywords = keywords;
+                await MongoDB.update('documents', bcDoc);
+                updated++;    
+            }
         }
+        // if (!bcDoc) {
+        //     newDoc = {
+        //         name: rec.name,
+        //         title: rec.name,
+        //         label: rec.name,
+        //         text: rec.text,
+        //         source: 'imp. documents batch'
+        //     };
+
+        //     await MongoDB.insert('documents', newDoc);
+        //     inserted++;
+        // } else {
+        //     if (bcDoc.text && bcDoc.text.trim() != "" && bcDoc.old_text != rec.text)
+        //     {
+        //         bcDoc.old_text = bcDoc.text;
+        //     }
+        //     bcDoc.text = rec.text
+        //     await MongoDB.update('documents', bcDoc);
+        //     updated++;
+        // }
     }
     return resp.status(200).send('Inserted: ' + inserted + ' Updated: ' + updated);
 });

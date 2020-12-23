@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v1.76.196</div>
+                    <div style="font-size: 12px;">גרסה v1.78.12</div>
                 </q-toolbar-title>
 
                 <q-btn-dropdown split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
@@ -38,7 +38,7 @@
                 </q-btn-dropdown>
 
                 <div class="q-pl-md q-gutter-sm row no-wrap items-center">
-                    <q-btn color="light-green" icon="device_hub" label="גרף" style="font-size: 15px;" to="/" />
+                    <SearchParams @search-options="graphClicked($event)" icon="device_hub" placeHolder="סינון גרף" />
                 </div>
 
                 <SearchParams @search-options="searchClicked($event)" />
@@ -122,6 +122,18 @@ export default {
                 name: 'Login'
             });
         },
+
+        graphClicked(opts) {
+            this.$router.push({ name: 'Blank' });
+
+            this.$router.push({
+                name: 'Home',
+                params: {
+                    graphFilter: opts
+                }
+            });
+        },
+
         searchClicked(opts) {
             this.$router.push({ name: 'Blank' });
 
@@ -133,7 +145,6 @@ export default {
                     filterOptions: opts.options
                 }
             });
-
         },
         onMainClick(evt) {
             switch (this.addItemType) {

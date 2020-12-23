@@ -1,5 +1,5 @@
 <template>
-    <Graph />
+    <Graph :filter="gFilter"/>
 </template>
 <script>
 import Graph from '../components/Graph.vue'
@@ -10,12 +10,20 @@ export default {
         Graph
     },
 
+    props: ['graphFilter'],
+
     data: () => ({
         error: '',
     }),
+
     mounted() {
     },
+
     methods: {
+    },
+
+    computed: {
+        gFilter() { return this.graphFilter || null; }
     }
 }
 </script>

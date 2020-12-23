@@ -9,8 +9,8 @@
                 :icon="expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
                 @click="expanded = !expanded"
             />
-            <q-input dense outlined square v-model="search" placeholder="חיפוש" class="bg-white col" />
-            <q-btn class="GPLAY__toolbar-input-btn" color="primary" icon="search" unelevated @click="searchClicked()" />
+            <q-input dense outlined square v-model="search" :placeholder="plHolder" class="bg-white col" />
+            <q-btn class="GPLAY__toolbar-input-btn" color="primary" :icon="searchIcon" unelevated @click="searchClicked()" />
         </div>
 
         <q-dialog v-model="expanded" position="top" dir="rtl">
@@ -44,7 +44,7 @@
 </template>
 <script>
     export default {
-        props: [],
+        props: ['icon', 'placeHolder'],
         data () {
             return {
                 search: '',
@@ -101,6 +101,10 @@
                     }
                 ]
             }
+        },
+        computed: {
+            searchIcon() { return this.icon || 'search'; },
+            plHolder() { return this.placeHolder || 'חיפוש'; }
         },
         methods: {
             searchClicked: function() {

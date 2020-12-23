@@ -1,15 +1,21 @@
 <template>
     <div dir="rtl">
-        <div style="display:flex; flex-direction: row; align-items: center">
-            <q-input rounded dense outlined type="text" v-model="nodeQuery" style="font-size: 19px;" />
-            <q-btn rounded dense label="חיפוש בגרף לפי שם" @click="findNode" />
-            <q-badge />
-            <q-separator vertical />
-            <q-badge outline label=" לחיצה בגרף " color="purple" style="font-size: 19px;" />
-            <input type="radio" id="card" name="graphClick" value="card" checked>
-            <label for="card">כרטיס</label><br>
-            <input type="radio" id="map" name="graphClick" value="map">
-            <label for="map">מפה</label><br>
+        <div style="display:flex; flex-direction: row; justify-content: space-between;">
+            <q-input rounded dense outlined type="text" v-model="nodeQuery" style="font-size: 19px;">
+                <q-btn rounded unelevated class="GPLAY__toolbar-input-btn" color="primary" icon="search" @click="findNode">
+                    <q-tooltip content-class="bg-accent">חיפוש בגרף לפי שם</q-tooltip>
+                </q-btn>
+            </q-input>
+            <q-field outlined rounded dense>
+                <div style="display:flex; flex-direction: row; align-items: center;">
+                    <input type="radio" id="card" name="graphClick" value="card" checked>
+                    <label for="card">כרטיס</label>
+                    <div class="q-pa-sm">...</div>
+                    <input type="radio" id="map" name="graphClick" value="map">
+                    <label for="map">מפה</label>
+                    <q-tooltip content-class="bg-accent">לחיצה בגרף</q-tooltip>
+                </div>
+            </q-field>
         </div>
         <div style="display: flex; flex-direction: row;">
             <div id="mynetwork" ref="mynetwork"></div>
@@ -90,7 +96,7 @@ let currQuery = {
 
 export default {
     name: 'home',
-    props: ['queryData'],
+    props: ['filter', 'queryData'],
     data: () => ({
         error: '',
         nodeQuery: ''
@@ -99,6 +105,10 @@ export default {
         if (this.queryData)
         {
             this.drawQuery(this.queryData);
+        }
+        else if (this.filter && this.filter.query && this.filter.options)
+        {
+            this.drawFilter(this.filter);
         }
         else
         {
@@ -130,13 +140,36 @@ export default {
                 });
             });
         },
+        queryResearch: function (filter) {
+            var that = this;
+            const QUERY_LIMIT = 500;
+            let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
+            var opts = { query: filter.query, filterOptions: filter.options }
+            researchURL += 'by_word_options/1/' + QUERY_LIMIT + '/' + encodeURIComponent(JSON.stringify(opts));
+
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    type: "GET",
+                    url: researchURL,
+                    crossdomain: true,
+                    headers: {
+                        "x-access-token": window.tokenData.token
+                    },
+                    success: function (result) {
+                        resolve({ collection: '##all##', records: result });
+                    },
+                    error: function (xhr, status, err) {
+                        reject(err);
+                    }
+                });
+            });
+        },
         destroy: function () {
             if (network) {
                 network.destroy();
                 network = null;
             }
         },
-
         drawQuery: function (qd) {
             this.destroy();
 
@@ -197,6 +230,61 @@ export default {
             });
 
             this.dataReady();
+        },
+
+        drawFilter: function (filter) {
+            console.log(filter.query + " " + filter.options)
+            this.destroy();
+
+            let opdsOpts = {};
+            nodesDS = new vis.DataSet(opdsOpts);
+            edgesDS = new vis.DataSet(opdsOpts);
+
+            let that = this;
+            let promise = new Promise((resolve, reject) => {
+                let qts = [];
+                // TODO: refine references filter....
+                qts.push(that.queryMongoCollection('references', currQuery['references']));
+                qts.push(that.queryResearch(filter));
+
+                let opdsOpts = {};
+                nodesDS = new vis.DataSet(opdsOpts);
+                edgesDS = new vis.DataSet(opdsOpts);
+
+                Promise.allSettled(qts).then((results) => {
+                    results.forEach(res => {
+                        let collection = res.value.collection;
+                        let records = res.value.records;
+                        let fI = (records.length > 0) ? records[0] : null;
+                        if (fI) {
+                            if (collection == "references")
+                            {
+                                records.forEach(item => {
+                                    item.id = item.ref_id;
+                                    item.title = item.type;
+                                    item.group = collection;
+                                    item.dashes = item._valid == 'yes' ? false : true;
+                                    item.width = item._valid == 'yes' ? 1.5 : 1.0;
+
+                                    var types = window.store.ref_types.filter(rt => rt.type === item.type);
+                                    if (types.length > 0) item.arrows = types[0].arrows;
+
+                                    edgesDS.add([item]);
+                                });
+                            } else {
+                                records.forEach(item => {
+                                    item.id = item.item_id;
+                                    item.group = item.collection;
+                                    item.label = item.name;
+                                    nodesDS.add([item]);
+                                });
+                            }
+                        }
+                    });
+
+                    that.dataReady();
+                });
+            });
         },
 
         drawEntireGraph: function () {
