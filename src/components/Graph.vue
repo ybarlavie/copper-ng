@@ -144,7 +144,7 @@ export default {
             var that = this;
             const QUERY_LIMIT = 500;
             let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
-            var opts = { query: filter.query, filterOptions: filter.options }
+            var opts = { query: filter.query, filterOptions: filter.options, extractRefs: true }
             researchURL += 'by_word_options/1/' + QUERY_LIMIT + '/' + encodeURIComponent(JSON.stringify(opts));
 
             return new Promise((resolve, reject) => {
@@ -156,7 +156,7 @@ export default {
                         "x-access-token": window.tokenData.token
                     },
                     success: function (result) {
-                        resolve({ collection: '##all##', records: result });
+                        resolve(result);
                     },
                     error: function (xhr, status, err) {
                         reject(err);
@@ -241,49 +241,69 @@ export default {
             edgesDS = new vis.DataSet(opdsOpts);
 
             let that = this;
-            let promise = new Promise((resolve, reject) => {
-                let qts = [];
-                // TODO: refine references filter....
-                qts.push(that.queryMongoCollection('references', currQuery['references']));
-                qts.push(that.queryResearch(filter));
+            this.queryResearch(filter)
+            .then((results) => {
+                // first pass, non-references first
+                results.forEach(item => {
+                    if (item.collection != "references") {
+                        item.id = item.item_id;
+                        item.group = item.collection;
+                        item.label = item.name;
 
-                let opdsOpts = {};
-                nodesDS = new vis.DataSet(opdsOpts);
-                edgesDS = new vis.DataSet(opdsOpts);
+                        nodesDS.add([item]);
+                    }
+                });
 
-                Promise.allSettled(qts).then((results) => {
-                    results.forEach(res => {
-                        let collection = res.value.collection;
-                        let records = res.value.records;
-                        let fI = (records.length > 0) ? records[0] : null;
-                        if (fI) {
-                            if (collection == "references")
-                            {
-                                records.forEach(item => {
-                                    item.id = item.ref_id;
-                                    item.title = item.type;
-                                    item.group = collection;
-                                    item.dashes = item._valid == 'yes' ? false : true;
-                                    item.width = item._valid == 'yes' ? 1.5 : 1.0;
+                // second pass - references only
+                var missingNodes = [];
+                results.forEach(item => {
+                    if (item.collection == "references")
+                    {
+                        item.id = item.ref_id;
+                        item.title = item.type;
+                        item.group = item.collection;
+                        item.dashes = item._valid == 'yes' ? false : true;
+                        item.width = item._valid == 'yes' ? 1.5 : 1.0;
 
-                                    var types = window.store.ref_types.filter(rt => rt.type === item.type);
-                                    if (types.length > 0) item.arrows = types[0].arrows;
+                        var types = window.store.ref_types.filter(rt => rt.type === item.type);
+                        if (types.length > 0) item.arrows = types[0].arrows;
 
-                                    edgesDS.add([item]);
-                                });
-                            } else {
-                                records.forEach(item => {
-                                    item.id = item.item_id;
-                                    item.group = item.collection;
-                                    item.label = item.name;
-                                    nodesDS.add([item]);
-                                });
+                        edgesDS.add([item]);
+
+                        // TODO: fix this. bring in the real entities
+                        var sel = nodesDS.get({ 
+                            filter: ((n) => { return (n.id == item.from || n.id == item.to); } ) 
+                        });
+                        if (sel && sel.length == 1) {
+                            // only one side of the reference was found...
+                            // we need to create the other side
+                            var id = (sel[0].id == item.to) ? item.from : item.to; 
+                            missingNodes.push(id);
+                            var newNode = { id: id, item_id: id, label: id };
+                            switch (id.substring(0,1)) {
+                                case "E":
+                                    newNode["group"] = "ext_documents";
+                                    break;
+                                case "D":
+                                    newNode["group"] = "documents";
+                                    break;
+                                case "P":
+                                    newNode["group"] = "persons";
+                                    break;
+                                case "L":
+                                    newNode["group"] = "locations";
+                                    break;
+                            }
+                            try {
+                                nodesDS.add([newNode]);
+                            } catch (e) {
+                                console.log('dup id ' + id);
                             }
                         }
-                    });
-
-                    that.dataReady();
+                    }
                 });
+
+                that.dataReady();
             });
         },
 

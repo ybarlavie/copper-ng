@@ -101,7 +101,6 @@ const _by_word_options = (opts, lim, id) => {
                     case 'useText':
                         flds.push('text');
                         break;
-        
                 }
             });
         
@@ -145,13 +144,35 @@ const _by_word_options = (opts, lim, id) => {
             });
     
             let items = [];
+            let item_ids = [];
             Promise.all(proms).then(values => {
                 values.forEach(v => {
                     items.push(...v);
+                    if (opts.extractRefs) {
+                        item_ids.push(...v.map(({item_id}) => item_id));
+                    }
                 });
-    
-                MongoDB.disconnectDB();
-                resolve(items);
+
+                if (opts.extractRefs)
+                {
+                    MongoDB.getDB()
+                    .collection('references')
+                    .find( { $or: [ { from: { $in: item_ids } }, { to: { $in: item_ids } } ] } )
+                    .toArray((err, refs) => {
+                        if (err) return resp.status(500).send("cannot query references");
+                        if (!refs) return resp.status(500).send("failed querying references");
+                
+                        refs.forEach(ref => {
+                            ref["collection"] = "references";
+                            items.push(ref)
+                        });
+                        MongoDB.disconnectDB();
+                        resolve(items);           
+                    });
+                } else {
+                    MongoDB.disconnectDB();
+                    resolve(items);    
+                }
             });
         });    
     });
