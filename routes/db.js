@@ -4,6 +4,28 @@ var Auth = require('../authUtils');
 
 var router = express.Router();
 
+router.post('/byIds/:collection', async (req, resp, next) => {
+    var collName = req.params.collection;
+    var ids = req.body;
+    var filter = collName == 'references' ? { ref_id: { $in: ids } } : { item_id: { $in: ids } };
+
+    MongoDB.connectDB('copper-db', async (err) => {
+        if (err) return resp.status(500).send("cannot connect to DB");
+
+        MongoDB
+        .getDB()
+        .collection(req.params.collection)
+        .find(filter).toArray(function(err1, items) {
+            if (err1) {
+                console.log(req.params.collection + " had error: " + JSON.stringify(err1));
+                return resp.status(500).send(err1);
+            }
+            console.log(req.params.collection + " returning " + items.length + " items.");
+            return resp.status(200).send(items);
+        });
+    });
+});
+
 router.get('/:collection', function (req, resp) {
     let filter = {};
     let projection = {};
@@ -55,6 +77,7 @@ router.delete('/:collection', async (req, resp, next) => {
         return resp.status(500).send(reason);
     });
 });
+
 
 router.post('/:collection', async (req, resp, next) => {
     var collName = req.params.collection;

@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v1.78.65</div>
+                    <div style="font-size: 12px;">גרסה v1.78.68</div>
                 </q-toolbar-title>
 
                 <q-btn-dropdown split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
@@ -127,7 +127,7 @@ export default {
             this.$router.push({ name: 'Blank' });
 
             this.$router.push({
-                name: 'Home',
+                name: 'Graph',
                 params: {
                     graphFilter: opts
                 }

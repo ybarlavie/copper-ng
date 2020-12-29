@@ -116,6 +116,33 @@ export default {
         }
     },
     methods: {
+        queryByIds: function (collection, ids) {
+            var that = this;
+
+            return new Promise((resolve, reject) => {
+                if (!collection || !ids || ids.length <= 0) {
+                    resolve([]);
+                }
+                var settings = {
+                    "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/byIds/' + collection,
+                    "method": "POST",
+                    "timeout": 0,
+                    "headers": {
+                        "Content-Type": "application/json",
+                        "x-access-token": window.tokenData.token
+                    },
+                    "data": JSON.stringify(ids),
+                };
+                            
+                $.ajax(settings)
+                    .done(function (result) {
+                        resolve({ collection: collection, records: result });
+                    })
+                    .fail(function(err) {
+                        reject(err);
+                    });
+            });
+        },
         queryMongoCollection: function (collection, query) {
             let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/';
             var that = this;
@@ -255,7 +282,8 @@ export default {
                 });
 
                 // second pass - references only
-                var missingNodes = [];
+                var missing = { ext_documents: [], documents: [], persons: [], locations: [] };
+
                 results.forEach(item => {
                     if (item.collection == "references")
                     {
@@ -278,32 +306,47 @@ export default {
                             // only one side of the reference was found...
                             // we need to create the other side
                             var id = (sel[0].id == item.to) ? item.from : item.to; 
-                            missingNodes.push(id);
                             var newNode = { id: id, item_id: id, label: id };
                             switch (id.substring(0,1)) {
                                 case "E":
-                                    newNode["group"] = "ext_documents";
+                                    missing.ext_documents.push(id);
                                     break;
                                 case "D":
-                                    newNode["group"] = "documents";
+                                    missing.documents.push(id);
                                     break;
                                 case "P":
-                                    newNode["group"] = "persons";
+                                    missing.persons.push(id);
                                     break;
                                 case "L":
-                                    newNode["group"] = "locations";
+                                    missing.locations.push(id);
                                     break;
-                            }
-                            try {
-                                nodesDS.add([newNode]);
-                            } catch (e) {
-                                console.log('dup id ' + id);
                             }
                         }
                     }
                 });
 
-                that.dataReady();
+                var qts = [];
+                for (var k in missing) {
+                    if (missing[k].length > 0)
+                        qts.push(that.queryByIds(k, missing[k]));
+                }
+
+                Promise.allSettled(qts).then((results) => {
+                    results.forEach(res => {
+                        let collection = res.value.collection;
+                        let records = res.value.records;
+                        let fI = (records.length > 0) ? records[0] : null;
+                        if (fI) {
+                            records.forEach(item => {
+                                item.id = item.item_id;
+                                item.group = collection;
+                                nodesDS.add([item]);
+                            });
+                        }
+                    });
+
+                    that.dataReady();
+                });
             });
         },
 

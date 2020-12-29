@@ -21,6 +21,15 @@ const routes = [{
         component: Blank
     },
     {
+        path: '/graph',
+        name: 'Graph',
+        component: Home,
+        props: true,
+        meta: {
+            requiresAuth: true
+        }
+    },
+    {
         path: '/login',
         name: 'Login',
         component: Login,
