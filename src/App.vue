@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v1.78.68</div>
+                    <div style="font-size: 12px;">גרסה v1.79.15</div>
                 </q-toolbar-title>
 
                 <q-btn-dropdown split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
@@ -126,24 +126,30 @@ export default {
         graphClicked(opts) {
             this.$router.push({ name: 'Blank' });
 
-            this.$router.push({
-                name: 'Graph',
-                params: {
-                    graphFilter: opts
-                }
+            var that = this;
+            this.$nextTick().then(function () {
+                that.$router.push({
+                    name: 'Graph',
+                    params: {
+                        graphFilter: opts
+                    }
+                });
             });
         },
 
         searchClicked(opts) {
             this.$router.push({ name: 'Blank' });
 
-            this.$router.push({
-                name: 'resultGrid',
-                params: {
-                    exclude: '1',
-                    query: opts.query,
-                    filterOptions: opts.options
-                }
+            var that = this;
+            this.$nextTick().then(function () {
+                that.$router.push({
+                    name: 'resultGrid',
+                    params: {
+                        exclude: '1',
+                        query: opts.query,
+                        filterOptions: opts.options
+                    }
+                });
             });
         },
         onMainClick(evt) {

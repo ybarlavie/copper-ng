@@ -297,7 +297,6 @@ export default {
                         if (types.length > 0) item.arrows = types[0].arrows;
 
                         edgesDS.add([item]);
-
                         // TODO: fix this. bring in the real entities
                         var sel = nodesDS.get({ 
                             filter: ((n) => { return (n.id == item.from || n.id == item.to); } ) 
@@ -339,7 +338,7 @@ export default {
                         if (fI) {
                             records.forEach(item => {
                                 item.id = item.item_id;
-                                item.group = collection;
+                                item.group = '_' + collection;
                                 nodesDS.add([item]);
                             });
                         }
