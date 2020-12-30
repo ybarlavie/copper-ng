@@ -220,7 +220,6 @@ export default {
                     if (result.length > 0) {
                         var res = result[0];
                         if (!res.keywords) res.keywords = [];
-                        //if (!res.aliases) res.aliases = [];
                         that.document = res;
                         that.origDoc = JSON.parse(JSON.stringify(that.document));
                         that.slide = (that.document.images && that.document.images.length > 0) ? that.document.images[0].label : '';
