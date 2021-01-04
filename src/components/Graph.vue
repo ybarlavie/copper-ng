@@ -352,7 +352,7 @@ export default {
                 item.y = NETWORK_OFFSET_Y + (1 - (item.Y_3857 - _BOT) / GIS_HEIGHT) * NETWORK_HEIGHT;
                 item.fixed = true;
 
-                console.log('projected item ' + JSON.stringify(item));                
+                //console.log('projected item ' + JSON.stringify(item));                
             }
         },
 
@@ -364,10 +364,15 @@ export default {
             nodesDS = new vis.DataSet(opdsOpts);
             edgesDS = new vis.DataSet(opdsOpts);
 
+            // map frame pass
+            nodesDS.add([{ id: 'min_XY', x: NETWORK_OFFSET_X, y: NETWORK_OFFSET_Y, fixed: true }]);
+            nodesDS.add([{ id: 'max_XY', x: Math.abs(NETWORK_OFFSET_X), y: Math.abs(NETWORK_OFFSET_Y), fixed: true }]);
+
             let that = this;
             this.queryResearch(filter)
             .then((results) => {
                 // first pass, non-references first
+                console.log('first pass');
                 results.forEach(item => {
                     if (item.collection != "references") {
                         item.id = item.item_id;
@@ -384,6 +389,7 @@ export default {
                 // second pass - references only
                 var missing = { ext_documents: [], documents: [], persons: [], locations: [] };
 
+                console.log('second pass');
                 results.forEach(item => {
                     if (item.collection == "references")
                     {
