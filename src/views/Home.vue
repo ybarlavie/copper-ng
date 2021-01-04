@@ -1,5 +1,5 @@
 <template>
-    <Graph :filter="gFilter"/>
+    <Graph :filter="gFilter" :mapObj="mObj" />
 </template>
 <script>
 import Graph from '../components/Graph.vue'
@@ -10,7 +10,7 @@ export default {
         Graph
     },
 
-    props: ['graphFilter'],
+    props: ['graphFilter', 'mapObj'],
 
     data: () => ({
         error: '',
@@ -23,7 +23,8 @@ export default {
     },
 
     computed: {
-        gFilter() { return this.graphFilter || null; }
+        gFilter() { return this.graphFilter || null; },
+        mObj() { return this.mapObj || null; }
     }
 }
 </script>

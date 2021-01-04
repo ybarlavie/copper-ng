@@ -8,7 +8,7 @@ const router = express.Router();
 const searches = [
     { coll: 'documents', fields: [ 'title', 'text', 'keywords' ], prj: { sug: 'מסמך בר כוכבא', item_id: 1, name: 1, title: 1, keywords: 1 } },
     { coll: 'ext_documents', fields: [ 'title', 'text', 'keywords' ], prj: { sug: 'מסמך חיצוני', item_id: 1, name: 1, title: 1, keywords: 1 } },
-    { coll: 'locations', fields: [ 'title', 'keywords' ], prj: { sug: 'מיקום', item_id: 1, name: 1, title: 1, keywords: 1 } },
+    { coll: 'locations', fields: [ 'title', 'keywords' ], prj: { sug: 'מיקום', item_id: 1, name: 1, title: 1, keywords: 1, lat: 1, lng: 1 } },
     { coll: 'persons', fields: [ 'title', 'name', 'aliases', 'keywords'], prj: { sug: 'דמות', item_id: 1, name: 1, title: 1, keywords: 1 } }
 ];
 
@@ -114,7 +114,7 @@ const _by_word_options = (opts, lim, id) => {
                         collOpts.push({ coll: 'ext_documents', fields: flds, prj: { collection: 'ext_documents', sug: 'מסמך חיצוני', item_id: 1, name: 1, title: 1, keywords: 1 } });
                         break;
                     case 'useLocations':
-                        collOpts.push({ coll: 'locations', fields: flds, prj: { collection: 'locations', sug: 'מיקום', item_id: 1, name: 1, title: 1, keywords: 1 } });
+                        collOpts.push({ coll: 'locations', fields: flds, prj: { collection: 'locations', sug: 'מיקום', item_id: 1, name: 1, title: 1, keywords: 1, lat: 1, lng: 1 } });
                         break;
                     case 'usePersons':
                         collOpts.push({ coll: 'persons', fields: flds, prj: { collection: 'persons', sug: 'דמות', item_id: 1, name: 1, title: 1, keywords: 1 } })

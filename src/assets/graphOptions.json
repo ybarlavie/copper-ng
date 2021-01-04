@@ -29,7 +29,7 @@
                 "weight": "bold",
                 "size": 20,
                 "code": "\uf15c",
-                "color": "#dddddd"
+                "color": "#000000"
             }
         },
         "ext_documents": {
@@ -49,7 +49,7 @@
                 "weight": "bold",
                 "size": 20,
                 "code": "\uf70e",
-                "color": "#dddddd"
+                "color": "#000000"
             }
         },
         "locations": {
@@ -69,7 +69,7 @@
                 "weight": "bold",
                 "size": 20,
                 "code": "\uf57d",
-                "color": "#dddddd"
+                "color": "#000000"
             }
         },
         "persons": {
@@ -89,7 +89,7 @@
                 "weight": "bold",
                 "size": 20,
                 "code": "\uf007",
-                "color": "#dddddd"
+                "color": "#000000"
             }
         },
         "unselected": {

@@ -18,12 +18,32 @@
             </q-field>
         </div>
         <div style="display: flex; flex-direction: row;">
-            <div id="mynetwork" ref="mynetwork"></div>
+            <div id="map_root" ref="map_root" style="position:relative;">
+                <div id="mymap" ref="mymap" style="position: absolute; top: 0; left: 0;"></div>
+                <div id="mynetwork" ref="mynetwork"></div>
+            </div>
         </div>
     </div>
 </template>
 <script>
 import graphOptions from '../assets/graphOptions.json';
+
+const   _LEFT = 3806054;    // 3857 left x
+const   _TOP = 3934294;     // 3857 top y
+const   _RIGHT = 3972366;   // 3857 right x
+const   _BOT = 3437999;     // 3857 bot y
+
+let GIS_WIDTH = -1;
+let GIS_HEIGHT = -1;
+let NETWORK_OFFSET_X = -1;
+let NETWORK_OFFSET_Y = -1;
+let NETWORK_WIDTH = -1;
+let NETWORK_HEIGHT = -1;
+
+let _map = null;
+let _currScale = 1.5;
+let _currZoom = 10;
+let _accumScale = 0;
 
 let nodesDS = null;
 let edgesDS = null;
@@ -96,12 +116,16 @@ let currQuery = {
 
 export default {
     name: 'home',
-    props: ['filter', 'queryData'],
+    props: ['filter', 'queryData', 'mapObj'],
     data: () => ({
         error: '',
         nodeQuery: ''
     }),
     mounted() {
+        if (this.mapObj) {
+            this.bindMap();
+        }
+
         if (this.queryData)
         {
             this.drawQuery(this.queryData);
@@ -116,6 +140,64 @@ export default {
         }
     },
     methods: {
+        bindMap: function() {
+            GIS_WIDTH = Math.abs(_RIGHT - _LEFT);
+            GIS_HEIGHT = Math.abs(_BOT - _TOP);
+
+            NETWORK_OFFSET_X = Math.ceil(GIS_WIDTH / -50);
+            NETWORK_OFFSET_Y = Math.ceil(GIS_HEIGHT / -50);
+
+            NETWORK_WIDTH = Math.abs(NETWORK_OFFSET_X * 2);
+            NETWORK_HEIGHT = Math.abs(NETWORK_OFFSET_Y * 2);
+
+            var mN = this.$refs.mynetwork;
+            var mM = this.$refs.mymap;
+
+            mM.width = mN.offsetWidth + "px";
+            mM.style.width = mN.offsetWidth + "px";
+            mM.height = mN.offsetWidth + "px";
+            mM.style.height = mN.offsetHeight + "px";
+
+            _currZoom = 10;
+            _map = new ol.Map({
+                target: 'mymap',
+                layers: [
+                    new ol.layer.Tile({
+                        source: new ol.source.OSM()
+                    })
+                ],
+                view: new ol.View({
+                    center: ol.proj.fromLonLat([35.10979, 31.75725]),
+                    zoom: _currZoom
+                })
+            });
+        },
+
+        _syncNetwork: function (nwRef) {
+            if (!nwRef) return;
+
+            var extent = _map.getView().calculateExtent();
+            var center = ol.extent.getCenter(extent);
+            var minX = extent[0];
+            var minY = extent[1];
+            var maxX = extent[2];
+            var maxY = extent[3];
+            
+            var scale = (nwRef.clientHeight / NETWORK_HEIGHT) * (GIS_HEIGHT / (maxY - minY));
+
+            var newPos = {
+                position: {
+                    x: NETWORK_OFFSET_X + ((center[0] - _LEFT) / GIS_WIDTH) * NETWORK_WIDTH,
+                    y: NETWORK_OFFSET_Y + (1 - (center[1] - _BOT) / GIS_HEIGHT) * NETWORK_HEIGHT
+                },
+                scale: scale,
+                animation: false
+            };
+
+            network.moveTo(newPos);
+            //console.log('synced... scale is ' + network.getScale());
+        },
+
         queryByIds: function (collection, ids) {
             var that = this;
 
@@ -259,8 +341,23 @@ export default {
             this.dataReady();
         },
 
+        projectItem: function(item) {
+            if (item['lat'] && item['lng'] && item.lat>0 && item.lng>0) 
+            {
+                // this is a location
+                var coords = ol.proj.transform([item.lng, item.lat], 'EPSG:4326', 'EPSG:3857');
+                item.X_3857 = coords[0];
+                item.Y_3857 = coords[1];
+                item.x = NETWORK_OFFSET_X + (item.X_3857 - _LEFT) / GIS_WIDTH * NETWORK_WIDTH;
+                item.y = NETWORK_OFFSET_Y + (1 - (item.Y_3857 - _BOT) / GIS_HEIGHT) * NETWORK_HEIGHT;
+                item.fixed = true;
+
+                console.log('projected item ' + JSON.stringify(item));                
+            }
+        },
+
         drawFilter: function (filter) {
-            console.log(filter.query + " " + filter.options)
+            //console.log(filter.query + " " + filter.options)
             this.destroy();
 
             let opdsOpts = {};
@@ -277,6 +374,9 @@ export default {
                         item.group = item.collection;
                         item.label = item.name;
 
+                        if (that.mapObj) {
+                            that.projectItem(item);
+                        }
                         nodesDS.add([item]);
                     }
                 });
@@ -339,6 +439,9 @@ export default {
                             records.forEach(item => {
                                 item.id = item.item_id;
                                 item.group = '_' + collection;
+                                if (that.mapObj) {
+                                    that.projectItem(item);
+                                }
                                 nodesDS.add([item]);
                             });
                         }
@@ -409,9 +512,68 @@ export default {
                 returnType: "Object",
             });
 
+            if (this.mapObj) {
+                this._syncNetwork(this.$refs.mynetwork);
+            }
+
             let that = this;
 
+            if (this.mapObj) {
+                network.on('zoom', function(params) {
+                    _accumScale = params.scale;
+
+                    var oldZoom = _currZoom;
+                    if (_accumScale <= 0.08157983033384501)
+                        _currZoom = 9;
+                    else if (_accumScale < 0.3263193213353777)
+                        _currZoom = 10;
+                    else if (_accumScale < 0.6526386426707648)
+                        _currZoom = 11;
+                    else if (_accumScale < 1.3052772853414918)
+                        _currZoom = 12;
+                    else if (_accumScale < 2.6105545706829836)
+                        _currZoom = 13;
+                    else if (_accumScale < 5.221109141365967)
+                        _currZoom = 14;
+                    else if (_accumScale < 10.442218283)
+                        _currZoom = 15;
+                    else if (_accumScale < 20.884436565)
+                        _currZoom = 16;
+                    else if (_accumScale < 41.768873131)
+                        _currZoom = 17;
+                    else if (_accumScale < 83.537746262)
+                        _currZoom = 18;
+                    else if (_accumScale < 167.075492524)
+                        _currZoom = 19;
+                    else if (_accumScale < 334.150985047)
+                        _currZoom = 20;
+                    else
+                        that._syncNetwork(that.$refs.mynetwork);
+
+                    //console.log('scale: ' + params.scale );
+                    if (_currZoom != oldZoom) {
+                        //console.log('changing zoom to ' + _currZoom);
+                        _map.getView().setZoom(_currZoom);
+                        that._syncNetwork(that.$refs.mynetwork);
+                    } else {
+                        //console.log('no change in zoom...');
+                    }
+                });
+                network.on('release', function(params) {
+                    //console.log('network release...');
+                    var pos = network.getViewPosition();
+
+                    var X = (((pos.x - NETWORK_OFFSET_X) / NETWORK_WIDTH) * GIS_WIDTH) + _LEFT;
+                    var Y = ((((-1 * pos.y) - NETWORK_OFFSET_Y) / NETWORK_HEIGHT) * GIS_HEIGHT) + _BOT + 1;
+                    
+                    _map.getView().setCenter([X, Y]);
+
+                    that._syncNetwork(that.$refs.mynetwork);
+                });
+            }
+
             network.on('click', function (params) {
+                //console.log('network click...');
                 let sel = null;
                 if (params.nodes.length > 0) {
                     sel = nodesDS.get(params.nodes[0]);
@@ -421,8 +583,11 @@ export default {
                     return;
                 }
                 if (document.getElementById("card").checked) {
-                    var params = { itemId: sel.item_id, editable: false, collName: sel.group };
-                    switch (sel.group)
+                    var collName = sel.group;
+                    if (collName.startsWith('_')) collName = collName.substring(1);
+
+                    var params = { itemId: sel.item_id, editable: false, collName: collName };
+                    switch (collName)
                     {
                         case "documents":
                             that.$router.push({ name: 'bcDocument', params: params });
@@ -480,7 +645,7 @@ export default {
 
     #mynetwork {
         width: 100vw;
-        height: 80vh;
+        height: 90vh;
         border: 1px solid lightgray;
     }
 
