@@ -33,6 +33,9 @@ const   _TOP = 3934294;     // 3857 top y
 const   _RIGHT = 3972366;   // 3857 right x
 const   _BOT = 3437999;     // 3857 bot y
 
+const   _SCALE_BASE = 50;
+const   _SCALE_FACTOR = 4;
+
 let GIS_WIDTH = -1;
 let GIS_HEIGHT = -1;
 let NETWORK_OFFSET_X = -1;
@@ -144,8 +147,8 @@ export default {
             GIS_WIDTH = Math.abs(_RIGHT - _LEFT);
             GIS_HEIGHT = Math.abs(_BOT - _TOP);
 
-            NETWORK_OFFSET_X = Math.ceil(GIS_WIDTH / -50);
-            NETWORK_OFFSET_Y = Math.ceil(GIS_HEIGHT / -50);
+            NETWORK_OFFSET_X = Math.ceil(GIS_WIDTH / (_SCALE_BASE/_SCALE_FACTOR*-1));
+            NETWORK_OFFSET_Y = Math.ceil(GIS_HEIGHT / (_SCALE_BASE/_SCALE_FACTOR*-1));
 
             NETWORK_WIDTH = Math.abs(NETWORK_OFFSET_X * 2);
             NETWORK_HEIGHT = Math.abs(NETWORK_OFFSET_Y * 2);
@@ -195,7 +198,6 @@ export default {
             };
 
             network.moveTo(newPos);
-            //console.log('synced... scale is ' + network.getScale());
         },
 
         queryByIds: function (collection, ids) {
@@ -508,6 +510,15 @@ export default {
             });
         },
 
+        _getZoom: function(scale) {
+            var _curr = 0.040789915;
+            for (var zoom=7; zoom<21; zoom++) {
+                if (scale < _curr/_SCALE_FACTOR) return zoom;
+                _curr *= 2;
+            }
+            return -1;
+        },
+
         dataReady: function () {
             network = new vis.Network(this.$refs.mynetwork, {
                 nodes: nodesDS,
@@ -526,43 +537,23 @@ export default {
 
             if (this.mapObj) {
                 network.on('zoom', function(params) {
-                    _accumScale = params.scale;
-
                     var oldZoom = _currZoom;
-                    if (_accumScale <= 0.08157983033384501)
-                        _currZoom = 9;
-                    else if (_accumScale < 0.3263193213353777)
-                        _currZoom = 10;
-                    else if (_accumScale < 0.6526386426707648)
-                        _currZoom = 11;
-                    else if (_accumScale < 1.3052772853414918)
-                        _currZoom = 12;
-                    else if (_accumScale < 2.6105545706829836)
-                        _currZoom = 13;
-                    else if (_accumScale < 5.221109141365967)
-                        _currZoom = 14;
-                    else if (_accumScale < 10.442218283)
-                        _currZoom = 15;
-                    else if (_accumScale < 20.884436565)
-                        _currZoom = 16;
-                    else if (_accumScale < 41.768873131)
-                        _currZoom = 17;
-                    else if (_accumScale < 83.537746262)
-                        _currZoom = 18;
-                    else if (_accumScale < 167.075492524)
-                        _currZoom = 19;
-                    else if (_accumScale < 334.150985047)
-                        _currZoom = 20;
-                    else
-                        that._syncNetwork(that.$refs.mynetwork);
 
-                    //console.log('scale: ' + params.scale );
+                    _currZoom = that._getZoom(params.scale);
+
                     if (_currZoom != oldZoom) {
-                        //console.log('changing zoom to ' + _currZoom);
-                        _map.getView().setZoom(_currZoom);
+                        if (_currZoom == -1) {
+                            _currZoom = oldZoom;
+                        } else {
+                            var pos = network.getViewPosition();
+
+                            var X = (((pos.x - NETWORK_OFFSET_X) / NETWORK_WIDTH) * GIS_WIDTH) + _LEFT;
+                            var Y = ((((-1 * pos.y) - NETWORK_OFFSET_Y) / NETWORK_HEIGHT) * GIS_HEIGHT) + _BOT + 1;
+                    
+                            _map.getView().setCenter([X, Y]);
+                            _map.getView().setZoom(_currZoom);
+                        }
                         that._syncNetwork(that.$refs.mynetwork);
-                    } else {
-                        //console.log('no change in zoom...');
                     }
                 });
                 network.on('release', function(params) {
