@@ -16,20 +16,20 @@ services:
             MONGO_INITDB_ROOT_USERNAME: root
             MONGO_INITDB_ROOT_PASSWORD: "AYNIL#$$%678liayn"
 
-    geoserver:
-        image: kartoza/geoserver
-        volumes:
-            - /var/docker-data/geoserver-data:/opt/geoserver/data_dir
-        ports:
-            - "8080:8080"
-        restart: on-failure
-        env_file:
-            - .geoserver.env
-        healthcheck:
-            test: curl --fail -s http://localhost:8080/ || exit 1
-            interval: 1m30s
-            timeout: 10s
-            retries: 3
+    # geoserver:
+    #     image: kartoza/geoserver
+    #     volumes:
+    #         - /var/docker-data/geoserver-data:/opt/geoserver/data_dir
+    #     ports:
+    #         - "8080:8080"
+    #     restart: on-failure
+    #     env_file:
+    #         - .geoserver.env
+    #     healthcheck:
+    #         test: curl --fail -s http://localhost:8080/ || exit 1
+    #         interval: 1m30s
+    #         timeout: 10s
+    #         retries: 3
 
     # mongo-express:
     #     image: mongo-express
