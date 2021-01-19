@@ -64,7 +64,8 @@ let currQuery = {
             'keywords': 0,
             'aliases': 0,
             '_who': 0,
-            '_when': 0
+            '_when': 0,
+            '_answers': 0
         }
     },
     documents: {

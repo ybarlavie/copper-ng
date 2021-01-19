@@ -27,21 +27,24 @@ router.post('/byIds/:collection', async (req, resp, next) => {
 });
 
 router.get('/:collection', function (req, resp) {
-    let filter = {};
-    let projection = {};
+    let aggArray = [];
 
     if (req.query.q) {
         try {
             q = JSON.parse(req.query.q);
+            var filter = {};
             filter[q.qv] = new RegExp(q.qe, 'i');
+            aggArray.push({ $match: filter });
         } catch {
             return res.status(400).end();
         }
 
         if (q.prj) {
-            projection = { projection: q.prj };
+            aggArray.push({ $project: q.prj });
         }
     }
+
+    console.log(req.params.collection + " aggregating " + JSON.stringify(aggArray));
 
     MongoDB.connectDB('copper-db', async (err) => {
         if (err) return resp.status(500).send("cannot connect to DB");
@@ -49,7 +52,8 @@ router.get('/:collection', function (req, resp) {
         MongoDB
         .getDB()
         .collection(req.params.collection)
-        .find(filter, projection).toArray(function(err1, items) {
+        .aggregate( aggArray )
+        .toArray(function(err1, items) {
             if (err1) {
                 console.log(req.params.collection + " had error: " + JSON.stringify(err1));
                 return resp.status(500).send(err1);

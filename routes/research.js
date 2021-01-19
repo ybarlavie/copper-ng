@@ -155,9 +155,11 @@ const _by_word_options = (opts, lim, id) => {
 
                 if (opts.extractRefs)
                 {
+                    var match = { $or: [ { from: { $in: item_ids } }, { to: { $in: item_ids } } ] };
+                    var prj = { _id: 0, from: 1, to: 1, type: 1, description: 1, ref_id: 1, _valid: 1 };
                     MongoDB.getDB()
                     .collection('references')
-                    .find( { $or: [ { from: { $in: item_ids } }, { to: { $in: item_ids } } ] } )
+                    .aggregate( [ { $match: match }, { $project: prj } ] )
                     .toArray((err, refs) => {
                         if (err) return resp.status(500).send("cannot query references");
                         if (!refs) return resp.status(500).send("failed querying references");

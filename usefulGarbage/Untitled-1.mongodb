@@ -1,0 +1,9 @@
+// MongoDB Playground
+// Use Ctrl+Space inside a snippet or a string literal to trigger completions.
+
+// The current database to use.
+use('copper-db');
+
+// Search for documents in the current collection.
+db.getCollection('references')
+  .find( { $and:[ { _valid: "no" }, { "_answers.4": { $exists: false } } ] } );
