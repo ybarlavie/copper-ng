@@ -6,8 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v2.0.234</div>
-                    <div style="font-size: 12px;">{{email}}</div>
+                    <div style="font-size: 12px;">גרסה v3.1.87</div>
                 </q-toolbar-title>
 
                 <q-btn-dropdown v-if="this.role != 'social_arch'" split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
