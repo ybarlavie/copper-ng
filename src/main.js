@@ -11,6 +11,7 @@ window.apiURL += 'api/';
 
 window.JWT_COOKIE = "copper-ng-jwt";
 window.tokenData = {};
+window.__isLoggenIn__ = false;
 
 window.store = {};
 

@@ -9,7 +9,7 @@ Vue.use(VueRouter)
 const routes = [{
         path: '/',
         name: 'Home',
-        component: Home,
+        component: Blank,
         props: true,
         meta: {
             requiresAuth: true
@@ -19,6 +19,15 @@ const routes = [{
         path: '/blank',
         name: 'Blank',
         component: Blank
+    },
+    {
+        path: '/socialArch',
+        name: 'SocialArch',
+        component: () => import( /* webpackChunkName: "SocialArch" */ '../views/SocialArch.vue'),
+        props: true,
+        meta: {
+            requiresAuth: true
+        }
     },
     {
         path: '/graph',
@@ -113,10 +122,11 @@ const router = new VueRouter({
 const _isLoggedIn = () => {
     try {
         window.tokenData = JSON.parse(window.localStorage.getItem(window.JWT_COOKIE));
-        return (window.tokenData && window.tokenData.expires > Math.floor(Date.now() / 1000));
+        window.__isLoggenIn__ = (window.tokenData && window.tokenData.expires > Math.floor(Date.now() / 1000));
     } catch {
-        return false;
+        window.__isLoggenIn__ = false;
     }
+    return window.__isLoggenIn__;
 }
 
 router.beforeEach((to, from, next) => {

@@ -1,5 +1,5 @@
 <template>
-    <q-layout>
+    <q-layout >
         <q-header elevated class="glossy">
             <q-toolbar dir="rtl">
                 <q-btn flat dense round @click="leftDrawerOpen = !leftDrawerOpen" aria-label="Menu" icon="menu" />
@@ -7,9 +7,10 @@
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
                     <div style="font-size: 12px;">גרסה v2.0.234</div>
+                    <div style="font-size: 12px;">{{email}}</div>
                 </q-toolbar-title>
 
-                <q-btn-dropdown split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
+                <q-btn-dropdown v-if="this.role != 'social_arch'" split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
                     <q-list dir="rtl">
                         <q-item clickable v-close-popup @click="addItemType = 'תעודת בר כוכבא'">
                             <q-item-section>
@@ -37,11 +38,11 @@
                     </q-list>
                 </q-btn-dropdown>
 
-                <div class="q-pl-md q-gutter-sm row no-wrap items-center">
+                <div v-if="this.role != 'social_arch'" class="q-pl-md q-gutter-sm row no-wrap items-center">
+                    <q-btn color="primary" icon="share" label="ארכיאולוגיה קהילתית" @click="onSocialArch" />
                     <SearchParams @search-options="graphClicked($event)" icon="device_hub" placeHolder="סינון גרף" />
+                    <SearchParams @search-options="searchClicked($event)" />
                 </div>
-
-                <SearchParams @search-options="searchClicked($event)" />
             </q-toolbar>
         </q-header>
 
@@ -58,15 +59,6 @@
                 </q-item>
 
                 <q-item-label header>קישורים חיצוניים</q-item-label>
-                <q-item clickable tag="a" target="_blank" href="http://blcloud.ddns.net:8081/db/copper-db">
-                    <q-item-section avatar>
-                        <q-icon name="school" />
-                    </q-item-section>
-                    <q-item-section>
-                        <q-item-label>בסיס הנתונים</q-item-label>
-                        <q-item-label caption>ז ה י ר ו ת ! ! !</q-item-label>
-                    </q-item-section>
-                </q-item>
             </q-list>
         </q-drawer>
 
@@ -88,32 +80,71 @@ export default {
     },
 
     beforeMount() {
-        queryMongoAsync(this, 'ref_types')
-        .then(result => {
-            window.store.ref_types = result;
-            window.store.ref_types.forEach(t => {
-                t.toRegEx = new RegExp(t.toRegEx, 'g');
-                t.fromRegEx = new RegExp(t.fromRegEx, 'g');
+    },
+
+    mounted() {
+        this.$nextTick().then(() => {
+            window.store.item_types = { 
+                D: { coll: "documents", s_heb: "תעודת ב.כ.", p_heb: "תעודות ב.כ."},
+                E: { type: "ext_documents", s_heb: "תעודה חיצונית", p_heb: "תעודות חיצוניות"},
+                P: { type: "persons", s_heb: "דמות", p_heb: "דמויות"},
+                L: { type: "locations", s_heb: "מיקום", p_heb: "מיקומים"},
+            };
+
+            queryMongoAsync(this, 'ref_types')
+            .then(result => {
+                window.store.ref_types = result;
+                window.store.ref_types.forEach(t => {
+                    t.toRegEx = new RegExp(t.toRegEx, 'g');
+                    t.fromRegEx = new RegExp(t.fromRegEx, 'g');
+                });
+            });
+
+            queryMongoAsync(this, 'keywords')
+            .then(result => {
+                window.store.keywords = result;
+                window.store.keywords.forEach(t => {
+                    t.itemsRegEx = new RegExp(t.itemsRegEx, 'g');
+                });
             });
         });
 
-        queryMongoAsync(this, 'keywords')
-        .then(result => {
-            window.store.keywords = result;
-            window.store.keywords.forEach(t => {
-                t.itemsRegEx = new RegExp(t.itemsRegEx, 'g');
-            });
-        });
+        if (window.tokenData) {
+            this.role = window.tokenData.role || "social_arch";
+            this.email = window.tokenData.email || null;
+        }
+
+        this.$root.$on('login-complete', this.loginComplete);
+    },
+
+    beforeDestroy() {
+        this.$root.$off('login-complete', this.loginComplete);
     },
 
     data() {
         return {
+            componentKey: 0,
+            role: 'social_arch',
+            email: null,
             leftDrawerOpen: false,
             addItemType: 'ישות',
             query: ''
         }
     },
+
+    computed: {
+        isLoggedIn() {
+            return window.__isLoggenIn__;
+        }
+    },
+
     methods: {
+        loginComplete(loginResult) {
+            this.role = window.tokenData.role;
+            this.email = window.tokenData.email;
+            this.componentKey += 1;
+        },
+
         logoutClicked() {
             window.tokenData = {};
             window.localStorage.setItem(window.JWT_COOKIE, "");
@@ -153,6 +184,19 @@ export default {
                 });
             });
         },
+
+        onSocialArch() {
+            this.$router.push({ name: 'Blank' });
+
+            var that = this;
+            this.$nextTick().then(function () {
+                that.$router.push({
+                    name: 'SocialArch',
+                    params: {}
+                });
+            });
+        },
+
         onMainClick(evt) {
             switch (this.addItemType) {
                 case 'תעודת בר כוכבא':

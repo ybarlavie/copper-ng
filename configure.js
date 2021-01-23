@@ -1,5 +1,6 @@
 const bodyParser = require('body-parser');
 const logger = require('morgan');
+const socialArchRouter = require('./routes/socialArch');
 const dbRouter = require('./routes/db');
 const researchRouter = require('./routes/research');
 const batchRouter = require('./routes/batch');
@@ -45,4 +46,5 @@ module.exports = (app) => {
     app.use('/api/research', researchRouter);
     app.use('/api/batch', batchRouter);
     app.use('/api/auth', authRouter);
+    app.use('/api/socialArch', socialArchRouter);
 }

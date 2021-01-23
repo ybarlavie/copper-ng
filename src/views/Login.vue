@@ -15,6 +15,8 @@
     </div>
 </template>
 <script>
+import AppVue from '../App.vue';
+
 export default {
     data: () => {
         return {
@@ -103,12 +105,18 @@ export default {
                     that.ajaxing = false;
                     that.componentKey += 1;
 
-                    that.$router.push({ path : '/' });
+                    that.$root.$emit('login-complete', true);
+                    
+                    that.$nextTick().then(function () {
+                        that.$router.push({ path : '/' });
+                    });
                 },
                 error: function (xhr, status, err) {
                     that.showNotif(false, "ההזדהות נכשלה");
                     that.ajaxing = false;
                     that.componentKey += 1;
+
+                    that.$root.$emit('login-complete', false);
                 }
             });
         },

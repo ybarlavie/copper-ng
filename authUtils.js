@@ -61,9 +61,9 @@ const verifyTOTP = (email, token) => {
                 console.log('token ' + token + ' is valid');
 
                 var expiryTime = Math.floor(Date.now() / 1000) + parseInt(process.env.MAX_JWT_SECONDS);
-                var payload = { exp: expiryTime, type: "JWT", email: email };
+                var payload = { exp: expiryTime, type: "JWT", email: email, role: result.role };
                 var jwToken = jwt.sign(payload, process.env.JWT_SECRET);
-                var client_jwt = { token: jwToken, expires: expiryTime };
+                var client_jwt = { token: jwToken, expires: expiryTime, role: result.role };
 
                 var removes = [];
                 for (var k in loggedInTokens) {
