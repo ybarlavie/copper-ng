@@ -3,30 +3,50 @@
         <q-linear-progress v-if="ajaxing" indeterminate />
         <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
             <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
-                <q-badge :label="greeting" align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
-                <q-badge label="האם הפריט מהסוג: " align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
-                <q-badge :label="fromItemTypeDecr" align="middle" color="blue" filled style="font-size: 19px; height: 25px;" />
-            </div>
-            <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
-                <q-badge label="שם" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                <q-badge :label="document.fromItem.name" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
-                <q-badge label="תווית" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                <q-badge :label="document.fromItem.label" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
-                <q-badge label="כותרת" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                <q-badge :label="document.fromItem.title" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
+                <div class="q-pa-md q-gutter-md row">
+                    <q-badge :label="greeting" align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
+                    <q-badge label="השאלה: " align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
+                    <q-badge label="האם הפריט מהסוג " align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
+                    <q-badge :label="fromItemTypeDecr" align="middle" color="blue" filled style="font-size: 19px; height: 25px;" />
+                </div>
+                <div class="q-pa-md q-gutter-md row">
+                    <div>
+                        <q-badge label="שם" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
+                        <q-badge :label="document.fromItem.name" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
+                    </div>
+                    <div>
+                        <q-badge label="תווית" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
+                        <q-badge :label="document.fromItem.label" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
+                    </div>
+                    <div>
+                        <q-badge label="כותרת" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
+                        <q-badge :label="document.fromItem.title" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
+                    </div>
+                </div>
                 <q-input v-if="document.fromItem.text" rounded outlined v-model="document.fromItem.text" type="textarea" readonly="true" hint="טקסט" style="font-size: 19px;" />
                 <q-input v-if="document.fromItem.remarks" rounded outlined v-model="document.fromItem.remarks" type="textarea" readonly="true" hint="הערות" style="font-size: 19px;" />
             </div>
             <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
-                <q-badge :label="refDescr" align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
+                <div class="q-pa-md q-gutter-md row">
+                    <q-badge :label="refDescr" align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
+                    <q-badge :label="toItemTypeDecr" align="middle" color="blue" filled style="font-size: 19px; height: 25px;" />
+                </div>
             </div>
             <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
-                <q-badge label="שם" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                <q-badge :label="document.toItem.name" align="middle" color="green" style="font-size: 19px; height: 25px;" />
-                <q-badge label="תווית" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                <q-badge :label="document.toItem.label" align="middle" color="green" style="font-size: 19px; height: 25px;" />
-                <q-badge label="תווית" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                <q-badge :label="document.toItem.title" align="middle" color="green" style="font-size: 19px; height: 25px;" />
+                <div class="q-pa-md q-gutter-md row">
+                    <div>
+                        <q-badge label="שם" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
+                        <q-badge :label="document.toItem.name" align="middle" color="green" style="font-size: 19px; height: 25px;" />
+                    </div>
+                    <div>
+                        <q-badge label="תווית" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
+                        <q-badge :label="document.toItem.label" align="middle" color="green" style="font-size: 19px; height: 25px;" />
+                    </div>
+                    <div>
+                        <q-badge label="תווית" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
+                        <q-badge :label="document.toItem.title" align="middle" color="green" style="font-size: 19px; height: 25px;" />
+                    </div>
+                </div>
                 <q-input v-if="document.toItem.text" rounded outlined v-model="document.toItem.text" type="textarea" readonly="true" hint="טקסט" style="font-size: 19px;" />
                 <q-input v-if="document.toItem.remarks" rounded outlined v-model="document.toItem.remarks" type="textarea" readonly="true" hint="הערות" style="font-size: 19px;" />
             </div>
