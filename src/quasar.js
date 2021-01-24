@@ -48,6 +48,7 @@ import {
     QSpace,
     QSelect,
     QOptionGroup,
+    QRadio,
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -94,6 +95,7 @@ Vue.use(Quasar, {
         QSpace,
         QSelect,
         QOptionGroup,
+        QRadio,
     },
     config: {},
     directives: {

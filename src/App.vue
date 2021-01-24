@@ -6,36 +6,9 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v3.1.87</div>
+                    <div style="font-size: 12px;">גרסה v3.1.95</div>
                 </q-toolbar-title>
 
-                <q-btn-dropdown v-if="this.role != 'social_arch'" split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
-                    <q-list dir="rtl">
-                        <q-item clickable v-close-popup @click="addItemType = 'תעודת בר כוכבא'">
-                            <q-item-section>
-                                <q-item-label>תעודת בר כוכבא</q-item-label>
-                            </q-item-section>
-                        </q-item>
-
-                        <q-item clickable v-close-popup @click="addItemType = 'תעודה חיצונית'">
-                            <q-item-section>
-                                <q-item-label>תעודה חיצונית</q-item-label>
-                            </q-item-section>
-                        </q-item>
-
-                        <q-item clickable v-close-popup @click="addItemType = 'דמות'">
-                            <q-item-section>
-                                <q-item-label>דמות</q-item-label>
-                            </q-item-section>
-                        </q-item>
-
-                        <q-item clickable v-close-popup @click="addItemType = 'מיקום'">
-                            <q-item-section>
-                                <q-item-label>מיקום</q-item-label>
-                            </q-item-section>
-                        </q-item>
-                    </q-list>
-                </q-btn-dropdown>
 
                 <div v-if="this.role != 'social_arch'" class="q-pl-md q-gutter-sm row no-wrap items-center">
                     <q-btn color="primary" icon="share" label="ארכיאולוגיה קהילתית" @click="onSocialArch" />
@@ -56,7 +29,35 @@
                         <q-item-label>התנתקות</q-item-label>
                     </q-item-section>
                 </q-item>
+                <q-item>
+                    <q-btn-dropdown v-if="this.role != 'social_arch'" split push color="primary" :label="'הוספת ' + addItemType" @click="onMainClick">
+                        <q-list dir="rtl">
+                            <q-item clickable v-close-popup @click="addItemType = 'תעודת בר כוכבא'">
+                                <q-item-section>
+                                    <q-item-label>תעודת בר כוכבא</q-item-label>
+                                </q-item-section>
+                            </q-item>
 
+                            <q-item clickable v-close-popup @click="addItemType = 'תעודה חיצונית'">
+                                <q-item-section>
+                                    <q-item-label>תעודה חיצונית</q-item-label>
+                                </q-item-section>
+                            </q-item>
+
+                            <q-item clickable v-close-popup @click="addItemType = 'דמות'">
+                                <q-item-section>
+                                    <q-item-label>דמות</q-item-label>
+                                </q-item-section>
+                            </q-item>
+
+                            <q-item clickable v-close-popup @click="addItemType = 'מיקום'">
+                                <q-item-section>
+                                    <q-item-label>מיקום</q-item-label>
+                                </q-item-section>
+                            </q-item>
+                        </q-list>
+                    </q-btn-dropdown>
+                </q-item>
                 <q-item-label header>קישורים חיצוניים</q-item-label>
             </q-list>
         </q-drawer>

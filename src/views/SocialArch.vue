@@ -23,8 +23,8 @@
                         <q-badge :label="document.fromItem.title" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
                     </div>
                 </div>
-                <q-input v-if="document.fromItem.text" rounded outlined v-model="document.fromItem.text" type="textarea" readonly="true" hint="טקסט" style="font-size: 19px;" />
-                <q-input v-if="document.fromItem.remarks" rounded outlined v-model="document.fromItem.remarks" type="textarea" readonly="true" hint="הערות" style="font-size: 19px;" />
+                <q-input v-if="document.fromItem.text" rounded outlined v-model="document.fromItem.text" type="textarea" :readonly="true" hint="טקסט" style="font-size: 19px;" />
+                <q-input v-if="document.fromItem.remarks" rounded outlined v-model="document.fromItem.remarks" type="textarea" :readonly="true" hint="הערות" style="font-size: 19px;" />
             </div>
             <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
                 <div class="q-pa-md q-gutter-md row">
@@ -47,12 +47,19 @@
                         <q-badge :label="document.toItem.title" align="middle" color="green" style="font-size: 19px; height: 25px;" />
                     </div>
                 </div>
-                <q-input v-if="document.toItem.text" rounded outlined v-model="document.toItem.text" type="textarea" readonly="true" hint="טקסט" style="font-size: 19px;" />
-                <q-input v-if="document.toItem.remarks" rounded outlined v-model="document.toItem.remarks" type="textarea" readonly="true" hint="הערות" style="font-size: 19px;" />
+                <q-input v-if="document.toItem.text" rounded outlined v-model="document.toItem.text" type="textarea" :readonly="true" hint="טקסט" style="font-size: 19px;" />
+                <q-input v-if="document.toItem.remarks" rounded outlined v-model="document.toItem.remarks" type="textarea" :readonly="true" hint="הערות" style="font-size: 19px;" />
+            </div>
+            <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
+                <div class="q-pa-md q-gutter-md row">
+                    <q-badge label="תשובתך: " align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
+                    <q-radio keep-color v-model="userAnswer" val="yes" label="הקשר תקין" color="cyan" />
+                    <q-radio keep-color v-model="userAnswer" val="no" label="הקשר לא תקין" color="red" />
+                </div>
             </div>
             <div v-if="docExists">
                 <q-btn label="שמירה" type="submit" color="primary"/>
-                <q-btn label="ביטול" type="reset" color="primary" flat class="q-ml-sm" />
+                <q-btn label="לא יודע/ת לענות" type="reset" color="red" class="q-ml-sm" />
             </div>
         </q-form>
     </div>
@@ -73,6 +80,7 @@ export default {
             componentKey: 0,
             docExists: false,
             ajaxing: false,
+            userAnswer: "no"
         }
     },
 
@@ -89,6 +97,27 @@ export default {
         },
 
         onSubmit () {
+            let saURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'socialArch/updateAnswer/' + this.document.ref._id + "/" + this.userAnswer;
+            let that = this;
+            this.ajaxing = true;
+            $.ajax({
+                type: "GET",
+                url: saURL,
+                crossdomain: true,
+                headers: {
+                    "x-access-token": window.tokenData.token
+                },
+                success: function (result) {
+                    that.ajaxing = false;
+                    that.showNotif(true, "תשובתך נשמרה");
+                    that.fetchData(true);
+                },
+                error: function (xhr, status, err) {
+                    that.ajaxing = false;
+                    that.componentKey += 1;
+                    that.showNotif(false, "לא ניתן לשמור את תשובתך");
+                }
+            });
         },
 
         onReset () {

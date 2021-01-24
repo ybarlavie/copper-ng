@@ -8,26 +8,17 @@ const totp = require('./totp');
 
 const USERS_COLLECTION = "users";
 
-const getEmailByRequest = (req) => {
-    if (req && req.headers) {
-        let jwToken = req.headers["x-access-token"];
-
-        if (loggedInTokens.hasOwnProperty(jwToken)) {
-            return loggedInTokens[jwToken];
-        }    
-    }
-
-    return 'n/a';
-}
 
 const tokenValidMiddleware = (req, res, next) => {
     console.log('path=' + req.path);
 
     let token = req.headers["x-access-token"];
+    var decoded = null;
 
     try {
         if (token) {
-            var decoded = jwt.verify(token, process.env.JWT_SECRET);
+            //decoded = jwt.verify(token, process.env.JWT_SECRET);
+            decoded = verifyJWToken(token, false);
             if (decoded) {
                 return next();
             } else {
@@ -78,7 +69,6 @@ const verifyTOTP = (email, token) => {
                 loggedInTokens[jwToken] = email;
 
                 console.log("client_jwt: " + JSON.stringify(client_jwt));
-
                 resolve(client_jwt);
             } else {
                 reject("token invalid");
@@ -107,19 +97,24 @@ const _GC_ToeknsCache = () => {
 
 const verifyJWToken = (jwToken, removeAfterVerification=false) => {
     _GC_ToeknsCache();
-    if (tokensCache.hasOwnProperty(jwToken)) {
-        try {
-            var decoded = jwt.verify(jwToken, process.env.JWT_SECRET);
-            if (decoded) {
-                if (removeAfterVerification) {
-                    delete tokensCache[jwToken];
-                }
-                return decoded;
+
+    var decoded = jwt.verify(jwToken, process.env.JWT_SECRET);
+    if (decoded) {
+        if (tokensCache.hasOwnProperty(jwToken)) {
+            if (removeAfterVerification) {
+                delete tokensCache[jwToken];
             }
-        } catch(err) {
-            return false;
+        } else if (!removeAfterVerification) {
+            console.log("updated token cache for " + jwToken + " as " + JSON.stringify(decoded));
+            tokensCache[jwToken] = decoded;
+        }
+        return decoded;
+    } else {
+        if (tokensCache.hasOwnProperty(jwToken)) {
+            delete tokensCache[jwToken];
         }
     }
+    
     return false;
 }
 
@@ -259,6 +254,34 @@ const regenerateSecret = (email) => {
     });
 }
 
+const getRole = (req) => {
+    let token = req.headers["x-access-token"];
+    if (tokensCache.hasOwnProperty(token) && tokensCache[token].role) {
+        return tokensCache[token].role;
+    } else {
+        var u = verifyJWToken(token, false);
+        if (u) {
+            return u.role;
+        }
+    }
+
+    return null;
+}
+
+const getEmailByRequest = (req) => {
+    let token = req.headers["x-access-token"];
+    if (tokensCache.hasOwnProperty(token) && tokensCache[token].email) {
+        return tokensCache[token].email;
+    } else {
+        var u = verifyJWToken(token, false);
+        if (u) {
+            return u.email;
+        }
+    }
+
+    return 'n/a';
+}
+
 const updateToken = (email, token) => {
     return new Promise((resolve, reject) => {
         MongoDB.connectDB('copper-db', async (err) => {
@@ -286,4 +309,4 @@ const updateToken = (email, token) => {
     });
 }
 
-module.exports = { verifyTOTP, getQRImage, verifyJWToken, sendQRCodeToUser, tokenValidMiddleware, getEmailByRequest, getUser, updateToken }
+module.exports = { verifyTOTP, getQRImage, verifyJWToken, sendQRCodeToUser, tokenValidMiddleware, getEmailByRequest, getUser, updateToken, getRole }

@@ -202,7 +202,7 @@ export default {
             this.origDoc = {};
             this.docExists = false;
 
-            let docQ = { qv:"item_id", qe:this.itemId };
+            let docQ = { qv:"item_id", qe: this.itemId };
             console.log("fetching document " + JSON.stringify(docQ));
 
             let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName;

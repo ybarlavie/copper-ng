@@ -1,5 +1,6 @@
 var express = require('express');
 var ObjectID = require('mongodb').ObjectID;
+var Auth = require('../authUtils');
 var MongoDB = require('../mongoUtils');
 const { json } = require('body-parser');
 
@@ -11,6 +12,21 @@ const searches = [
     { coll: 'locations', fields: [ 'title', 'keywords' ], prj: { sug: 'מיקום', item_id: 1, name: 1, title: 1, keywords: 1, lat: 1, lng: 1 } },
     { coll: 'persons', fields: [ 'title', 'name', 'aliases', 'keywords'], prj: { sug: 'דמות', item_id: 1, name: 1, title: 1, keywords: 1 } }
 ];
+
+const _getMatchExpr = (req, filter) => {
+    let role = Auth.getRole(req);
+    var q0 = { _restricts: { $ne: role }};
+
+    if (filter) {
+        if (Array.isArray(filter)) {
+            return { $and: [q0].concat(filter) };
+        } else {
+            return { $and: [q0, filter] };
+        }
+    } else {
+        return q0;
+    }
+}
 
 const _regexBuilder = ((str, wholeWord, ignoreSquare) => {
     var expr = '';
@@ -54,7 +70,11 @@ const _queryBuilder = ((exclude_id, fields, re) => {
     }
 });
 
-const _by_word_options = (opts, lim, id) => {
+const _by_word_options = (req) => {
+    var opts = JSON.parse(req.params.json);
+    var lim = req.params.limit;
+    var id = req.params.id;
+
     return new Promise((resolve, reject) => {
         const limit = lim<=500 ? parseInt(lim) : 5;
     
@@ -130,11 +150,13 @@ const _by_word_options = (opts, lim, id) => {
     
             let proms = [];
             collOpts.forEach(s => {
+                var q1 = _queryBuilder(exclude_id, s.fields, re);
+                var match = _getMatchExpr(req, q1);
                 proms.push(
                     new Promise((resolve, reject) => {
                         MongoDB.getDB()
                         .collection(s.coll)
-                        .aggregate( [ { $match: _queryBuilder(exclude_id, s.fields, re) }, { $project: s.prj } ] )
+                        .aggregate( [ { $match: match }, { $project: s.prj } ] )
                         .limit(limit)
                         .toArray((err, data) => {
                             err ? reject(err) : resolve(data);
@@ -155,7 +177,8 @@ const _by_word_options = (opts, lim, id) => {
 
                 if (opts.extractRefs)
                 {
-                    var match = { $or: [ { from: { $in: item_ids } }, { to: { $in: item_ids } } ] };
+                    var q1 = { $or: [ { from: { $in: item_ids } }, { to: { $in: item_ids } } ] };
+                    var match = _getMatchExpr(req, q1);
                     var prj = { _id: 0, from: 1, to: 1, type: 1, description: 1, ref_id: 1, _valid: 1 };
                     MongoDB.getDB()
                     .collection('references')
@@ -180,12 +203,17 @@ const _by_word_options = (opts, lim, id) => {
     });
 }
 
-const _to_refs = (docId) => {
+const _to_refs = (req, docId) => {
+    var match = _getMatchExpr(req, { to: docId });
+
     return new Promise((resolve, reject) => {
         MongoDB.connectDB('copper-db', async (err) => {
             if (err) reject(err);
     
-            MongoDB.getDB().collection("references").find({ to: docId }).toArray((err, items) => {
+            MongoDB.getDB()
+            .collection("references")
+            .aggregate([ { $match: match } ])
+            .toArray((err, items) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -232,7 +260,8 @@ router.get('/text/:docId', async (req, resp) => {
                 prj.sug = 'מיקום';
                 break;
         }
-        var match = _inTextRegExp(text);
+        var q1 = _inTextRegExp(text);
+        var match = _getMatchExpr(req, q1);
         proms.push(
             new Promise((resolve, reject) => {
                 MongoDB.connectDB('copper-db', async (err) => {
@@ -260,7 +289,7 @@ router.get('/text/:docId', async (req, resp) => {
         return resp.status(500).send(reason);
     });
 
-    var existingRefs = await _to_refs(docId).catch(reason => {
+    var existingRefs = await _to_refs(req, docId).catch(reason => {
         return resp.status(500).send(reject);
     });
 
@@ -306,12 +335,12 @@ router.get('/refs/:fromId', function (req, resp) {
         if (err) return resp.status(500).send("cannot connet to DB");
 
         let proms = [];
+        var q1 = { $or: [ { from: req.params.fromId }, { to: req.params.fromId } ] };
+        var match = _getMatchExpr(req, q1);
 
         MongoDB.getDB()
         .collection("references")
-        .aggregate( [ 
-            { $match: { $or: [ { from: req.params.fromId }, { to: req.params.fromId } ] } }
-        ])
+        .aggregate( [ { $match: match } ] )
         .limit(limit)
         .toArray((err, refs) => {
             if (err) return resp.status(500).send("cannot query references");
@@ -349,11 +378,12 @@ router.get('/refs/:fromId', function (req, resp) {
                         break;
                 }
                 if (q0) {
+                    var match = _getMatchExpr(req, q0.fltr);
                     proms.push(
                         new Promise((resolve, reject) => {    
                             MongoDB.getDB()
                             .collection(q0.coll)
-                            .aggregate( [ { $match: q0.fltr }, { $project: q0.prj } ] )
+                            .aggregate( [ { $match: match }, { $project: q0.prj } ] )
                             .limit(limit)
                             .toArray(function(err1, items) {
                                 err1 ? reject(err1) : resolve(items);
@@ -394,11 +424,13 @@ router.get('/by_word/:id/:limit/:word', function (req, resp) {
 
         let proms = [];
         searches.forEach(s => {
+            var q1 = _queryBuilder(exclude_id, s.fields, re);
+            var match = _getMatchExpr(req, q1);
             proms.push(
                 new Promise((resolve, reject) => {
                     MongoDB.getDB()
                     .collection(s.coll)
-                    .aggregate( [ { $match: _queryBuilder(exclude_id, s.fields, re) }, { $project: s.prj } ] )
+                    .aggregate( [ { $match: match }, { $project: s.prj } ] )
                     .limit(limit)
                     .toArray((err, data) => {
                         err ? reject(err) : resolve(data);
@@ -422,9 +454,7 @@ router.get('/by_word/:id/:limit/:word', function (req, resp) {
 router.get('/by_word_options/:id/:limit/:json', function (req, resp) {
     console.log('by_word_options: exclude id:' + req.params.id + ' searh for "' + req.params.json +'"');
 
-    var opts = JSON.parse(req.params.json);
-
-    _by_word_options(opts, req.params.limit, req.params.id)
+    _by_word_options(req)
     .then(result => {
         return resp.status(200).send(result);
     }, reason => {

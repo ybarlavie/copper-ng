@@ -1,21 +1,38 @@
 var express = require('express');
 var MongoDB = require('../mongoUtils');
 var Auth = require('../authUtils');
+const ObjectID = require('mongodb').ObjectID;
 
 var router = express.Router();
+
+const _getMatchExpr = (req, filter) => {
+    let role = Auth.getRole(req);
+    var q0 = { _restricts: { $ne: role }};
+
+    if (filter) {
+        if (Array.isArray(filter)) {
+            return { $and: [q0].concat(filter) };
+        } else {
+            return { $and: [q0, filter] };
+        }
+    } else {
+        return q0;
+    }
+}
 
 router.post('/byIds/:collection', async (req, resp, next) => {
     var collName = req.params.collection;
     var ids = req.body;
-    var filter = collName == 'references' ? { ref_id: { $in: ids } } : { item_id: { $in: ids } };
+    var q1 = collName == 'references' ? { ref_id: { $in: ids } } : { item_id: { $in: ids } };
+    var match = _getMatchExpr(req, q1);
 
     MongoDB.connectDB('copper-db', async (err) => {
         if (err) return resp.status(500).send("cannot connect to DB");
 
-        MongoDB
-        .getDB()
+        MongoDB.getDB()
         .collection(req.params.collection)
-        .find(filter).toArray(function(err1, items) {
+        .aggregate([ { $match: match } ])
+        .toArray(function(err1, items) {
             if (err1) {
                 console.log(req.params.collection + " had error: " + JSON.stringify(err1));
                 return resp.status(500).send(err1);
@@ -29,12 +46,12 @@ router.post('/byIds/:collection', async (req, resp, next) => {
 router.get('/:collection', function (req, resp) {
     let aggArray = [];
 
+    var q1 = null;
     if (req.query.q) {
         try {
             q = JSON.parse(req.query.q);
-            var filter = {};
-            filter[q.qv] = new RegExp(q.qe, 'i');
-            aggArray.push({ $match: filter });
+            q1 = {};
+            q1[q.qv] = new RegExp('\\b' + q.qe + '\\b', 'i');
         } catch {
             return res.status(400).end();
         }
@@ -44,7 +61,8 @@ router.get('/:collection', function (req, resp) {
         }
     }
 
-    console.log(req.params.collection + " aggregating " + JSON.stringify(aggArray));
+    var match = _getMatchExpr(req, q1);
+    aggArray.push({ $match: match });
 
     MongoDB.connectDB('copper-db', async (err) => {
         if (err) return resp.status(500).send("cannot connect to DB");
@@ -86,12 +104,17 @@ router.delete('/:collection', async (req, resp, next) => {
 router.post('/:collection', async (req, resp, next) => {
     var collName = req.params.collection;
     var doc = req.body;
+    var origDoc = null;
+    var role = Auth.getRole(req);
     var _id = doc.hasOwnProperty('_id') ? doc['_id'] : null;
     var dbFunc = MongoDB.insert;
 
     if (_id) {
-        var docExists = await MongoDB.docExists(collName, _id);
-        if (docExists) {
+        origDoc = await MongoDB.firstOrDefault(collName, { _id: ObjectID(_id)} );
+        if (origDoc) {
+            if (origDoc._restricts && origDoc._restricts.includes(role)) {
+                return resp.status(403).send('unauthorized');
+            }
             dbFunc = MongoDB.update;
         }
     }
