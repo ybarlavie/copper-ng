@@ -229,17 +229,22 @@ router.get('/text/:docId', async (req, resp) => {
     var text = '';
     var _id = '';
     var docId = req.params.docId;
+    var srcDoc = null;
+    var srcColl = null;
+    var inserted = 0;
 
     if (req.params.docId.startsWith('D')) {
-        var doc = await MongoDB.firstOrDefault('documents', {item_id:docId});
-        if (!doc) return resp.status(500).send("cannot find document");
-        text = doc.text;
-        _id = doc._id;
+        srcDoc = await MongoDB.firstOrDefault('documents', {item_id:docId});
+        if (!srcDoc) return resp.status(500).send("cannot find document");
+        srcColl = "documents";
+        text = srcDoc.text;
+        _id = srcDoc._id;
     } else if (req.params.docId.startsWith('E')) {
-        var doc = await MongoDB.firstOrDefault('ext_documents', {item_id:docId});
-        if (!doc) return resp.status(500).send("cannot find external document");
-        text = doc.text;
-        _id = doc._id;
+        srcDoc = await MongoDB.firstOrDefault('ext_documents', {item_id:docId});
+        if (!srcDoc) return resp.status(500).send("cannot find external document");
+        srcColl = "ext_documents";
+        text = srcDoc.text;
+        _id = srcDoc._id;
     } else {
         return resp.status(500).send("bad doc id");
     }
@@ -294,7 +299,6 @@ router.get('/text/:docId', async (req, resp) => {
     });
 
     // now create new references
-    var inserted = 0;
     for (var i=0; i<candidates.length; i++) {
         var can = candidates[i];
         var links = existingRefs.filter(ref => {
@@ -322,6 +326,14 @@ router.get('/text/:docId', async (req, resp) => {
             });
         }
     };
+
+    if (inserted > 0) {
+        srcDoc._researchText = "yes";
+        await MongoDB.update(srcColl, srcDoc)
+        .then(id => {}, reason => {
+            console.log('failed updating _searchText on doc: ' + srcDoc.item_id + ' ' + JSON.stringify(reason));
+        })
+    }
 
     return resp.status(200).send(existingRefs);
 });
