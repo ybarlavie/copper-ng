@@ -354,8 +354,7 @@ export default {
                 item.x = NETWORK_OFFSET_X + (item.X_3857 - _LEFT) / GIS_WIDTH * NETWORK_WIDTH;
                 item.y = NETWORK_OFFSET_Y + (1 - (item.Y_3857 - _BOT) / GIS_HEIGHT) * NETWORK_HEIGHT;
                 item.fixed = true;
-
-                //console.log('projected item ' + JSON.stringify(item));                
+                item.group = item.group + ".fixed";
             }
         },
 
@@ -447,7 +446,7 @@ export default {
                         if (fI) {
                             records.forEach(item => {
                                 item.id = item.item_id;
-                                item.group = '_' + collection;
+                                item.group = collection + ".sec";
                                 if (that.mapObj) {
                                     that.projectItem(item);
                                 }
@@ -581,8 +580,8 @@ export default {
                     return;
                 }
                 if (document.getElementById("card").checked) {
-                    var collName = sel.group;
-                    if (collName.startsWith('_')) collName = collName.substring(1);
+                    var tokens = sel.group.split('.');
+                    var collName = tokens[0];
 
                     var params = { itemId: sel.item_id, editable: false, collName: collName };
                     switch (collName)

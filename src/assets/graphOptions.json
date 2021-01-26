@@ -22,7 +22,7 @@
                 "color": "#ff0000"
             }
         },
-        "_documents": {
+        "documents.sec": {
             "shape": "icon",
             "icon": {
                 "face": "'Font Awesome 5 Free'",
@@ -42,7 +42,7 @@
                 "color": "#00ff00"
             }
         },
-        "_ext_documents": {
+        "ext_documents.sec": {
             "shape": "icon",
             "icon": {
                 "face": "'Font Awesome 5 Free'",
@@ -62,7 +62,7 @@
                 "color": "#0000ff"
             }
         },
-        "_locations": {
+        "locations.sec": {
             "shape": "icon",
             "icon": {
                 "face": "'Font Awesome 5 Free'",
@@ -72,6 +72,27 @@
                 "color": "#000000"
             }
         },
+        "locations.fixed": {
+            "shape": "icon",
+            "icon": {
+                "face": "'Font Awesome 5 Free'",
+                "weight": "bold",
+                "size": 20,
+                "code": "\uf13d",
+                "color": "#0000ff"
+            }
+        },
+        "locations.sec.fixed": {
+            "shape": "icon",
+            "icon": {
+                "face": "'Font Awesome 5 Free'",
+                "weight": "bold",
+                "size": 20,
+                "code": "\uf13d",
+                "color": "#000000"
+            }
+        },
+
         "persons": {
             "shape": "icon",
             "icon": {
@@ -82,7 +103,7 @@
                 "color": "#ff00ff"
             }
         },
-        "_persons": {
+        "persons.sec": {
             "shape": "icon",
             "icon": {
                 "face": "'Font Awesome 5 Free'",

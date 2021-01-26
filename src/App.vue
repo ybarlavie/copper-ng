@@ -6,12 +6,13 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v3.1.95</div>
+                    <div style="font-size: 12px;">גרסה v3.1.98</div>
                 </q-toolbar-title>
 
-
                 <div v-if="this.role != 'social_arch'" class="q-pl-md q-gutter-sm row no-wrap items-center">
-                    <q-btn color="primary" icon="share" label="ארכיאולוגיה קהילתית" @click="onSocialArch" />
+                    <q-btn color="primary" icon="share" @click="onSocialArch" >
+                        <q-tooltip content-class="bg-accent">ארכיאולוגיה קהילתית</q-tooltip>
+                    </q-btn>
                     <SearchParams @search-options="graphClicked($event)" icon="device_hub" placeHolder="סינון גרף" />
                     <SearchParams @search-options="searchClicked($event)" />
                 </div>
