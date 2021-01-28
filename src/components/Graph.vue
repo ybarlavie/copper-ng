@@ -209,7 +209,7 @@ export default {
                     resolve([]);
                 }
                 var settings = {
-                    "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/byIds/' + collection,
+                    "url": window.apiURL + 'db/byIds/' + collection,
                     "method": "POST",
                     "timeout": 0,
                     "headers": {
@@ -229,7 +229,7 @@ export default {
             });
         },
         queryMongoCollection: function (collection, query) {
-            let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/';
+            let dbURL = window.apiURL + 'db/';
             var that = this;
 
             return new Promise((resolve, reject) => {
@@ -255,7 +255,7 @@ export default {
         queryResearch: function (filter) {
             var that = this;
             const QUERY_LIMIT = 500;
-            let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
+            let researchURL = window.apiURL + 'research/';
             var opts = { query: filter.query, filterOptions: filter.options, extractRefs: true }
             researchURL += 'by_word_options/1/' + QUERY_LIMIT + '/' + encodeURIComponent(JSON.stringify(opts));
 

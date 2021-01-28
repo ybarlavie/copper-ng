@@ -234,7 +234,7 @@ export default {
         },
 
         onResearchText() {
-            let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
+            let researchURL = window.apiURL + 'research/';
             var that = this;
             $.ajax({
                 type: "GET",
@@ -275,7 +275,7 @@ export default {
                 nl.end = d.toISOString().replace(/-|:|.\d\d\dZ/g,'');
             }
             var settings = {
-                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/references',
+                "url": window.apiURL + 'db/references',
                 "method": "POST",
                 "timeout": 0,
                 "headers": {
@@ -312,7 +312,7 @@ export default {
             this.newLink = { from_id: JSON.parse(JSON.stringify(this.fromEntity.item_id)), to_id: null, type: null, typeAlias: null, start: "-50000101T000000", end: "50000101T000000" , uniqueType: 'from-to', descr: "", range: { from: "-5000/01/01", to: "5000/01/01" } };
             this.toEntity = null;
 
-            let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
+            let researchURL = window.apiURL + 'research/';
             let that = this;
             const QUERY_LIMIT = 500;
             $.ajax({
@@ -395,7 +395,7 @@ export default {
         onToggleValid(props) {
             var row = props.row;
             var settings = {
-                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/updateFields/references/' + row.ref_id ,
+                "url": window.apiURL + 'db/updateFields/references/' + row.ref_id ,
                 "method": "PUT",
                 "timeout": 0,
                 "headers": {
@@ -424,7 +424,7 @@ export default {
         onDelete(props) {
             var row = props.row;
             var settings = {
-                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/references',
+                "url": window.apiURL + 'db/references',
                 "method": "DELETE",
                 "timeout": 0,
                 "headers": {

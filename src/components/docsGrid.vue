@@ -125,7 +125,7 @@ export default {
 
             const QUERY_LIMIT = 500;
 
-            let researchURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'research/';
+            let researchURL = window.apiURL + 'research/';
 
             var opts = { query: this.query, filterOptions: this.filterOptions }
             researchURL += 'by_word_options/' + this.exclude + '/' + QUERY_LIMIT + '/' + encodeURIComponent(JSON.stringify(opts));

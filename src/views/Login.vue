@@ -64,7 +64,7 @@ export default {
             window.localStorage.setItem(window.JWT_COOKIE, "");
 
             console.log('requesting QR for: ' + this.email);
-            let verifyUrl =  window.apiURL.replace(this.$route.matched[0].path, '') + 'auth/reqQR';
+            let verifyUrl =  window.apiURL + 'auth/reqQR';
             let authURL = `${verifyUrl}/${this.email}`;
 
             let that = this;
@@ -89,7 +89,7 @@ export default {
         onSubmit () {
             this.onClear();
 
-            let verifyUrl =  window.apiURL.replace(this.$route.matched[0].path, '') + 'auth/verifyTOTP';
+            let verifyUrl =  window.apiURL + 'auth/verifyTOTP';
             let authURL = `${verifyUrl}/${this.email}?t=${this.authCode}`;
             console.log('authing: ' + authURL);
             let that = this;

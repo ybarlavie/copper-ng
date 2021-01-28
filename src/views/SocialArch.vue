@@ -110,7 +110,7 @@ export default {
         },
 
         onSubmit () {
-            let saURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'socialArch/updateAnswer/' + this.document.ref._id + "/" + this.userAnswer;
+            let saURL = window.apiURL + 'socialArch/updateAnswer/' + this.document.ref._id + "/" + this.userAnswer;
             let that = this;
             this.ajaxing = true;
             $.ajax({
@@ -144,7 +144,7 @@ export default {
                 return;
             }
 
-            let saURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'socialArch/getRandom';
+            let saURL = window.apiURL + 'socialArch/getRandom';
             let that = this;
             this.ajaxing = true;
             $.ajax({

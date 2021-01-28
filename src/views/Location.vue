@@ -155,7 +155,7 @@ export default {
             }
 
             var settings = {
-                "url": window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName,
+                "url": window.apiURL + 'db/' + this.collName,
                 "method": "POST",
                 "timeout": 0,
                 "headers": {
@@ -201,7 +201,7 @@ export default {
             let docQ = {qv:"item_id", qe:this.itemId };
             console.log("fetching document " + JSON.stringify(docQ));
 
-            let dbURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'db/' + this.collName;
+            let dbURL = window.apiURL + 'db/' + this.collName;
             let that = this;
             this.ajaxing = true;
             $.ajax({
