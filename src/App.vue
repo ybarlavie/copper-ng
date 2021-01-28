@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v3.1.104</div>
+                    <div style="font-size: 12px;">גרסה v3.1.108</div>
                 </q-toolbar-title>
 
                 <div v-if="this.role != 'social_arch'" class="q-pl-md q-gutter-sm row no-wrap items-center">
@@ -84,6 +84,7 @@ export default {
     },
 
     mounted() {
+        var that = this;
         this.$nextTick().then(() => {
             window.store.item_types = { 
                 D: { coll: "documents", s_heb: "תעודת ב.כ.", p_heb: "תעודות ב.כ.", gender: "female" },
@@ -91,23 +92,26 @@ export default {
                 P: { type: "persons", s_heb: "דמות", p_heb: "דמויות", gender: "female"},
                 L: { type: "locations", s_heb: "מיקום", p_heb: "מיקומים", gender: "male"},
             };
-
-            queryMongoAsync(this, 'ref_types')
+            
+            queryMongoAsync(that, 'ref_types')
             .then(result => {
                 window.store.ref_types = result;
                 window.store.ref_types.forEach(t => {
                     t.toRegEx = new RegExp(t.toRegEx, 'g');
                     t.fromRegEx = new RegExp(t.fromRegEx, 'g');
                 });
-            });
 
-            queryMongoAsync(this, 'keywords')
-            .then(result => {
-                window.store.keywords = result;
-                window.store.keywords.forEach(t => {
-                    t.itemsRegEx = new RegExp(t.itemsRegEx, 'g');
+                queryMongoAsync(that, 'keywords')
+                .then(result => {
+                    window.store.keywords = result;
+                    window.store.keywords.forEach(t => {
+                        t.itemsRegEx = new RegExp(t.itemsRegEx, 'g');
+                    });
+
+                    window.__storeReady__ = true;
                 });
             });
+
         });
 
         if (window.tokenData) {

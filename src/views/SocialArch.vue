@@ -138,7 +138,11 @@ export default {
         },
 
         fetchData(noisy) {
-            console.log("fetching social arch query...");
+            if (!window.__storeReady__) {
+                // TODO: move store to vuex
+                this.showNotif(false, "ממתין לעדכון סוגי קשרים");
+                return;
+            }
 
             let saURL = window.apiURL.replace(this.$route.matched[0].path, '') + 'socialArch/getRandom';
             let that = this;

@@ -1,6 +1,12 @@
 export default function queryMongoAsync(component, collName, query) {
     return new Promise(function(resolve, reject) {
-        let url = window.apiURL.replace(component.$route.matched[0].path, '') + 'db/' + collName;
+        var url = "";
+        if (component.$route.matched.length <= 0) {
+            url = window.apiURL + 'db/' + collName;
+        } else {
+            url = window.apiURL.replace(component.$route.matched[0].path, '') + 'db/' + collName;
+        }
+        
         if (query) {
             url = url + "?q=" + encodeURIComponent(JSON.stringify(query))
         }

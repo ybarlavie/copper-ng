@@ -324,8 +324,11 @@ export default {
                     dashes: item._valid == 'yes' ? false : true,
                     width: item._valid == 'yes' ? 1.5 : 1.0,
                 }
-                var types = window.store.ref_types.filter(rt => rt.type === item.type);
-                if (types.length > 0) ref.arrows = types[0].arrows;
+                if (window.__storeReady__) {
+                    // TODO: move store to vuex
+                    var types = window.store.ref_types.filter(rt => rt.type === item.type);
+                    if (types.length > 0) ref.arrows = types[0].arrows;
+                }
 
                 edgesDS.add([ref]);
 
@@ -401,8 +404,11 @@ export default {
                         item.dashes = item._valid == 'yes' ? false : true;
                         item.width = item._valid == 'yes' ? 1.5 : 1.0;
 
-                        var types = window.store.ref_types.filter(rt => rt.type === item.type);
-                        if (types.length > 0) item.arrows = types[0].arrows;
+                        if (window.__storeReady__) {
+                            // TODO: move store to vuex
+                            var types = window.store.ref_types.filter(rt => rt.type === item.type);
+                            if (types.length > 0) item.arrows = types[0].arrows;
+                        }
 
                         edgesDS.add([item]);
                         // TODO: fix this. bring in the real entities
@@ -490,8 +496,11 @@ export default {
                                     item.dashes = item._valid == 'yes' ? false : true;
                                     item.width = item._valid == 'yes' ? 1.5 : 1.0;
 
-                                    var types = window.store.ref_types.filter(rt => rt.type === item.type);
-                                    if (types.length > 0) item.arrows = types[0].arrows;
+                                    if (window.__storeReady__) {
+                                        // TODO: move store to vuex
+                                        var types = window.store.ref_types.filter(rt => rt.type === item.type);
+                                        if (types.length > 0) item.arrows = types[0].arrows;
+                                    }
 
                                     edgesDS.add([item]);
                                 });
