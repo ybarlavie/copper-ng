@@ -57,6 +57,34 @@ const _getItemById = (req, itemId) => {
     });
 };
 
+const _getStats = (req, email) => {
+    return new Promise((resolve, reject) => {
+        MongoDB.connectDB('copper-db', async (err) => {
+            if (err) resolve(0);
+    
+            var restricts = _getMatchExpr(req, null);   // will return object and not array with $and
+            var match = { $and: [
+                restricts
+                ,{ "_answers._who": email }
+            ] };
+
+            MongoDB.getDB()
+            .collection("references")
+            .aggregate( [
+                { $match: match },
+                { $count: "stats" } 
+            ] )
+            .toArray((err, items) => {
+                if (err) {
+                    resolve(0);
+                } else {
+                    resolve(items[0].stats);
+                }
+            });
+        });    
+    });
+};
+
 // get a random reference that is:
 //      a) not valid
 //      b) has less than MAX_ANSWERS 
@@ -99,9 +127,12 @@ router.get('/getRandom', async (req, resp) => {
     var result = {};
     if (token) {
         var jwToken = Auth.verifyJWToken(token, false);
+
+        result["stats"] = await _getStats(req, jwToken.email);
+
         Auth.getUser(jwToken.email)
         .then(user => { 
-            result['user'] = { name: user.name, alias: user.alias, email: user.email };
+            result['user'] = { name: user.name, alias: user.alias, email: user.email };    
 
             _getRefQuery(req, jwToken.email)
             .then(randomRef => {

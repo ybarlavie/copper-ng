@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v3.1.98</div>
+                    <div style="font-size: 12px;">גרסה v3.1.104</div>
                 </q-toolbar-title>
 
                 <div v-if="this.role != 'social_arch'" class="q-pl-md q-gutter-sm row no-wrap items-center">
@@ -86,10 +86,10 @@ export default {
     mounted() {
         this.$nextTick().then(() => {
             window.store.item_types = { 
-                D: { coll: "documents", s_heb: "תעודת ב.כ.", p_heb: "תעודות ב.כ."},
-                E: { type: "ext_documents", s_heb: "תעודה חיצונית", p_heb: "תעודות חיצוניות"},
-                P: { type: "persons", s_heb: "דמות", p_heb: "דמויות"},
-                L: { type: "locations", s_heb: "מיקום", p_heb: "מיקומים"},
+                D: { coll: "documents", s_heb: "תעודת ב.כ.", p_heb: "תעודות ב.כ.", gender: "female" },
+                E: { type: "ext_documents", s_heb: "תעודה חיצונית", p_heb: "תעודות חיצוניות", gender: "female"},
+                P: { type: "persons", s_heb: "דמות", p_heb: "דמויות", gender: "female"},
+                L: { type: "locations", s_heb: "מיקום", p_heb: "מיקומים", gender: "male"},
             };
 
             queryMongoAsync(this, 'ref_types')

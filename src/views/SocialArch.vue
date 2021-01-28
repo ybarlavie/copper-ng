@@ -1,62 +1,70 @@
 <template>
-    <div class="q-pa-md" :key="componentKey">
+    <div v-if="docExists" class="q-pa-md" :key="componentKey">
         <q-linear-progress v-if="ajaxing" indeterminate />
-        <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
-            <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
-                <div class="q-pa-md q-gutter-md row">
-                    <q-badge :label="greeting" align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
-                    <q-badge label="השאלה: " align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
-                    <q-badge label="האם הפריט מהסוג " align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
-                    <q-badge :label="fromItemTypeDecr" align="middle" color="blue" filled style="font-size: 19px; height: 25px;" />
-                </div>
-                <div class="q-pa-md q-gutter-md row">
-                    <div>
-                        <q-badge label="שם" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                        <q-badge :label="document.fromItem.name" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
-                    </div>
-                    <div>
-                        <q-badge label="תווית" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                        <q-badge :label="document.fromItem.label" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
-                    </div>
-                    <div>
-                        <q-badge label="כותרת" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                        <q-badge :label="document.fromItem.title" align="middle" color="blue" style="font-size: 19px; height: 25px;" />
-                    </div>
-                </div>
-                <q-input v-if="document.fromItem.text" rounded outlined v-model="document.fromItem.text" type="textarea" :readonly="true" hint="טקסט" style="font-size: 19px;" />
-                <q-input v-if="document.fromItem.remarks" rounded outlined v-model="document.fromItem.remarks" type="textarea" :readonly="true" hint="הערות" style="font-size: 19px;" />
-            </div>
-            <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
-                <div class="q-pa-md q-gutter-md row">
-                    <q-badge :label="refDescr" align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
-                    <q-badge :label="toItemTypeDecr" align="middle" color="blue" filled style="font-size: 19px; height: 25px;" />
-                </div>
-            </div>
-            <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
-                <div class="q-pa-md q-gutter-md row">
-                    <div>
-                        <q-badge label="שם" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                        <q-badge :label="document.toItem.name" align="middle" color="green" style="font-size: 19px; height: 25px;" />
-                    </div>
-                    <div>
-                        <q-badge label="תווית" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                        <q-badge :label="document.toItem.label" align="middle" color="green" style="font-size: 19px; height: 25px;" />
-                    </div>
-                    <div>
-                        <q-badge label="תווית" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
-                        <q-badge :label="document.toItem.title" align="middle" color="green" style="font-size: 19px; height: 25px;" />
-                    </div>
-                </div>
-                <q-input v-if="document.toItem.text" rounded outlined v-model="document.toItem.text" type="textarea" :readonly="true" hint="טקסט" style="font-size: 19px;" />
-                <q-input v-if="document.toItem.remarks" rounded outlined v-model="document.toItem.remarks" type="textarea" :readonly="true" hint="הערות" style="font-size: 19px;" />
-            </div>
-            <div v-if="docExists" class="q-gutter-md" style="max-width: 1024px;">
-                <div class="q-pa-md q-gutter-md row">
-                    <q-badge label="תשובתך: " align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
-                    <q-radio keep-color v-model="userAnswer" val="yes" label="הקשר תקין" color="cyan" />
-                    <q-radio keep-color v-model="userAnswer" val="no" label="הקשר לא תקין" color="red" />
-                </div>
-            </div>
+        <q-card bordered>
+            <q-card-section>
+                <div class="text-h6">{{ greeting }}</div>
+                <div class="text-subtitle2">{{ stats }}</div>
+            </q-card-section>
+
+            <q-separator inset />
+
+            <q-card-section>
+                {{ abstract }}
+            </q-card-section>
+        </q-card>
+        <q-badge label="האם" align="middle" color="purple" style="font-size: 21px; height: 23px;" />
+        <q-card bordered>
+            <q-card-section>
+                <div class="text-h6">{{fromItemTypeDecr + " " + fromTitleGender + " '" + document.fromItem.title + "'" }}</div>
+            </q-card-section>
+
+            <q-separator inset />
+            <q-card-section v-if="document.fromItem.text" style="font-size: 19px;">
+                <q-badge label="טקסט" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
+                {{document.fromItem.text}}
+            </q-card-section>
+
+            <q-separator inset />            
+            <q-card-section v-if="document.fromItem.remarks" style="font-size: 19px;">
+                <q-badge label="הערות" align="middle" color="grey" style="font-size: 15px; height: 17px;" />
+                {{document.fromItem.remarks}}
+            </q-card-section>
+        </q-card>
+
+        <q-badge label="קשר" align="middle" color="grey" style="font-size: 15px; height: 15px;" />
+        <q-badge :label="refDescr" align="middle" color="purple" style="font-size: 21px; height: 23px;" />
+
+        <q-card bordered>
+            <q-card-section>
+                <div class="text-h6">{{toItemTypeDecr + " " + toTitleGender+ " '" + document.toItem.title + "'" }}</div>
+            </q-card-section>
+
+            <q-separator inset />
+            <q-card-section v-if="document.toItem.text" style="font-size: 19px;">
+                <q-badge label="טקסט" align="middle" color="grey" style="font-size: 15px; height: 15px;" />
+                {{document.toItem.text}}
+            </q-card-section>
+
+            <q-separator inset />            
+            <q-card-section v-if="document.toItem.remarks" style="font-size: 19px;">
+                <q-badge label="הערות" align="middle" color="grey" style="font-size: 15px; height: 15px;" />
+                {{document.toItem.remarks}}
+            </q-card-section>
+        </q-card>
+
+        <q-card>
+            <q-card-section>
+                <q-badge label="תשובתך: " align="middle" color="purple" filled style="font-size: 19px; height: 25px;" />
+            </q-card-section>
+            <q-separator />
+            <q-card-actions vertical>
+                <q-radio keep-color v-model="userAnswer" val="yes" label="הקשר תקין" color="cyan" />
+                <q-radio keep-color v-model="userAnswer" val="no" label="הקשר לא תקין" color="red" />
+            </q-card-actions>
+        </q-card>
+
+        <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">    
             <div v-if="docExists">
                 <q-btn label="שמירה" type="submit" color="primary"/>
                 <q-btn label="לא יודע/ת לענות" type="reset" color="red" class="q-ml-sm" />
@@ -73,14 +81,19 @@ export default {
     data: () => {
         return {
             document: null,
-            greeting: null,
-            fromItemTypeDecr: null,
-            toItemTypeDecr: null,
             refDescr: null,
             componentKey: 0,
             docExists: false,
             ajaxing: false,
-            userAnswer: "no"
+            userAnswer: "no",
+
+            greeting: null,
+            stats: null,
+            abstract: null,
+            fromItemTypeDecr: null,
+            fromTitleGender: null,
+            toItemTypeDecr: null,
+            toTitleGender: null
         }
     },
 
@@ -139,9 +152,7 @@ export default {
                 },
                 success: function (result) {
                     that.ajaxing = false;
-                    
-                    that.greeting = "שלום, " + result.user.alias + ". תודה על עזרתך.";
-                    
+
                     var rt = window.store.ref_types.filter(t => t.type == result.ref.type)[0];
                     if (rt.toRegEx.source == rt.fromRegEx.source && rt.alias != rt.revAlias) {
                         that.refDescr = rt.revAlias + " או " + rt.alias;
@@ -151,10 +162,20 @@ export default {
                         that.refDescr = rt.revAlias;
                     }
 
-                    that.fromItemTypeDecr = window.store.item_types[result.fromItem.item_id.substring(0,1)].s_heb;
-                    that.toItemTypeDecr = window.store.item_types[result.toItem.item_id.substring(0,1)].s_heb;
+                    var itemT = window.store.item_types[result.fromItem.item_id.substring(0,1)];
+                    that.fromItemTypeDecr = itemT.s_heb;
+                    that.fromTitleGender = itemT.gender == "female" ? "שכותרתה" : "שכותרתו";
+
+                    itemT = window.store.item_types[result.toItem.item_id.substring(0,1)];
+                    that.toItemTypeDecr = itemT.s_heb;
+                    that.toTitleGender = itemT.gender == "female" ? "שכותרתה" : "שכותרתו";
 
                     that.document = result;
+                    
+                    that.greeting = "שלום, " + result.user.alias + ". תודה על עזרתך.";
+                    that.stats = " עד כה עזרת בטיוב של " + result.stats + " קשרים. כל הכבוד !";
+                    that.abstract = "הסוגיה הנוכחית עוסקת בקשר שבין " + that.fromItemTypeDecr + " " + that.fromTitleGender + " '" +that.document.fromItem.title + "'";
+                    that.abstract += " לבין " + that.toItemTypeDecr + " " + that.toTitleGender + " '" + that.document.toItem.title + "'";
 
                     that.docExists = true;
                     if (noisy) {
