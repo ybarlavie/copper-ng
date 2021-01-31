@@ -32,7 +32,10 @@ const tokenValidMiddleware = (req, res, next) => {
     if (req.path.startsWith('/api/')) {
         if (req.path.startsWith('/api/auth/')) {
             return next();
+        } else if (req.path.startsWith('/api/db/store_data')) {
+            return next()
         }
+        
         // invalid token for api call. block!
         console.log("blocking " + req.path + " due to authorization...")
         return res.status(401).send({ message: "api Unauthorized!" });
