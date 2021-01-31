@@ -20,6 +20,43 @@ const _getMatchExpr = (req, filter) => {
     }
 }
 
+const _getStoreData = (req, resp) => {
+    var result = {};
+    result.item_types = { 
+        D: { coll: "documents", s_heb: "תעודת ב.כ.", p_heb: "תעודות ב.כ.", gender: "female" },
+        E: { type: "ext_documents", s_heb: "תעודה חיצונית", p_heb: "תעודות חיצוניות", gender: "female"},
+        P: { type: "persons", s_heb: "דמות", p_heb: "דמויות", gender: "female"},
+        L: { type: "locations", s_heb: "מיקום", p_heb: "מיקומים", gender: "male"},
+    };
+
+    MongoDB.connectDB('copper-db', async (err) => {
+        if (err) return resp.status(500).send("cannot connect to DB");
+
+        MongoDB.getDB()
+        .collection('keywords')
+        .find({})
+        .toArray(function(err0, items0) {
+            if (err0) {
+                return resp.status(500).send(err0);
+            }
+            result.keywords = items0;
+
+            MongoDB.getDB()
+            .collection('ref_types')
+            .find({})
+            .toArray(function(err1, items1) {
+                if (err1) {
+                    return resp.status(500).send(err0);
+                }
+
+                result.ref_types = items1;
+
+                return resp.status(200).send(result);
+            });    
+        });
+    });
+}
+
 router.post('/byIds/:collection', async (req, resp, next) => {
     var collName = req.params.collection;
     var ids = req.body;
@@ -43,8 +80,15 @@ router.post('/byIds/:collection', async (req, resp, next) => {
     });
 });
 
+
+
 router.get('/:collection', function (req, resp) {
     let aggArray = [];
+
+    if (req.params.collection == 'store_data')
+    {
+        return _getStoreData(req, resp);
+    }
 
     var q1 = null;
     if (req.query.q) {

@@ -357,21 +357,22 @@ export default {
                 item.x = NETWORK_OFFSET_X + (item.X_3857 - _LEFT) / GIS_WIDTH * NETWORK_WIDTH;
                 item.y = NETWORK_OFFSET_Y + (1 - (item.Y_3857 - _BOT) / GIS_HEIGHT) * NETWORK_HEIGHT;
                 item.fixed = true;
-                item.group = item.group + ".fixed";
+                item.group += ".fixed";
             }
         },
 
         drawFilter: function (filter) {
-            //console.log(filter.query + " " + filter.options)
             this.destroy();
 
             let opdsOpts = {};
             nodesDS = new vis.DataSet(opdsOpts);
             edgesDS = new vis.DataSet(opdsOpts);
 
-            // map frame pass
-            nodesDS.add([{ id: 'min_XY', x: NETWORK_OFFSET_X, y: NETWORK_OFFSET_Y, fixed: true }]);
-            nodesDS.add([{ id: 'max_XY', x: Math.abs(NETWORK_OFFSET_X), y: Math.abs(NETWORK_OFFSET_Y), fixed: true }]);
+            if (this.mapObj) {
+                // map frame pass
+                nodesDS.add([{ id: 'min_XY', x: NETWORK_OFFSET_X, y: NETWORK_OFFSET_Y, fixed: true }]);
+                nodesDS.add([{ id: 'max_XY', x: Math.abs(NETWORK_OFFSET_X), y: Math.abs(NETWORK_OFFSET_Y), fixed: true }]);
+            }
 
             let that = this;
             this.queryResearch(filter)

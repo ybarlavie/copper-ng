@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v3.1.109</div>
+                    <div style="font-size: 12px;">גרסה v3.2.07</div>
                 </q-toolbar-title>
 
                 <div v-if="this.role != 'social_arch'" class="q-pl-md q-gutter-sm row no-wrap items-center">
@@ -70,7 +70,6 @@
 </template>
 
 <script>
-import queryMongoAsync from './clientMongo'
 import SearchParams from './components/searchParams'
 
 export default {
@@ -84,36 +83,6 @@ export default {
     },
 
     mounted() {
-        var that = this;
-        this.$nextTick().then(() => {
-            window.store.item_types = { 
-                D: { coll: "documents", s_heb: "תעודת ב.כ.", p_heb: "תעודות ב.כ.", gender: "female" },
-                E: { type: "ext_documents", s_heb: "תעודה חיצונית", p_heb: "תעודות חיצוניות", gender: "female"},
-                P: { type: "persons", s_heb: "דמות", p_heb: "דמויות", gender: "female"},
-                L: { type: "locations", s_heb: "מיקום", p_heb: "מיקומים", gender: "male"},
-            };
-            
-            queryMongoAsync(that, 'ref_types')
-            .then(result => {
-                window.store.ref_types = result;
-                window.store.ref_types.forEach(t => {
-                    t.toRegEx = new RegExp(t.toRegEx, 'g');
-                    t.fromRegEx = new RegExp(t.fromRegEx, 'g');
-                });
-
-                queryMongoAsync(that, 'keywords')
-                .then(result => {
-                    window.store.keywords = result;
-                    window.store.keywords.forEach(t => {
-                        t.itemsRegEx = new RegExp(t.itemsRegEx, 'g');
-                    });
-
-                    window.__storeReady__ = true;
-                });
-            });
-
-        });
-
         if (window.tokenData) {
             this.role = window.tokenData.role || "social_arch";
             this.email = window.tokenData.email || null;
@@ -163,13 +132,15 @@ export default {
             this.$router.push({ name: 'Blank' });
 
             var that = this;
+            var p = { graphFilter: opts };
+            if (opts.options.indexOf('useMap') >= 0) {
+                p.mapObj = 1;
+            }
+
             this.$nextTick().then(function () {
                 that.$router.push({
                     name: 'Graph',
-                    params: {
-                        graphFilter: opts,
-                        mapObj: 1
-                    }
+                    params: p
                 });
             });
         },

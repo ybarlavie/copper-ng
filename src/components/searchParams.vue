@@ -52,6 +52,10 @@
                 group: [ 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText', 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons'],
                 options: [
                     {
+                        label: 'הצג ע"ג מפה',
+                        value: 'useMap'
+                    },
+                    {
                         label: 'חיפוש מילה שלמה',
                         value: 'wholeWord'
                     },
@@ -111,9 +115,8 @@
                 this.$emit("search-options", { query: this.search, options: this.group } );
             },
             set: function(what) {
-                if (what == 'all')
-                {
-                    this.group = [ 'wholeWord', 'ignoreSquare', 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText', 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons' ];
+                if (what == 'all') {
+                    this.group = [ 'useMap', 'wholeWord', 'ignoreSquare', 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText', 'useDocuments', 'useExtDocuments', 'useLocations', 'usePersons' ];
                 } else if (what == 'fields') {
                     [ 'useName', 'useLabel', 'useTitle', 'useKeywords', 'useAliases', 'useText' ].forEach(i =>{
                         if (!this.group.includes(i)) this.group.push(i);
