@@ -167,8 +167,7 @@ export default {
             var that = this;
             this.$nextTick().then(function () {
                 that.$router.push({
-                    name: 'SocialArch',
-                    params: {}
+                    name: 'SocialArch'
                 });
             });
         },

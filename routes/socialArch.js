@@ -78,7 +78,10 @@ const _getStats = (req, email) => {
                 if (err) {
                     resolve(0);
                 } else {
-                    resolve(items[0].stats);
+                    if (items && Array.isArray(items) && items.length>0)
+                        resolve(items[0].stats);
+                    else
+                        resolve(0);
                 }
             });
         });    
@@ -123,6 +126,8 @@ const _getRefQuery = (req, email) => {
 
 router.get('/getRandom', async (req, resp) => {
     let token = req.headers["x-access-token"];
+
+    console.log("getRandom called with token " + token);
 
     var result = {};
     if (token) {
