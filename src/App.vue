@@ -13,8 +13,8 @@
                     <q-btn color="primary" icon="share" @click="onSocialArch" >
                         <q-tooltip content-class="bg-accent">ארכיאולוגיה קהילתית</q-tooltip>
                     </q-btn>
-                    <SearchParams @search-options="graphClicked($event)" icon="device_hub" placeHolder="סינון גרף" />
-                    <SearchParams @search-options="searchClicked($event)" />
+                    <SearchParams v-if="this.role != 'social_arch'" @search-options="graphClicked($event)" icon="device_hub" placeHolder="סינון גרף" />
+                    <SearchParams v-if="this.role != 'social_arch'" @search-options="searchClicked($event)" />
                 </div>
             </q-toolbar>
         </q-header>
