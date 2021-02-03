@@ -9,7 +9,7 @@
                     <div style="font-size: 12px;">גרסה v3.2.07</div>
                 </q-toolbar-title>
 
-                <div v-if="this.role != 'social_arch'" class="q-pl-md q-gutter-sm row no-wrap items-center">
+                <div class="q-pl-md q-gutter-sm row no-wrap items-center">
                     <q-btn color="primary" icon="share" @click="onSocialArch" >
                         <q-tooltip content-class="bg-accent">ארכיאולוגיה קהילתית</q-tooltip>
                     </q-btn>
