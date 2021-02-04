@@ -1,3 +1,5 @@
+var Auth = require('./authUtils');
+
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
 let _client
