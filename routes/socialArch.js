@@ -8,21 +8,6 @@ const MAX_ANSWERS = 5;
 
 const router = express.Router();
 
-const _getMatchExpr = (req, filter) => {
-    let role = Auth.getRole(req);
-    var q0 = { _restricts: { $ne: role }};
-
-    if (filter) {
-        if (Array.isArray(filter)) {
-            return { $and: [q0].concat(filter) };
-        } else {
-            return { $and: [q0, filter] };
-        }
-    } else {
-        return q0;
-    }
-}
-
 const _getItemById = (req, itemId) => {
     var coll = null;
     switch (itemId.substring(0,1)) {
@@ -40,7 +25,7 @@ const _getItemById = (req, itemId) => {
             break;
     }
     var q1 = { item_id: itemId };
-    var match = _getMatchExpr(req, q1);
+    var match = MongoDB.getMatchExprByRole(req, q1);
     return new Promise((resolve, reject) => {
         MongoDB.connectDB('copper-db', async (err) => {
             MongoDB.getDB()
@@ -62,7 +47,7 @@ const _getStats = (req, email) => {
         MongoDB.connectDB('copper-db', async (err) => {
             if (err) resolve(0);
     
-            var restricts = _getMatchExpr(req, null);   // will return object and not array with $and
+            var restricts = MongoDB.getMatchExprByRole(req, null);   // will return object and not array with $and
             var match = { $and: [
                 restricts
                 ,{ "_answers._who": email }
@@ -99,7 +84,7 @@ const _getRefQuery = (req, email) => {
     
             var maxAns = "_answers." + MAX_ANSWERS;
             var emailRegEx = new RegExp(email, 'im');
-            var restricts = _getMatchExpr(req, null);   // will return object and not array with $and
+            var restricts = MongoDB.getMatchExprByRole(req, null);   // will return object and not array with $and
             var match = { $and: [
                 restricts
                 ,{ _valid: "no" }

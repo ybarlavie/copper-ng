@@ -5,25 +5,6 @@ const ObjectID = require('mongodb').ObjectID;
 
 var router = express.Router();
 
-const _getMatchExpr = (req, filter) => {
-    let role = Auth.getRole(req);
-    var q0 = { _exclude: { $ne: role } };
-    var q1 = { $or: [
-        { _include: { $exists: false } },
-        { _include: role }
-    ]}; 
-
-    if (filter) {
-        if (Array.isArray(filter)) {
-            return { $and: [q0, q1].concat(filter) };
-        } else {
-            return { $and: [q0, q1, filter] };
-        }
-    } else {
-        return { $and: [q0, q1] };
-    }
-}
-
 const _getStoreData = (req, resp) => {
     var result = {};
     result.item_types = { 
@@ -65,7 +46,7 @@ router.post('/byIds/:collection', async (req, resp, next) => {
     var collName = req.params.collection;
     var ids = req.body;
     var q1 = collName == 'references' ? { ref_id: { $in: ids } } : { item_id: { $in: ids } };
-    var match = _getMatchExpr(req, q1);
+    var match = MongoDB.getMatchExprByRole(req, q1);
 
     MongoDB.connectDB('copper-db', async (err) => {
         if (err) return resp.status(500).send("cannot connect to DB");
@@ -109,7 +90,7 @@ router.get('/:collection', function (req, resp) {
         }
     }
 
-    var match = _getMatchExpr(req, q1);
+    var match = MongoDB.getMatchExprByRole(req, q1);
     aggArray.push({ $match: match });
 
     MongoDB.connectDB('copper-db', async (err) => {

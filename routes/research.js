@@ -13,21 +13,6 @@ const searches = [
     { coll: 'persons', fields: [ 'title', 'name', 'aliases', 'keywords'], prj: { sug: 'דמות', item_id: 1, name: 1, title: 1, keywords: 1 } }
 ];
 
-const _getMatchExpr = (req, filter) => {
-    let role = Auth.getRole(req);
-    var q0 = { _restricts: { $ne: role }};
-
-    if (filter) {
-        if (Array.isArray(filter)) {
-            return { $and: [q0].concat(filter) };
-        } else {
-            return { $and: [q0, filter] };
-        }
-    } else {
-        return q0;
-    }
-}
-
 const _regexBuilder = ((str, wholeWord, ignoreSquare) => {
     var expr = '';
     if (ignoreSquare) {
@@ -151,7 +136,7 @@ const _by_word_options = (req) => {
             let proms = [];
             collOpts.forEach(s => {
                 var q1 = _queryBuilder(exclude_id, s.fields, re);
-                var match = _getMatchExpr(req, q1);
+                var match = MongoDB.getMatchExprByRole(req, q1);
                 proms.push(
                     new Promise((resolve, reject) => {
                         MongoDB.getDB()
@@ -178,7 +163,7 @@ const _by_word_options = (req) => {
                 if (opts.extractRefs)
                 {
                     var q1 = { $or: [ { from: { $in: item_ids } }, { to: { $in: item_ids } } ] };
-                    var match = _getMatchExpr(req, q1);
+                    var match = MongoDB.getMatchExprByRole(req, q1);
                     var prj = { _id: 0, from: 1, to: 1, type: 1, description: 1, ref_id: 1, _valid: 1 };
                     MongoDB.getDB()
                     .collection('references')
@@ -204,7 +189,7 @@ const _by_word_options = (req) => {
 }
 
 const _to_refs = (req, docId) => {
-    var match = _getMatchExpr(req, { to: docId });
+    var match = MongoDB.getMatchExprByRole(req, { to: docId });
 
     return new Promise((resolve, reject) => {
         MongoDB.connectDB('copper-db', async (err) => {
@@ -266,7 +251,7 @@ router.get('/text/:docId', async (req, resp) => {
                 break;
         }
         var q1 = _inTextRegExp(text);
-        var match = _getMatchExpr(req, q1);
+        var match = MongoDB.getMatchExprByRole(req, q1);
         proms.push(
             new Promise((resolve, reject) => {
                 MongoDB.connectDB('copper-db', async (err) => {
@@ -348,7 +333,7 @@ router.get('/refs/:fromId', function (req, resp) {
 
         let proms = [];
         var q1 = { $or: [ { from: req.params.fromId }, { to: req.params.fromId } ] };
-        var match = _getMatchExpr(req, q1);
+        var match = MongoDB.getMatchExprByRole(req, q1);
 
         MongoDB.getDB()
         .collection("references")
@@ -390,7 +375,7 @@ router.get('/refs/:fromId', function (req, resp) {
                         break;
                 }
                 if (q0) {
-                    var match = _getMatchExpr(req, q0.fltr);
+                    var match = MongoDB.getMatchExprByRole(req, q0.fltr);
                     proms.push(
                         new Promise((resolve, reject) => {    
                             MongoDB.getDB()
@@ -437,7 +422,7 @@ router.get('/by_word/:id/:limit/:word', function (req, resp) {
         let proms = [];
         searches.forEach(s => {
             var q1 = _queryBuilder(exclude_id, s.fields, re);
-            var match = _getMatchExpr(req, q1);
+            var match = MongoDB.getMatchExprByRole(req, q1);
             proms.push(
                 new Promise((resolve, reject) => {
                     MongoDB.getDB()
