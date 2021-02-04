@@ -7,16 +7,20 @@ var router = express.Router();
 
 const _getMatchExpr = (req, filter) => {
     let role = Auth.getRole(req);
-    var q0 = { _restricts: { $ne: role }};
+    var q0 = { _exclude: { $ne: role } };
+    var q1 = { $or: [
+        { _include: { $exists: false } },
+        { _include: role }
+    ]}; 
 
     if (filter) {
         if (Array.isArray(filter)) {
-            return { $and: [q0].concat(filter) };
+            return { $and: [q0, q1].concat(filter) };
         } else {
-            return { $and: [q0, filter] };
+            return { $and: [q0, q1, filter] };
         }
     } else {
-        return q0;
+        return { $and: [q0, q1] };
     }
 }
 

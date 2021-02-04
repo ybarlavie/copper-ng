@@ -5,7 +5,6 @@ let _db
 
 const connectDB = async (database, callback) => {
     var pwd = Buffer.from(process.env.MONGO_PWD, 'base64');
-    console.log(pwd);
     var uri = "mongodb://root:" + encodeURIComponent(pwd) + "@blcloud.ddns.net:27017";
     try {
         var cli = new MongoClient(uri, { useUnifiedTopology: true } );

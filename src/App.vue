@@ -6,7 +6,7 @@
 
                 <q-toolbar-title>
                     ארכיון בר-בוכבא
-                    <div style="font-size: 12px;">גרסה v3.2.09</div>
+                    <div style="font-size: 12px;">גרסה v3.2.11</div>
                 </q-toolbar-title>
 
                 <div class="q-pl-md q-gutter-sm row no-wrap items-center">
