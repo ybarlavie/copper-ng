@@ -155,7 +155,7 @@ const _sendQRCode = (email, secret) => {
         QRCode.toDataURL(qrCodeUrl, function (err, url) {
             if (err) reject(err);
 
-            var expiryTime = Math.floor(Date.now() / 1000) + 600; // now + 600 secs = now + 10 mins
+            var expiryTime = Math.floor(Date.now() / 1000) + 1800; // now + 1800 secs = now + 10 mins
             var payload = { exp: expiryTime, type: "QRCode", email: email, secret: secret };
             var jwToken = jwt.sign(payload, process.env.JWT_SECRET);
             var validateUrl1 = `${process.env.PROD_ADDR}/api/auth/getQR?t=${jwToken}`;
