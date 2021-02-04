@@ -23,8 +23,7 @@ module.exports = (app) => {
     var det = JSON.parse(process.env.SECRETS);
     process.env.GMAIL_USER = det.username;
     process.env.GMAIL_PASS = det.password;
-    console.log("gmail password: " + process.env.GMAIL_PASS);
-    process.env.JWT_SECRET = new Buffer(det.jwt_secret, "base64");
+    process.env.JWT_SECRET = new Buffer.from(det.jwt_secret, "base64");
 
     app.use(cookieParser());
     app.use(cors());
