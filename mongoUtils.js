@@ -1,10 +1,11 @@
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
+const uri = "mongodb://root:" + encodeURIComponent('AYNIL#$%678liayn') + "@blcloud.ddns.net:27017";
 let _client
 let _db
 
 const connectDB = async (database, callback) => {
-    const uri = "mongodb://root:" + encodeURIComponent(process.env.MONGO_PWD) + "@blcloud.ddns.net:27017";
+    
     try {
         var cli = new MongoClient(uri, { useUnifiedTopology: true } );
         cli.connect((err, client) => {
