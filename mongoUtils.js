@@ -1,5 +1,3 @@
-var Auth = require('./authUtils');
-
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
 let _client
@@ -204,27 +202,8 @@ const remove = (collName, filter) => {
     })
 }
 
-const getMatchExprByRole = (req, filter) => {
-    let role = Auth.getRole(req);
-    var q0 = { _exclude: { $ne: role } };
-    var q1 = { $or: [
-        { _include: { $exists: false } },
-        { _include: role }
-    ]}; 
-
-    if (filter) {
-        if (Array.isArray(filter)) {
-            return { $and: [q0, q1].concat(filter) };
-        } else {
-            return { $and: [q0, q1, filter] };
-        }
-    } else {
-        return { $and: [q0, q1] };
-    }
-}
-
 const getClient = () => _client
 const getDB = () => _db
 const disconnectDB = () => _client.close()
 
-module.exports = { connectDB, getClient, getDB, getMatchExprByRole, disconnectDB, docExists, nameExists, firstOrDefault, getNextId, incrementNext, insert, update, remove }
+module.exports = { connectDB, getClient, getDB, disconnectDB, docExists, nameExists, firstOrDefault, getNextId, incrementNext, insert, update, remove }

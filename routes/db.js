@@ -46,7 +46,7 @@ router.post('/byIds/:collection', async (req, resp, next) => {
     var collName = req.params.collection;
     var ids = req.body;
     var q1 = collName == 'references' ? { ref_id: { $in: ids } } : { item_id: { $in: ids } };
-    var match = MongoDB.getMatchExprByRole(req, q1);
+    var match = Auth.getMatchExprByRole(req, q1);
 
     MongoDB.connectDB('copper-db', async (err) => {
         if (err) return resp.status(500).send("cannot connect to DB");
@@ -90,7 +90,7 @@ router.get('/:collection', function (req, resp) {
         }
     }
 
-    var match = MongoDB.getMatchExprByRole(req, q1);
+    var match = Auth.getMatchExprByRole(req, q1);
     aggArray.push({ $match: match });
 
     MongoDB.connectDB('copper-db', async (err) => {

@@ -25,7 +25,7 @@ const _getItemById = (req, itemId) => {
             break;
     }
     var q1 = { item_id: itemId };
-    var match = MongoDB.getMatchExprByRole(req, q1);
+    var match = Auth.getMatchExprByRole(req, q1);
     return new Promise((resolve, reject) => {
         MongoDB.connectDB('copper-db', async (err) => {
             MongoDB.getDB()
@@ -47,7 +47,7 @@ const _getStats = (req, email) => {
         MongoDB.connectDB('copper-db', async (err) => {
             if (err) resolve(0);
     
-            var restricts = MongoDB.getMatchExprByRole(req, null);   // will return object and not array with $and
+            var restricts = Auth.getMatchExprByRole(req, null);   // will return object and not array with $and
             var match = { $and: [
                 restricts
                 ,{ "_answers._who": email }
@@ -84,7 +84,7 @@ const _getRefQuery = (req, email) => {
     
             var maxAns = "_answers." + MAX_ANSWERS;
             var emailRegEx = new RegExp(email, 'im');
-            var restricts = MongoDB.getMatchExprByRole(req, null);   // will return object and not array with $and
+            var restricts = Auth.getMatchExprByRole(req, null);   // will return object and not array with $and
             var match = { $and: [
                 restricts
                 ,{ _valid: "no" }

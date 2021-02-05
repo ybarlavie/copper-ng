@@ -312,4 +312,23 @@ const updateToken = (email, token) => {
     });
 }
 
-module.exports = { verifyTOTP, getQRImage, verifyJWToken, sendQRCodeToUser, tokenValidMiddleware, getEmailByRequest, getUser, updateToken, getRole }
+const getMatchExprByRole = (req, filter) => {
+    let role = getRole(req);
+    var q0 = { _exclude: { $ne: role } };
+    var q1 = { $or: [
+        { _include: { $exists: false } },
+        { _include: role }
+    ]}; 
+
+    if (filter) {
+        if (Array.isArray(filter)) {
+            return { $and: [q0, q1].concat(filter) };
+        } else {
+            return { $and: [q0, q1, filter] };
+        }
+    } else {
+        return { $and: [q0, q1] };
+    }
+}
+
+module.exports = { getMatchExprByRole, verifyTOTP, getQRImage, verifyJWToken, sendQRCodeToUser, tokenValidMiddleware, getEmailByRequest, getUser, updateToken, getRole }
