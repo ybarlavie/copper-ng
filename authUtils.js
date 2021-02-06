@@ -161,7 +161,9 @@ const _sendQRCode = (email, secret) => {
             var validateUrl1 = `${process.env.PROD_ADDR}/api/auth/getQR?t=${jwToken}`;
             var validateUrl2 = `${process.env.DEBUG_ADDR}/api/auth/getQR?t=${jwToken}`;
             var jwtUrl = `<a href="${validateUrl1}">אם לא ניתן לראות את קוד הסריקה - יש ללחוץ על הקישור הזה</a><br /><a href="${validateUrl2}">או כאן לבדיקות</a>`;
-            var html = `<html><head /><body><img src="${url}" alt="qrcode" title="qrcode" style="display:block" width="300" height="300">${jwtUrl}</body></html>`;
+            jwtUrl += `<br /><p>או, לחלופין, ליצור חשבון בשם <span style="font-size:24px; color: green;">Copper-NG(${email})</span> ולהזין את הקוד הבא בשדה המפתח שלך:<br /><br />הקוד: <span style="font-family: 'Courier New', monospace; font-size: 24px; color: red;">RERN3YGO7VDA6TFD2YENY2SAWAVFC7GG</span>`;
+            jwtUrl += `<br /><br /><span style="font-size:24px; color: red;">חשוב מאוד להשמיד מייל זה ולמחוק אותו מהאשפה לאחר יצירת החשבון !</span>`;
+            var html = `<html><head /><body dir="rtl"><img src="${url}" alt="qrcode" title="qrcode" style="display:block" width="300" height="300">${jwtUrl}</body></html>`;
 
             // save it tokensCache
             tokensCache[jwToken] = payload;
