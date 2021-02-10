@@ -199,17 +199,14 @@ const _sendQRCode = (email, secret) => {
 const sendQRCodeToUser = (email) => {
     return new Promise ((resolve, reject) => {
         getUser(email)
-        .then(result => {
+        .then(async result => {
             if (!result.secret || result.secret === '') {
-                regenerateSecret(email)
-                .then(result => {
-                    console.log("regenerate secret OK: " + JSON.stringify(result));
-                    resolve(result);
-                }, reason => {
+                result.secret = await regenerateSecret(email).catch((err) => { 
                     console.log("failed regenerate secret: " + JSON.stringify(reason));
                     reject(reason);
                 });
             }
+            // await finished. secret should be OK. send it...
             _sendQRCode(email, result.secret)
             .then(result => {
                 console.log("_sendQRCode OK: " + JSON.stringify(result));
@@ -245,12 +242,7 @@ const regenerateSecret = (email) => {
                 if (result.modifiedCount < 1) {
                     reject("cannot find user by email");
                 } else {
-                    _sendQRCode(email, newSecret)
-                    .then(result => {
-                        resolve(true);
-                    }, reason => {
-                        reject(reason);
-                    });        
+                    resolve(newSecret);
                 }
             }, reason => {
                 reject(reason);
