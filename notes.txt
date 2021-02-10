@@ -1,1 +1,5 @@
 https://hackernoon.com/how-to-implement-google-authenticator-two-factor-auth-in-javascript-091wy3vh3
+
+backup:
+-----------
+mongodump --db=copper-db --authenticationDatabase=admin --host=blcloud.ddns.net --port=27017 --username=root --forceTableScan --out=./copper-db.20210207
