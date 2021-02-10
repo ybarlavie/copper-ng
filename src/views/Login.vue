@@ -74,6 +74,7 @@ export default {
                 url: authURL,
                 crossdomain: true,
                 success: function (result) {
+                    that.authCode = '';
                     that.showNotif(false, `הבקשה נקלטה, הודעה נשלחה לדואל ${that.email}`);
                     that.ajaxing = false;
                     that.componentKey += 1;
